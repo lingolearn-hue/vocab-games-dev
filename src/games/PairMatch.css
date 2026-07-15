@@ -1,0 +1,250 @@
+.pm-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0;
+  user-select: none;
+}
+
+.pm-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 1rem 1.2rem 0.6rem;
+  flex-shrink: 0;
+}
+
+.pm-header-center {
+  justify-self: center;
+}
+
+.pm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: end;
+}
+
+.pm-pos-toggle {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 32px;
+  height: 28px;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pm-pos-toggle.active {
+  color: #4f7ef8;
+  border-color: #4f7ef8;
+  background: #eef2ff;
+}
+
+.pm-back {
+  background: none;
+  border: none;
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 0.9rem;
+  color: #555;
+  cursor: pointer;
+  padding: 0.4rem 0;
+}
+.pm-back:hover { color: #111; }
+
+.pm-gear {
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pm-gear:hover { border-color: #4f7ef8; }
+
+.pm-stats {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+/* Board */
+.pm-board {
+  flex: 1;
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.4rem 1rem;
+  overflow: hidden;
+}
+
+.pm-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Items — fixed uniform height so all cards are same size */
+.pm-item {
+  flex: 0 0 auto;
+  height: 68px;        /* fixed — uniform across all items */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.12s, background 0.12s, opacity 0.2s, transform 0.12s;
+  overflow: hidden;
+}
+
+.pm-item:active { transform: scale(0.97); }
+
+.pm-label {
+  font-size: clamp(0.78rem, 3.5vw, 1.15rem);
+  font-weight: 500;
+  line-height: 1.25;
+  word-break: break-word;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* CJK glyphs are compact — can afford larger size */
+.pm-item--cjk .pm-label {
+  font-size: clamp(1.4rem, 6vw, 2rem);
+}
+
+.pm-sub {
+  font-size: clamp(0.58rem, 2vw, 0.76rem);
+  color: #555;
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* States */
+.pm-item--selected {
+  border-color: #4f7ef8;
+  background: #eef2ff;
+}
+
+.pm-item--matched {
+  border-color: #22a06b;
+  background: #f0faf5;
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.pm-item--wrong {
+  border-color: #e5534b;
+  background: #fff0ef;
+  animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  60%       { transform: translateX(6px); }
+  80%       { transform: translateX(-3px); }
+}
+
+/* Progress pips */
+.pm-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.8rem 1rem 1.2rem;
+  flex-shrink: 0;
+}
+
+.pm-pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  transition: background 0.2s;
+}
+
+.pm-pip.done {
+  background: #22a06b;
+}
+
+.pm-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  color: #555;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Dark mode */
+
+[data-theme="light"] {
+  .pm-item { background: #fff; }
+  .pm-sub { color: #555; }
+  .pm-item--selected { background: #eef2ff; }
+  .pm-item--matched { background: #f0faf5; }
+  .pm-item--wrong { background: #fff0ef; }
+  .pm-pip { background: #e0e0e0; }
+  .pm-back:hover { color: #111; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .pm-item { background: #f0f0f0; border-color: #ccc; color: #111; }
+  .pm-sub { color: #555; }
+  .pm-item--selected { background: #dce8ff; border-color: #4f7ef8; }
+  .pm-item--matched  { background: #d4f0e4; border-color: #22a06b; }
+  .pm-item--wrong    { background: #fde0de; border-color: #e5534b; }
+  .pm-pip            { background: #333; }
+  .pm-back:hover     { color: #eee; }
+}
+[data-theme="dark"] .pm-item { background: #f0f0f0; border-color: #ccc; color: #111; }
+[data-theme="dark"] .pm-sub { color: #555; }
+[data-theme="dark"] .pm-item--selected { background: #dce8ff; border-color: #4f7ef8; }
+[data-theme="dark"] .pm-item--matched  { background: #d4f0e4; border-color: #22a06b; }
+[data-theme="dark"] .pm-item--wrong    { background: #fde0de; border-color: #e5534b; }
+[data-theme="dark"] .pm-pip            { background: #333; }
+[data-theme="dark"] .pm-back:hover     { color: #f0f0f0; }
+
+/* Override RubyText inside pair items — dynamic sizing */
+.pm-item .ruby-sm,
+.pm-item .ruby-plain {
+  font-size: clamp(1.0rem, 4.5vw, 1.6rem);
+  line-height: 1.35;
+  font-weight: 400;
+  text-align: center;
+  word-break: break-word;
+  color: #111;
+}
+
+/* CJK: short glyphs can be larger */
+.pm-item .ruby-sm[lang="zh"],
+.pm-item .ruby-sm[lang="ja"],
+.pm-item--cjk .ruby-sm {
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+}
