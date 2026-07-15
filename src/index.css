@@ -1,0 +1,129 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Prevent double-tap zoom on buttons/inputs — allow normal scroll elsewhere */
+button, a, input, select, textarea, label { touch-action: manipulation; }
+
+/* Block all pinch/zoom */
+html { touch-action: pan-x pan-y; }
+
+/* Prevent iOS Safari zoom on input focus (triggered when font-size < 16px) */
+input, textarea, select { font-size: max(16px, 1em); }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #fff;
+  color: #111;
+  min-height: 100dvh;
+}
+
+button { font-family: inherit; }
+
+/* Remove tap highlight on mobile */
+button, a { -webkit-tap-highlight-color: transparent; }
+button:focus:not(:focus-visible) { outline: none; }
+
+[data-theme="light"] {
+  body { background: #fff; color: #111; }
+  .level-warning { background: #fff8e0; }
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #111; color: #eee; }
+}
+[data-theme="dark"] body { background: #111; color: #eee; }
+[data-theme="light"] body { background: #fafafa; color: #111; }
+
+/* ── Shared level chip — used by every level chooser across the app ──────── */
+.level-chip {
+  padding: calc(0.3rem * var(--chip-row-scale, 1)) calc(0.7rem * var(--chip-row-scale, 1));
+  border: 1.5px solid #e0e0e0;
+  border-radius: 20px;
+  background: #f5f5f5;
+  font-size: calc(0.75rem * var(--chip-row-scale, 1));
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.15;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.level-chip.active {
+  background: #4f7ef8;
+  border-color: #4f7ef8;
+  color: #fff;
+}
+.level-chip:focus:not(:focus-visible) { outline: none; }
+.level-chip:hover:not(.active) { border-color: #4f7ef8; color: #4f7ef8; background: #f0f4ff; }
+
+[data-theme="dark"] .level-chip { background: #1e1e1e; border-color: #333; color: #b0b0b0; }
+[data-theme="dark"] .level-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
+[data-theme="dark"] .level-chip:hover:not(.active) { border-color: #4f7ef8; color: #4f7ef8; }
+
+/* POS chip reuses the exact same visual language as level-chip */
+.pos-chip {
+  padding: calc(0.3rem * var(--chip-row-scale, 1)) calc(0.7rem * var(--chip-row-scale, 1));
+  border: 1.5px solid #e0e0e0;
+  border-radius: 20px;
+  background: #f5f5f5;
+  font-size: calc(0.75rem * var(--chip-row-scale, 1));
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.pos-chip.active {
+  background: #4f7ef8;
+  border-color: #4f7ef8;
+  color: #fff;
+}
+.pos-chip:focus:not(:focus-visible) { outline: none; }
+.pos-chip:hover:not(.active) { border-color: #4f7ef8; color: #4f7ef8; background: #f0f4ff; }
+
+[data-theme="dark"] .pos-chip { background: #1e1e1e; border-color: #333; color: #b0b0b0; }
+[data-theme="dark"] .pos-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
+[data-theme="dark"] .pos-chip:hover:not(.active) { border-color: #4f7ef8; color: #4f7ef8; }
+
+/* Shared level-filter warning banner */
+.level-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff8e0;
+  border-bottom: 1px solid #f0d070;
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+  color: #7a5a00;
+  flex-shrink: 0;
+}
+.level-warning strong { font-weight: 700; }
+
+@media (prefers-color-scheme: dark) {
+  .level-warning { background: #2d2510; border-color: #5c4a1a; color: #c9a227; }
+}
+[data-theme="dark"] .level-warning { background: #2d2510; border-color: #5c4a1a; color: #c9a227; }
+
+/* Remove tap/click focus rings on touch devices — keep keyboard focus for a11y */
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ── Global text color system ─────────────────────────────────────────
+   ONLY these four values are used for text color across the entire app.
+
+   Light backgrounds (white cards, white screens):
+     #111  — primary text
+     #555  — secondary / muted text
+
+   Dark backgrounds (dark cards, adventure/racecar, dark mode):
+     #f0f0f0  — primary text
+     #b0b0b0  — secondary / muted text
+──────────────────────────────────────────────────────────────────── */
+:root {
+  --t1:  #111;      /* primary on light */
+  --t2:  #555;      /* secondary on light */
+  --dt1: #f0f0f0;   /* primary on dark */
+  --dt2: #b0b0b0;   /* secondary on dark */
+}
+@media (prefers-color-scheme: dark) {
+  :root { --t1: #f0f0f0; --t2: #b0b0b0; }
+}
+[data-theme="dark"]  { --t1: #f0f0f0; --t2: #b0b0b0; }
+[data-theme="light"] { --t1: #111;     --t2: #555; }

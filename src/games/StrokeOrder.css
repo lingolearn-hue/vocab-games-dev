@@ -1,0 +1,114 @@
+/* ── Stroke Order ──────────────────────────────────────────────────────────── */
+
+.so-screen {
+  display: flex; flex-direction: column; height: 100dvh;
+  max-width: 480px; margin: 0 auto; background: var(--bg, #fafafa);
+}
+
+.so-header {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: calc(0.8rem + env(safe-area-inset-top)) 1rem 0.6rem;
+  border-bottom: 1px solid #e0e0e0; flex-shrink: 0;
+}
+.so-back {
+  background: none; border: none; -webkit-appearance: none;
+  font-size: 0.88rem; color: #555; cursor: pointer; flex-shrink: 0;
+}
+.so-back:hover { color: #111; }
+.so-back:focus:not(:focus-visible) { outline: none; }
+.so-title    { flex: 1; font-size: 0.95rem; font-weight: 700; color: #111; }
+.so-progress { font-size: 0.75rem; color: #999; flex-shrink: 0; }
+
+/* Toggle buttons */
+.so-toggles { display: flex; gap: 0.7rem; flex-shrink: 0; }
+.so-toggle {
+  padding: 0.55rem 1.1rem; border-radius: 12px;
+  border: 2px solid #ddd; background: none;
+  font-size: 1.3rem; color: #999; cursor: pointer; -webkit-appearance: none;
+  line-height: 1;
+}
+.so-toggle.active { border-color: #4f7ef8; color: #4f7ef8; background: #eef2ff; }
+.so-toggle:focus:not(:focus-visible) { outline: none; }
+
+/* Leitner bar — shared component (see src/components/LeitnerBar.css); just add the border-bottom this screen uses */
+.so-screen .lb-bar {
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.so-scroll { flex: 1; overflow-y: auto; }
+
+/* ── Practice card ────────────────────────────────────────────────────────── */
+
+.so-practice { padding: 0 1rem 2rem; }
+
+.so-practice-header {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.7rem 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0.5rem;
+}
+.so-practice-title { flex: 1; }
+.so-practice-word  { font-size: 1.1rem; font-weight: 700; color: #111; }
+
+.so-outline-hint {
+  font-size: 0.75rem; color: #777; text-align: center; padding: 0.3rem 0 0.8rem;
+}
+
+.so-chars-grid { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Each char: glyph left, canvas right */
+.so-char-row    { display: flex; align-items: center; gap: 1rem; }
+.so-glyph-slot  { width: 3.2rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; align-self: stretch; }
+.so-char-glyph  { font-size: 2.8rem; line-height: 1; color: #333; text-align: center; }
+.so-char-block  { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+
+.so-canvas { display: block; border-radius: 12px; background: #fff; border: 1.5px solid #e0e0e0; }
+.so-char-done  { font-size: 1rem; font-weight: 700; color: #22a06b; margin-top: 0.2rem; }
+.so-error { font-size: 0.75rem; color: #e5534b; margin-top: 0.3rem; }
+
+/* Result row */
+.so-result-row {
+  margin-top: 1.2rem; padding: 1rem; background: #f8f8f8;
+  border-radius: 12px; display: flex; flex-direction: column; gap: 0.6rem;
+}
+.so-result-msg { font-size: 0.85rem; color: #555; margin: 0; text-align: center; }
+.so-result-btn {
+  padding: 0.6rem 1rem; border: none; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 700; cursor: pointer; -webkit-appearance: none; width: 100%;
+}
+.so-result-btn--correct { background: #22a06b; color: #fff; }
+.so-result-btn--wrong   { background: #e5534b; color: #fff; }
+.so-result-btn--master  { background: #f0a500; color: #fff; }
+
+.so-empty {
+  text-align: center; color: #999; padding: 2rem 1.5rem; font-size: 0.88rem; line-height: 1.7;
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .so-screen      { background: #111; }
+  .so-header      { border-color: #222; }
+  .so-screen .lb-bar { border-bottom-color: #222; }
+  .so-back        { color: #b0b0b0; }
+  .so-back:hover  { color: #f0f0f0; }
+  .so-title       { color: #f0f0f0; }
+  .so-practice-word { color: #f0f0f0; }
+  .so-practice-header { border-color: #222; }
+  .so-toggle      { border-color: #333; color: #666; }
+  .so-toggle.active { background: #1a1a30; border-color: #4f7ef8; color: #4f7ef8; }
+  .so-canvas      { background: #f5f5f5; border-color: #333; }
+  .so-char-glyph  { color: #222; }
+  .so-result-row  { background: #1a1a1a; }
+  .so-result-msg  { color: #b0b0b0; }
+}
+[data-theme="dark"] .so-screen    { background: #111; }
+[data-theme="dark"] .so-header    { border-color: #222; }
+[data-theme="dark"] .so-screen .lb-bar { border-bottom-color: #222; }
+[data-theme="dark"] .so-back     { color: #b0b0b0; }
+[data-theme="dark"] .so-title    { color: #f0f0f0; }
+[data-theme="dark"] .so-practice-word { color: #f0f0f0; }
+[data-theme="dark"] .so-practice-header { border-color: #222; }
+[data-theme="dark"] .so-toggle   { border-color: #333; color: #666; }
+[data-theme="dark"] .so-toggle.active { background: #1a1a30; border-color: #4f7ef8; color: #4f7ef8; }
+[data-theme="dark"] .so-canvas   { background: #f5f5f5; }
+[data-theme="dark"] .so-char-glyph { color: #222; }
+[data-theme="dark"] .so-result-row { background: #1a1a1a; }
