@@ -36,7 +36,7 @@ button:focus:not(:focus-visible) { outline: none; }
 /* ── Shared level chip — used by every level chooser across the app ──────── */
 .level-chip {
   padding: calc(0.3rem * var(--chip-row-scale, 1)) calc(0.7rem * var(--chip-row-scale, 1));
-  border: 1.5px solid #e0e0e0;
+  border: calc(1.5px * var(--chip-row-scale, 1)) solid #e0e0e0;
   border-radius: 20px;
   background: #f5f5f5;
   font-size: calc(0.75rem * var(--chip-row-scale, 1));
@@ -62,7 +62,7 @@ button:focus:not(:focus-visible) { outline: none; }
 /* POS chip reuses the exact same visual language as level-chip */
 .pos-chip {
   padding: calc(0.3rem * var(--chip-row-scale, 1)) calc(0.7rem * var(--chip-row-scale, 1));
-  border: 1.5px solid #e0e0e0;
+  border: calc(1.5px * var(--chip-row-scale, 1)) solid #e0e0e0;
   border-radius: 20px;
   background: #f5f5f5;
   font-size: calc(0.75rem * var(--chip-row-scale, 1));

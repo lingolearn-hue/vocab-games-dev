@@ -198,7 +198,7 @@ export default function Setup() {
         <p className="hint">{activeLanguage ? 'Loading vocabulary…' : 'Tap the flag above to choose a language.'}</p>
       )}
 
-      <div className="setup-version">v0.63af</div>
+      <div className="setup-version">v0.63ah</div>
 
       {tutorialOpen && <Tutorial onDone={() => setTutorialOpen(false)} />}
     </div>
