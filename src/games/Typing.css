@@ -187,6 +187,8 @@
 .ty-answer-reveal.wrong {
   background: #fff0ef;
 }
+[data-theme="dark"] .ty-answer-reveal.correct { background: #182d24; color: #6fcf9e; }
+[data-theme="dark"] .ty-answer-reveal.wrong   { background: #2d1a18; }
 
 .ty-correct-msg {
   font-weight: 600;
