@@ -37,7 +37,7 @@
 .lb-label {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #555;
+  color: #333;
 }
 .lb-count {
   font-size: 0.78rem;
@@ -67,14 +67,7 @@
 .lb-box.box-mastered .lb-fill { background: #22a06b; }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .lb-box            { border-color: #333; }
-  .lb-box.active     { background: #1a1a30; border-color: #4f7ef8; }
-  .lb-box.box-mastered { background: #182d24; border-color: #22a06b; }
-  .lb-label          { color: #b0b0b0; }
-  .lb-count          { color: #f0f0f0; }
-  .lb-progress       { background: #333; }
-}
+
 [data-theme="dark"] .lb-box            { border-color: #333; }
 [data-theme="dark"] .lb-box.active     { background: #1a1a30; border-color: #4f7ef8; }
 [data-theme="dark"] .lb-box.box-mastered { background: #182d24; border-color: #22a06b; }

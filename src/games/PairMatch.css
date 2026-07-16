@@ -214,15 +214,7 @@
   .pm-back:hover { color: #111; }
 }
 
-@media (prefers-color-scheme: dark) {
-  .pm-item { background: #f0f0f0; border-color: #ccc; color: #111; }
-  .pm-sub { color: #555; }
-  .pm-item--selected { background: #dce8ff; border-color: #4f7ef8; }
-  .pm-item--matched  { background: #d4f0e4; border-color: #22a06b; }
-  .pm-item--wrong    { background: #fde0de; border-color: #e5534b; }
-  .pm-pip            { background: #333; }
-  .pm-back:hover     { color: #eee; }
-}
+
 [data-theme="dark"] .pm-item { background: #f0f0f0; border-color: #ccc; color: #111; }
 [data-theme="dark"] .pm-sub { color: #555; }
 [data-theme="dark"] .pm-item--selected { background: #dce8ff; border-color: #4f7ef8; }

@@ -222,17 +222,7 @@
 .tut-dot.active { background: #4f7ef8; }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .tut-panel     { background: #1a1a1a; }
-  .tut-bottom    { border-color: #2a2a2a; }
-  .tut-title     { color: #f0f0f0; }
-  .tut-warning-text, .tut-subtitle { color: #b0b0b0; }
-  .tut-rhythm    { background: #222; color: #b0b0b0; }
-  .tut-box-desc  { color: #888; }
-  .tut-dot       { background: #444; }
-  .tut-dot.active { background: #4f7ef8; }
-  .tut-back-btn  { color: #555; }
-}
+
 [data-theme="dark"] .tut-panel  { background: #1a1a1a; }
 [data-theme="dark"] .tut-bottom { border-color: #2a2a2a; }
 [data-theme="dark"] .tut-title  { color: #f0f0f0; }

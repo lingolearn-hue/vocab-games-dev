@@ -328,21 +328,7 @@
   .fc-mnemonic-peek { color: #555; }
 }
 
-@media (prefers-color-scheme: dark) {
-  .fc-card { background: #1e1e1e; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-  .fc-main { color: #111; }
-  .fc-answer { color: #ddd; }
-  .fc-reading { color: #b0b0b0; }
-  .fc-divider { background: #333; }
-  .fc-tap-hint { color: #b0b0b0; }
-  .fc-dot { background: #333; }
-  .fc-dot.filled { background: #4f7ef8; }
-  .fc-back { color: #b0b0b0; }
-  .fc-back:hover { color: #eee; }
-  .fc-btn-unknown { background: #2d1a19; border-color: #5c2522; }
-  .fc-btn-known   { background: #182d24; border-color: #244d38; }
-  .fc-btn-master  { background: #2d2510; border-color: #5c4a1a; }
-}
+
 [data-theme="dark"] .fc-card { background: #1e1e1e; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
 [data-theme="dark"] .fc-main { color: #111; }
 [data-theme="dark"] .fc-answer { color: #f0f0f0; }
@@ -456,9 +442,7 @@
   color: #555;
 }
 
-@media (prefers-color-scheme: dark) {
-  .fc-detail-example { color: #b0b0b0; }
-}
+
 [data-theme="dark"] .fc-detail-example { color: #b0b0b0; }
 
 .fc-detail-example-empty {
@@ -606,18 +590,7 @@
 }
 
 /* Dark mode — detail panel */
-@media (prefers-color-scheme: dark) {
-  .fc-detail-panel    { background: #1e1e1e; }
-  .fc-detail-close:hover { color: #eee; }
-  .fc-detail-trans-item { background: #2a2a2a; color: #ddd; }
-  .fc-detail-level    { background: #2a2a2a; color: #666; }
-  .fc-mnemonic-text   { color: #b0b0b0; }
-  .fc-mnemonic-input  { background: #111; border-color: #4f7ef8; color: #eee; }
-  .fc-mnemonic-cancel { background: #2a2a2a; color: #666; }
-  .fc-mnemonic-cancel:hover { background: #333; }
-  .fc-detail-actions  { border-color: #2a2a2a; }
-  .fc-mnemonic-peek   { color: #b0b0b0; }
-}
+
 [data-theme="dark"] .fc-detail-panel    { background: #1e1e1e; }
 [data-theme="dark"] .fc-mnemonic-seeded-badge { background: #2d2510; border-color: #5c4a1a; color: #bf8700; }
 [data-theme="dark"] .fc-detail-close:hover { color: #f0f0f0; }
@@ -653,10 +626,7 @@
 .fc-autoplay-btn.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
 .fc-autoplay-btn:focus:not(:focus-visible) { outline: none; }
 
-@media (prefers-color-scheme: dark) {
-  .fc-autoplay-btn { background: #1e1e1e; border-color: #333; color: #555; }
-  .fc-autoplay-btn.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
-}
+
 [data-theme="dark"] .fc-autoplay-btn { background: #1e1e1e; border-color: #333; color: #555; }
 [data-theme="dark"] .fc-autoplay-btn.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
 

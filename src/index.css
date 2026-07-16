@@ -27,9 +27,7 @@ button:focus:not(:focus-visible) { outline: none; }
   .level-warning { background: #fff8e0; }
 }
 
-@media (prefers-color-scheme: dark) {
-  body { background: #111; color: #eee; }
-}
+
 [data-theme="dark"] body { background: #111; color: #eee; }
 [data-theme="light"] body { background: #fafafa; color: #111; }
 
@@ -97,9 +95,7 @@ button:focus:not(:focus-visible) { outline: none; }
 }
 .level-warning strong { font-weight: 700; }
 
-@media (prefers-color-scheme: dark) {
-  .level-warning { background: #2d2510; border-color: #5c4a1a; color: #c9a227; }
-}
+
 [data-theme="dark"] .level-warning { background: #2d2510; border-color: #5c4a1a; color: #c9a227; }
 
 /* Remove tap/click focus rings on touch devices — keep keyboard focus for a11y */
@@ -122,8 +118,6 @@ button:focus:not(:focus-visible) { outline: none; }
   --dt1: #f0f0f0;   /* primary on dark */
   --dt2: #b0b0b0;   /* secondary on dark */
 }
-@media (prefers-color-scheme: dark) {
-  :root { --t1: #f0f0f0; --t2: #b0b0b0; }
-}
+
 [data-theme="dark"]  { --t1: #f0f0f0; --t2: #b0b0b0; }
 [data-theme="light"] { --t1: #111;     --t2: #555; }

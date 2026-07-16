@@ -84,22 +84,7 @@
 }
 
 /* ── Dark mode ────────────────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  .so-screen      { background: #111; }
-  .so-header      { border-color: #222; }
-  .so-screen .lb-bar { border-bottom-color: #222; }
-  .so-back        { color: #b0b0b0; }
-  .so-back:hover  { color: #f0f0f0; }
-  .so-title       { color: #f0f0f0; }
-  .so-practice-word { color: #f0f0f0; }
-  .so-practice-header { border-color: #222; }
-  .so-toggle      { border-color: #333; color: #666; }
-  .so-toggle.active { background: #1a1a30; border-color: #4f7ef8; color: #4f7ef8; }
-  .so-canvas      { background: #f5f5f5; border-color: #333; }
-  .so-char-glyph  { color: #222; }
-  .so-result-row  { background: #1a1a1a; }
-  .so-result-msg  { color: #b0b0b0; }
-}
+
 [data-theme="dark"] .so-screen    { background: #111; }
 [data-theme="dark"] .so-header    { border-color: #222; }
 [data-theme="dark"] .so-screen .lb-bar { border-bottom-color: #222; }
