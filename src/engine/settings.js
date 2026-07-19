@@ -66,21 +66,6 @@ export function levelLabel(level) {
   return level === 'HSK7' ? 'HSK7-9' : level
 }
 
-// Friendly display labels for part-of-speech tags. Unrecognized values (some
-// language datasets contain inconsistent or leftover tags) fall back to the
-// raw value, capitalized, rather than being hidden — so a messy tag is still
-// visible and usable as a chip, just not prettified.
-const POS_LABELS = {
-  noun: 'Noun', verb: 'Verb', adj: 'Adjective', adv: 'Adverb',
-  pron: 'Pronoun', conj: 'Conjunction', classifier: 'Classifier',
-  phrase: 'Phrase', interj: 'Interjection', num: 'Number', other: 'Other',
-}
-
-export function posLabel(pos) {
-  if (POS_LABELS[pos]) return POS_LABELS[pos]
-  return pos ? pos.charAt(0).toUpperCase() + pos.slice(1) : pos
-}
-
 export const DEFAULTS = {
   darkMode: 'auto',
   direction: 'entry->translation',

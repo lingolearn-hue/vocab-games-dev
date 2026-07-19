@@ -5,18 +5,21 @@ import './ChipRow.css'
  * Generic multi-select chip chooser for any small, fixed set of values
  * (levels, parts of speech, etc). This is the one central place the
  * "toggle chip filter" behavior is implemented; specialized wrappers like
- * LevelChooser and PosChips just supply the value list and a label function.
+ * LevelChooser and CategoryChooser just supply the value list and a label function.
  *
  * Contract:
  *  - `value` is either `null` (meaning "everything active / no filter") or
  *    an array of the currently-selected values.
- *  - Clicking a chip while `value` is `null` narrows the selection to just
- *    that one value.
- *  - Clicking an already-selected chip removes it; if that empties the
- *    selection, it collapses back to `null` rather than an empty array, so
- *    the UI never shows "everything is off".
- *  - Selecting every available chip also collapses back to `null`, since
- *    "all selected" and "no filter" mean the same thing.
+ *  - Clicking a chip while everything is active (`value` is `null`, *or*
+ *    happens to already list every option) narrows the selection to just
+ *    that one value — "all selected" and "no filter" are the same state
+ *    from the user's point of view, so they behave the same on click.
+ *  - Clicking an already-selected chip (with something else also active)
+ *    removes it; if that empties the selection, it collapses back to
+ *    `null` rather than an empty array, so the UI never shows "everything
+ *    is off".
+ *  - Selecting every available chip one-by-one also collapses back to
+ *    `null`, for the same reason.
  *
  * Chips are auto-scaled (via ChipRow) to always fit on one row.
  *
@@ -28,12 +31,14 @@ import './ChipRow.css'
 export default function ChoiceChips({ options, value, onChange, getLabel = String, chipClassName = 'level-chip', className = 'level-filter', prefixChip = null }) {
   if (!options?.length) return null
 
+  const allActive = !value || value.length === options.length
+
   function isActive(opt) {
-    return !value || value.includes(opt)
+    return allActive || value.includes(opt)
   }
 
   function toggle(opt) {
-    if (!value) {
+    if (allActive) {
       onChange([opt])
       return
     }

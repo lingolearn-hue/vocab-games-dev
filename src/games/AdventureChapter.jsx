@@ -395,7 +395,7 @@ function PassagePhase({ passage, language, lookup, scores, showReading, surfaceF
 
 // ── Chapter Overview Hub ──────────────────────────────────────────────────────
 
-function ChapterHub({ chapter, storyIntro, storyIntroTranslation, wordEntries, contentItems, artifact, surfaceForms, language, lookup, scores, showReading, currentPhase, onPhaseAdvance, onComplete, activeView, setActiveView }) {
+function ChapterHub({ chapter, storyIntro, storyIntroTranslation, wordEntries, contentItems, surfaceForms, language, lookup, scores, showReading, currentPhase, onPhaseAdvance, onComplete, activeView, setActiveView }) {
   const [doneParts, setDoneParts]   = useState(new Set())       // 'vocab' / 'grammar' — single-item phases
   const [doneItems, setDoneItems]   = useState(new Set())       // individual content item indices (dialogue/passage)
   const [pendingItem, setPendingItem] = useState(null)  // item awaiting vocab-overlay dismissal before opening
@@ -644,8 +644,6 @@ export default function AdventureChapter({ chapter, currentPhase, onPhaseAdvance
   const chapterTitle  = (tsvMeta?.chapterTitle ?? tsvMeta?.titles)?.[language] ?? (tsvMeta?.chapterTitle ?? tsvMeta?.titles)?.en ?? chapter.title ?? chapter.titleTranslation
   const chapterLevel  = tsvMeta?.level               ?? chapter.level
   const storyIntro    = tsvMeta?.storyIntro?.[language] ?? tsvMeta?.storyIntro?.en ?? chapter.storyIntro ?? ''
-  const storyOutro    = tsvMeta?.storyOutro?.[language] ?? tsvMeta?.storyOutro?.en ?? chapter.storyOutro ?? ''
-  const artifact      = tsvMeta?.artifact ?? chapter.grammarArtifact
 
   // Phase step bar
   const phaseOrder = ['vocab', 'grammar', 'dialogue', 'passage', 'complete']
@@ -690,7 +688,6 @@ export default function AdventureChapter({ chapter, currentPhase, onPhaseAdvance
           storyIntroTranslation={tsvMeta?.storyIntro?.en ?? ''}
           wordEntries={wordEntries}
           contentItems={contentItems}
-          artifact={artifact}
           language={language}
           lookup={lookup}
           scores={scores}

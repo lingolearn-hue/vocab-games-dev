@@ -10,7 +10,7 @@ import { useRef, useLayoutEffect, useState } from 'react'
  * Mechanism: measures natural content width vs. available width, then sets
  * a `--chip-row-scale` CSS variable on the wrapper. Chip rules opt in by
  * multiplying their own font-size/padding by `var(--chip-row-scale, 1)` via
- * calc() — see index.css's .level-chip / .pos-chip etc. This keeps real
+ * calc() — see index.css's .level-chip etc. This keeps real
  * layout metrics (so chips don't blur or look visually "off" the way a
  * transform: scale() would), while ChipRow stays a single, generic,
  * reusable measuring component that knows nothing about chip styling.

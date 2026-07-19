@@ -51,7 +51,7 @@ export const CATEGORY_TREE = [
     ],
   },
   {
-    id: 'society', labels: { en: 'Society', de: 'Gesellschaft', es: 'Sociedad', fr: 'Société', ja: '社会', zh: '社会' },
+    id: 'society', labels: { en: 'Society', de: 'Sozial', es: 'Sociedad', fr: 'Société', ja: '社会', zh: '社会' },
     leaves: [
       { id: 'work',       labels: { en: 'Work',       de: 'Arbeit',      es: 'Trabajo',    fr: 'Travail',    ja: '仕事', zh: '工作' } },
       { id: 'school',     labels: { en: 'School',     de: 'Schule',      es: 'Escuela',    fr: 'École',      ja: '学校', zh: '学校' } },
@@ -70,7 +70,7 @@ export const CATEGORY_TREE = [
     ],
   },
   {
-    id: 'science', labels: { en: 'Science', de: 'Wissenschaft', es: 'Ciencia', fr: 'Science', ja: '科学', zh: '科学' },
+    id: 'science', labels: { en: 'Science', de: 'Wissen', es: 'Ciencia', fr: 'Science', ja: '科学', zh: '科学' },
     leaves: [
       { id: 'physics',    labels: { en: 'Physics',    de: 'Physik',   es: 'Física',   fr: 'Physique', ja: '物理', zh: '物理' } },
       { id: 'chemistry',  labels: { en: 'Chemistry',  de: 'Chemie',   es: 'Química',  fr: 'Chimie',   ja: '化学', zh: '化学' } },
