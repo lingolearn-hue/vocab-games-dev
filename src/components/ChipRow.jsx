@@ -15,8 +15,10 @@ import { useRef, useLayoutEffect, useState } from 'react'
  * transform: scale() would), while ChipRow stays a single, generic,
  * reusable measuring component that knows nothing about chip styling.
  *
- * Bounded to a sane range (0.6–1.4) so text never becomes illegible or
- * comically oversized with very few/short chips.
+ * Bounded to a sane range (0.05–1.4) so text never becomes comically
+ * oversized with very few/short chips; the low floor exists to guarantee
+ * a full row of chips (e.g. all 7 category parents, or "HSK1".."HSK9")
+ * always fits on one row on narrow phones without ever wrapping.
  */
 const MIN_SCALE = 0.05
 const MAX_SCALE = 1.4

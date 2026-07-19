@@ -191,6 +191,17 @@ export function filterByCategory(entries, categories) {
   if (!categories || categories.length === 0) return entries
   return entries.filter(e => categories.some(c => e.categories?.includes(c)))
 }
+/**
+ * Always sets an explicit data-theme="light"|"dark" attribute — this
+ * resolves 'auto' mode itself, so [data-theme] CSS selectors are always
+ * authoritative. IMPORTANT: because of this, CSS must never use
+ * `@media (prefers-color-scheme: dark)` — those blocks fire purely off OS
+ * preference regardless of what's set here, and previously caused a real
+ * bug where explicit light-mode selections got silently overridden by a
+ * dark OS setting (fixed by removing ~33 such blocks across the codebase;
+ * see chat history "text color is also an issue" for the full writeup).
+ * Use [data-theme="dark"] exclusively for dark-theme CSS.
+ */
 export function applyDarkMode(mode) {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   const isDark = mode === 'dark' || (mode === 'auto' && prefersDark)

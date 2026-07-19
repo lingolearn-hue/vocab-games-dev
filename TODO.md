@@ -54,7 +54,37 @@
       language. If revisited, pilot with German only first (most developed
       list) before committing to all five.
 
-## Housekeeping
+## Category system (topic tagging)
+- [x] Taxonomy designed: 8 parents (Nature, People, Life, Time, Places,
+      Society, Science, Abstract) with ~25 leaves, per-language display
+      labels. Lives in `src/engine/categories.js` — see its header comment
+      and `README.md` "Category system" section for the design rationale.
+- [x] Two-level chooser UI (parent row + on-demand leaf drill-down), wired
+      into Setup (global filter) and Vocab Browser (local filter).
+- [x] German A1 (678 words) — tagged, high precision.
+- [x] Japanese N5/N4 (1,415 words) — tagged, high precision.
+- [x] Chinese HSK1-3 (1,210 words) — tagged, high precision.
+- [x] German A2 (2,057 words) — tagged; first pass leaned too hard on a
+      generic fallback bucket (62% landed in "Concepts"), caught via spot
+      check and redone by hand — now ~14% Concepts, in line with the others.
+      Lesson: always spot-check a random sample before trusting a
+      keyword-driven tagging pass, especially at >1000 words.
+- [ ] Not yet tagged: German B1/B2/C1/C2, Chinese HSK4-7, Spanish, French,
+      English (entirely untagged). Untagged words are simply unaffected by
+      category filters, so this is safe to pick up incrementally.
+- [ ] Science parent (Physics/Chemistry/Biology leaves) currently has ~1
+      word tagged (Japanese "biology") — will need real content once
+      higher levels (which actually contain science vocab) get tagged.
+
+## Session hygiene
+- [ ] This chat has been running very long (multiple big features across
+      many turns) and has started showing reliability issues. Plan: start a
+      fresh conversation after each natural milestone (e.g. right after a
+      push) rather than continuing indefinitely in one thread. Memory
+      carries durable facts/preferences across chats; this TODO + the repo
+      itself is the source of truth a new chat should read first.
+
+
 - [ ] Main repo (`vocab-games`) `dev` branch is stale (~v0.46, pre-dates all
       the lost-session recovery work) — decide whether to retire it or
       fast-forward it from the current `main`/recovered line.
