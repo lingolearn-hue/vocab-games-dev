@@ -62,6 +62,10 @@ IDIOM_SCRUBS = [
     'wing mirror',         # car part, not an animal "wing"
     '(plural)',            # grammatical-number annotation, not about grammar itself
     'half-timbered',       # architecture term, not the quantifier "half"
+    'factory plant',       # "factory, plant" — same word, industrial sense
+    'water treatment plant',  # infrastructure, not the botanical "plant"
+    'to bore',             # "to drill", not the emotion "bored"
+    'dog owner', 'cat owner', 'pet owner', 'of a pet',  # a person, not the animal
 ]
 
 
