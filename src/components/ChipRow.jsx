@@ -18,7 +18,7 @@ import { useRef, useLayoutEffect, useState } from 'react'
  * Bounded to a sane range (0.6–1.4) so text never becomes illegible or
  * comically oversized with very few/short chips.
  */
-const MIN_SCALE = 0.08
+const MIN_SCALE = 0.05
 const MAX_SCALE = 1.4
 
 export default function ChipRow({ className = '', children }) {
@@ -32,15 +32,23 @@ export default function ChipRow({ className = '', children }) {
     if (!outer || !inner) return
 
     function measure() {
-      // Reset to natural size first so we measure true content width
-      outer.style.setProperty('--chip-row-scale', '1')
       const cs = getComputedStyle(outer)
       const hPadding = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
       const available = outer.clientWidth - hPadding
-      const needed    = inner.scrollWidth
-      if (available <= 0 || needed <= 0) return
-      const raw = available / needed
-      setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, raw)))
+      // Derive the natural (unscaled) content width from the currently
+      // rendered width, rather than imperatively resetting the DOM to scale
+      // 1 first — that reset was itself a size change, which retriggers the
+      // ResizeObserver below, which recomputes the same scale and calls
+      // setScale with an identical value, so React bails the re-render and
+      // the imperative reset is left as the final (wrong) DOM state instead
+      // of the computed scale ever actually rendering.
+      const currentScale = parseFloat(cs.getPropertyValue('--chip-row-scale')) || 1
+      const neededAtCurrentScale = inner.scrollWidth
+      if (available <= 0 || neededAtCurrentScale <= 0 || currentScale <= 0) return
+      const naturalNeeded = neededAtCurrentScale / currentScale
+      const raw = available / naturalNeeded
+      const next = Math.min(MAX_SCALE, Math.max(MIN_SCALE, raw))
+      setScale(prev => (Math.abs(prev - next) < 0.01 ? prev : next))
     }
 
     measure()

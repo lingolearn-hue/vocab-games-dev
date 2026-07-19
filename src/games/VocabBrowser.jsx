@@ -135,6 +135,7 @@ export default function VocabBrowser() {
         entries={activeEntries}
         value={filterCategory}
         onChange={setFilterCategory}
+        lang={activeLanguage}
         className="vb-category-filter"
       />
 

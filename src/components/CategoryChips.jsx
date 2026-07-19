@@ -5,7 +5,7 @@ import CategoryChooser from './CategoryChooser'
 // settings.categories.global filter, scoped to the currently visible
 // (level-filtered, vulgar-filtered) entries — mirrors LevelChips.
 export default function CategoryChips({ entries }) {
-  const { settings, updateSettings } = useApp()
+  const { settings, updateSettings, activeLanguage } = useApp()
 
   const activeCategories = settings.categories?.global ?? null
 
@@ -13,5 +13,5 @@ export default function CategoryChips({ entries }) {
     updateSettings(s => ({ ...s, categories: { ...s.categories, global: next } }))
   }
 
-  return <CategoryChooser entries={entries} value={activeCategories} onChange={handleChange} />
+  return <CategoryChooser entries={entries} value={activeCategories} onChange={handleChange} lang={activeLanguage} />
 }

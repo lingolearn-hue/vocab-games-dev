@@ -79,13 +79,17 @@
   flex-shrink: 0;
 }
 .vb-category-filter-parents .chip-row-inner {
-  gap: calc(0.35rem * var(--chip-row-scale, 1));
+  gap: calc(0.18rem * var(--chip-row-scale, 1));
+}
+.vb-category-filter-parents .level-chip {
+  font-size: calc(0.58rem * var(--chip-row-scale, 1));
+  padding: calc(0.2rem * var(--chip-row-scale, 1)) calc(0.4rem * var(--chip-row-scale, 1));
 }
 .vb-category-filter-leaves {
-  padding: 0.35rem 0 0;
+  padding: 0.3rem 0 0;
 }
 .vb-category-filter-leaves .chip-row-inner {
-  gap: calc(0.3rem * var(--chip-row-scale, 1));
+  gap: calc(0.18rem * var(--chip-row-scale, 1));
 }
 
 .vb-select {

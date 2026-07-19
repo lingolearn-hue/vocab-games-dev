@@ -94,16 +94,26 @@
   padding: 0.3rem 1.2rem 0.2rem;
 }
 .category-filter-parents .chip-row-inner {
-  gap: calc(0.35rem * var(--chip-row-scale, 1));
+  gap: calc(0.18rem * var(--chip-row-scale, 1));
+}
+/* Parent labels run longer in some target languages (e.g. "Gesellschaft"),
+   so they start smaller/tighter than level-chip's base size — this gives
+   ChipRow more headroom before it has to shrink drastically, and keeps
+   the row legible even on narrow phones with a full 7-chip set. */
+.category-filter-parents .level-chip {
+  font-size: calc(0.58rem * var(--chip-row-scale, 1));
+  padding: calc(0.2rem * var(--chip-row-scale, 1)) calc(0.4rem * var(--chip-row-scale, 1));
 }
 .category-filter-leaves {
-  padding: 0.35rem 0 0;
+  padding: 0.3rem 0 0;
 }
 .category-filter-leaves .chip-row-inner {
-  gap: calc(0.3rem * var(--chip-row-scale, 1));
+  gap: calc(0.18rem * var(--chip-row-scale, 1));
 }
 .category-leaf-chip {
   background: #eef2ff;
+  font-size: calc(0.58rem * var(--chip-row-scale, 1));
+  padding: calc(0.2rem * var(--chip-row-scale, 1)) calc(0.4rem * var(--chip-row-scale, 1));
 }
 [data-theme="dark"] .category-leaf-chip { background: #1a1f2e; }
 

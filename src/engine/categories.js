@@ -6,86 +6,95 @@
  *
  * A word may carry 0+ leaf tags. Untagged words are unaffected by any
  * category filter (same convention as the existing 'vulgar' tag).
+ *
+ * Each node's `labels` is keyed by language code, shown in the target
+ * language being studied (falls back to English if a translation is
+ * missing for a given language).
  */
 
 export const CATEGORY_TREE = [
   {
-    id: 'nature', label: 'Nature',
+    id: 'nature', labels: { en: 'Nature', de: 'Natur', es: 'Naturaleza', fr: 'Nature', ja: '自然', zh: '自然' },
     leaves: [
-      { id: 'animals',   label: 'Animals' },
-      { id: 'plants',    label: 'Plants' },
-      { id: 'weather',   label: 'Weather' },
-      { id: 'landscape', label: 'Landscape' },
+      { id: 'animals',   labels: { en: 'Animals',   de: 'Tiere',      es: 'Animales', fr: 'Animaux', ja: '動物', zh: '动物' } },
+      { id: 'plants',    labels: { en: 'Plants',    de: 'Pflanzen',   es: 'Plantas',  fr: 'Plantes', ja: '植物', zh: '植物' } },
+      { id: 'weather',   labels: { en: 'Weather',   de: 'Wetter',     es: 'Clima',    fr: 'Météo',   ja: '天気', zh: '天气' } },
+      { id: 'landscape', labels: { en: 'Landscape', de: 'Landschaft', es: 'Paisaje',  fr: 'Paysage', ja: '風景', zh: '风景' } },
     ],
   },
   {
-    id: 'people', label: 'People',
+    id: 'people', labels: { en: 'People', de: 'Menschen', es: 'Personas', fr: 'Gens', ja: '人々', zh: '人' },
     leaves: [
-      { id: 'family',     label: 'Family' },
-      { id: 'body',       label: 'Body' },
-      { id: 'emotions',   label: 'Emotions' },
-      { id: 'appearance', label: 'Appearance' },
+      { id: 'family',     labels: { en: 'Family',     de: 'Familie', es: 'Familia',   fr: 'Famille',  ja: '家族', zh: '家庭' } },
+      { id: 'body',       labels: { en: 'Body',       de: 'Körper',  es: 'Cuerpo',    fr: 'Corps',    ja: '体',   zh: '身体' } },
+      { id: 'emotions',   labels: { en: 'Emotions',   de: 'Gefühle', es: 'Emociones', fr: 'Émotions', ja: '感情', zh: '情感' } },
+      { id: 'appearance', labels: { en: 'Appearance', de: 'Aussehen', es: 'Apariencia', fr: 'Apparence', ja: '外見', zh: '外貌' } },
     ],
   },
   {
-    id: 'life', label: 'Life',
+    id: 'life', labels: { en: 'Life', de: 'Leben', es: 'Vida', fr: 'Vie', ja: '生活', zh: '生活' },
     leaves: [
-      { id: 'food',     label: 'Food' },
-      { id: 'clothing', label: 'Clothing' },
-      { id: 'home',     label: 'Home' },
-      { id: 'shopping', label: 'Shopping' },
+      { id: 'food',     labels: { en: 'Food',     de: 'Essen',     es: 'Comida', fr: 'Nourriture', ja: '食べ物', zh: '食物' } },
+      { id: 'clothing', labels: { en: 'Clothing', de: 'Kleidung',  es: 'Ropa',   fr: 'Vêtements',  ja: '服',     zh: '衣服' } },
+      { id: 'home',     labels: { en: 'Home',     de: 'Zuhause',   es: 'Hogar',  fr: 'Maison',     ja: '家',     zh: '家'   } },
+      { id: 'shopping', labels: { en: 'Shopping', de: 'Einkaufen', es: 'Compras', fr: 'Achats',    ja: '買い物', zh: '购物' } },
     ],
   },
   {
-    id: 'time', label: 'Time',
+    id: 'time', labels: { en: 'Time', de: 'Zeit', es: 'Tiempo', fr: 'Temps', ja: '時間', zh: '时间' },
     leaves: [
-      { id: 'calendar', label: 'Calendar' },
-      { id: 'numbers',  label: 'Numbers' },
+      { id: 'calendar', labels: { en: 'Calendar', de: 'Kalender', es: 'Calendario', fr: 'Calendrier', ja: 'カレンダー', zh: '日历' } },
     ],
   },
   {
-    id: 'places', label: 'Places',
+    id: 'places', labels: { en: 'Places', de: 'Orte', es: 'Lugares', fr: 'Lieux', ja: '場所', zh: '地方' },
     leaves: [
-      { id: 'travel',     label: 'Travel' },
-      { id: 'directions', label: 'Directions' },
-      { id: 'countries',  label: 'Countries' },
+      { id: 'travel',     labels: { en: 'Travel',     de: 'Reisen',      es: 'Viajes',     fr: 'Voyage',     ja: '旅行', zh: '旅行' } },
+      { id: 'directions', labels: { en: 'Directions', de: 'Richtungen', es: 'Direcciones', fr: 'Directions', ja: '方向', zh: '方向' } },
+      { id: 'countries',  labels: { en: 'Countries',  de: 'Länder',     es: 'Países',      fr: 'Pays',       ja: '国',   zh: '国家' } },
     ],
   },
   {
-    id: 'society', label: 'Society',
+    id: 'society', labels: { en: 'Society', de: 'Gesellschaft', es: 'Sociedad', fr: 'Société', ja: '社会', zh: '社会' },
     leaves: [
-      { id: 'work',       label: 'Work' },
-      { id: 'school',     label: 'School' },
-      { id: 'technology', label: 'Technology' },
-      { id: 'health',     label: 'Health' },
-      { id: 'economy',    label: 'Economy' },
+      { id: 'work',       labels: { en: 'Work',       de: 'Arbeit',      es: 'Trabajo',    fr: 'Travail',    ja: '仕事', zh: '工作' } },
+      { id: 'school',     labels: { en: 'School',     de: 'Schule',      es: 'Escuela',    fr: 'École',      ja: '学校', zh: '学校' } },
+      { id: 'technology', labels: { en: 'Technology', de: 'Technik',     es: 'Tecnología', fr: 'Technologie', ja: '技術', zh: '技术' } },
+      { id: 'health',     labels: { en: 'Health',     de: 'Gesundheit',  es: 'Salud',      fr: 'Santé',      ja: '健康', zh: '健康' } },
+      { id: 'economy',    labels: { en: 'Economy',    de: 'Wirtschaft',  es: 'Economía',   fr: 'Économie',   ja: '経済', zh: '经济' } },
     ],
   },
   {
-    id: 'science', label: 'Science',
+    id: 'science', labels: { en: 'Science', de: 'Wissenschaft', es: 'Ciencia', fr: 'Science', ja: '科学', zh: '科学' },
     leaves: [
-      { id: 'physics',   label: 'Physics' },
-      { id: 'chemistry', label: 'Chemistry' },
-      { id: 'biology',   label: 'Biology' },
+      { id: 'physics',   labels: { en: 'Physics',   de: 'Physik',   es: 'Física',   fr: 'Physique', ja: '物理', zh: '物理' } },
+      { id: 'chemistry', labels: { en: 'Chemistry', de: 'Chemie',   es: 'Química',  fr: 'Chimie',   ja: '化学', zh: '化学' } },
+      { id: 'biology',   labels: { en: 'Biology',   de: 'Biologie', es: 'Biología', fr: 'Biologie', ja: '生物', zh: '生物' } },
     ],
   },
   {
-    id: 'abstract', label: 'Abstract',
+    id: 'abstract', labels: { en: 'Abstract', de: 'Abstrakt', es: 'Abstracto', fr: 'Abstrait', ja: '抽象', zh: '抽象' },
     leaves: [
-      { id: 'verbs',       label: 'Verbs' },
-      { id: 'connectors',  label: 'Connectors' },
-      { id: 'questions',   label: 'Questions' },
-      { id: 'quantifiers', label: 'Quantifiers' },
-      { id: 'concepts',    label: 'Concepts' },
-      { id: 'grammar',     label: 'Grammar' },
+      { id: 'verbs',       labels: { en: 'Verbs',       de: 'Verben',        es: 'Verbos',          fr: 'Verbes',          ja: '動詞',   zh: '动词' } },
+      { id: 'connectors',  labels: { en: 'Connectors',  de: 'Konnektoren',   es: 'Conectores',      fr: 'Connecteurs',     ja: '接続詞', zh: '连接词' } },
+      { id: 'questions',   labels: { en: 'Questions',   de: 'Fragen',        es: 'Preguntas',       fr: 'Questions',       ja: '疑問詞', zh: '疑问词' } },
+      { id: 'quantifiers', labels: { en: 'Quantifiers', de: 'Mengenwörter',  es: 'Cuantificadores', fr: 'Quantificateurs', ja: '数量詞', zh: '数量词' } },
+      { id: 'numbers',     labels: { en: 'Numbers',     de: 'Zahlen',        es: 'Números',         fr: 'Nombres',         ja: '数字',   zh: '数字' } },
+      { id: 'concepts',    labels: { en: 'Concepts',    de: 'Konzepte',      es: 'Conceptos',       fr: 'Concepts',        ja: '概念',   zh: '概念' } },
+      { id: 'grammar',     labels: { en: 'Grammar',     de: 'Grammatik',     es: 'Gramática',       fr: 'Grammaire',       ja: '文法',   zh: '语法' } },
     ],
   },
 ]
 
-/** Flat lookup: leaf id -> { parentId, parentLabel, leafLabel } */
+/** Resolve a labels map to a specific language, falling back to English. */
+export function resolveLabel(labels, lang) {
+  return labels[lang] ?? labels.en
+}
+
+/** Flat lookup: leaf id -> { parentId, parentLabels, leafLabels } */
 export const LEAF_INFO = CATEGORY_TREE.reduce((acc, parent) => {
   for (const leaf of parent.leaves) {
-    acc[leaf.id] = { parentId: parent.id, parentLabel: parent.label, leafLabel: leaf.label }
+    acc[leaf.id] = { parentId: parent.id, parentLabels: parent.labels, leafLabels: leaf.labels }
   }
   return acc
 }, {})

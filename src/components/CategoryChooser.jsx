@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { CATEGORY_TREE, LEAF_INFO } from '../engine/categories'
+import { CATEGORY_TREE, LEAF_INFO, resolveLabel } from '../engine/categories'
 import ChipRow from './ChipRow'
 import ChoiceChips from './ChoiceChips'
 import './ChipRow.css'
@@ -11,13 +11,15 @@ import './ChipRow.css'
  *
  * `value` is the flat array of selected LEAF ids (or null = no filter) —
  * the same shape filterByCategory/settings.categories.global expects.
+ * `lang` selects which language the chip labels are shown in (the target
+ * language being studied), falling back to English if untranslated.
  * Selecting a parent selects all of its present leaves at once; selecting
  * a second parent broadens any already-active parent back to its full
  * leaf set first (so drilling into one topic doesn't silently narrow a
  * topic you'd already broadened out of). Leaf-level narrowing only makes
  * sense with a single parent active, so the leaf row hides otherwise.
  */
-export default function CategoryChooser({ entries, value, onChange, className = 'category-filter' }) {
+export default function CategoryChooser({ entries, value, onChange, lang = 'en', className = 'category-filter' }) {
   const presentLeaves = useMemo(() => {
     const set = new Set()
     for (const e of entries) for (const c of (e.categories ?? [])) set.add(c)
@@ -66,7 +68,7 @@ export default function CategoryChooser({ entries, value, onChange, className = 
             className={`level-chip ${activeParents.includes(p) ? 'active' : ''}`}
             onClick={() => toggleParent(p)}
           >
-            {p.label}
+            {resolveLabel(p.labels, lang)}
           </button>
         ))}
       </ChipRow>
@@ -76,7 +78,7 @@ export default function CategoryChooser({ entries, value, onChange, className = 
           options={drilledParent.leaves.map(l => l.id)}
           value={value}
           onChange={onChange}
-          getLabel={id => LEAF_INFO[id].leafLabel}
+          getLabel={id => resolveLabel(LEAF_INFO[id].leafLabels, lang)}
           chipClassName="level-chip category-leaf-chip"
           className={`${className}-leaves`}
         />
