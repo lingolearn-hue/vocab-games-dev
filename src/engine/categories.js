@@ -41,17 +41,12 @@ export const CATEGORY_TREE = [
     ],
   },
   {
-    id: 'time', labels: { en: 'Time', de: 'Zeit', es: 'Tiempo', fr: 'Temps', ja: '時間', zh: '时间' },
-    leaves: [
-      { id: 'calendar', labels: { en: 'Calendar', de: 'Kalender', es: 'Calendario', fr: 'Calendrier', ja: 'カレンダー', zh: '日历' } },
-    ],
-  },
-  {
     id: 'places', labels: { en: 'Places', de: 'Orte', es: 'Lugares', fr: 'Lieux', ja: '場所', zh: '地方' },
     leaves: [
       { id: 'travel',     labels: { en: 'Travel',     de: 'Reisen',      es: 'Viajes',     fr: 'Voyage',     ja: '旅行', zh: '旅行' } },
       { id: 'directions', labels: { en: 'Directions', de: 'Richtungen', es: 'Direcciones', fr: 'Directions', ja: '方向', zh: '方向' } },
       { id: 'countries',  labels: { en: 'Countries',  de: 'Länder',     es: 'Países',      fr: 'Pays',       ja: '国',   zh: '国家' } },
+      { id: 'traffic',    labels: { en: 'Traffic',    de: 'Verkehr',    es: 'Tráfico',     fr: 'Circulation', ja: '交通', zh: '交通' } },
     ],
   },
   {
@@ -62,6 +57,17 @@ export const CATEGORY_TREE = [
       { id: 'technology', labels: { en: 'Technology', de: 'Technik',     es: 'Tecnología', fr: 'Technologie', ja: '技術', zh: '技术' } },
       { id: 'health',     labels: { en: 'Health',     de: 'Gesundheit',  es: 'Salud',      fr: 'Santé',      ja: '健康', zh: '健康' } },
       { id: 'economy',    labels: { en: 'Economy',    de: 'Wirtschaft',  es: 'Economía',   fr: 'Économie',   ja: '経済', zh: '经济' } },
+      { id: 'media',      labels: { en: 'Media',      de: 'Medien',      es: 'Medios',     fr: 'Médias',     ja: 'メディア', zh: '媒体' } },
+      { id: 'sports',     labels: { en: 'Sports',     de: 'Sport',       es: 'Deportes',   fr: 'Sport',      ja: 'スポーツ', zh: '体育' } },
+    ],
+  },
+  {
+    id: 'culture', labels: { en: 'Culture', de: 'Kultur', es: 'Cultura', fr: 'Culture', ja: '文化', zh: '文化' },
+    leaves: [
+      { id: 'time',     labels: { en: 'Time',     de: 'Zeit',      es: 'Tiempo',     fr: 'Temps',      ja: '時間', zh: '时间' } },
+      { id: 'politics', labels: { en: 'Politics', de: 'Politik',   es: 'Política',   fr: 'Politique',  ja: '政治', zh: '政治' } },
+      { id: 'music',    labels: { en: 'Music',    de: 'Musik',     es: 'Música',     fr: 'Musique',    ja: '音楽', zh: '音乐' } },
+      { id: 'art',      labels: { en: 'Art',      de: 'Kunst',     es: 'Arte',       fr: 'Art',        ja: '芸術', zh: '艺术' } },
     ],
   },
   {

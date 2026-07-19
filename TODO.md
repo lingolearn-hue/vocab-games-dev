@@ -69,12 +69,40 @@
       check and redone by hand — now ~14% Concepts, in line with the others.
       Lesson: always spot-check a random sample before trusting a
       keyword-driven tagging pass, especially at >1000 words.
-- [ ] Not yet tagged: German B1/B2/C1/C2, Chinese HSK4-7, Spanish, French,
-      English (entirely untagged). Untagged words are simply unaffected by
-      category filters, so this is safe to pick up incrementally.
+- [x] Taxonomy restructured: removed "Time" as its own parent, added
+      "Culture" parent (time/politics/music/art leaves), added "traffic"
+      leaf under Places. Now 9 parents, ~32 leaves.
+- [x] German B1 (6,441 words) — tagged via keyword pass against English
+      glosses + heavy iterative spot-checking (~10 rounds). Concepts
+      fallback down from 62.5% to 54.5%. Found and fixed ~35 polysemy bugs
+      (short/boot/field/little/degree/bill/bear/bat/right/player/show/
+      button/plant/course/article/nail/jam/taste/branch/law/clip/country/
+      head-shower/and/or/while, etc.) — single English keywords collide
+      constantly with unrelated senses; multi-word phrase requirements and
+      targeted idiom-scrub lists (see `IDIOM_SCRUBS` in the tagging script)
+      fixed most of it. ~54.5% Concepts is treated as B1's real ceiling,
+      not a bug — B1 vocab is structurally more abstract than A1/A2.
+- [ ] Continue category tagging: German B2/C1/C2, Chinese HSK4-7, Spanish,
+      French, English (entirely untagged). Reuse the B1 keyword set as a
+      starting point but expect a fresh round of spot-check-driven fixes
+      per language/level — polysemy bugs are language- and vocab-specific.
+- [ ] Check existing categories: A1/A2 (German), N5/N4 (Japanese), HSK1-3
+      (Chinese) were tagged before the taxonomy restructure (new Culture
+      parent, traffic/music/art leaves, calendar→time rename) and before
+      the polysemy-bug lessons learned during B1. Worth a fresh spot check
+      to see if any of that earlier work has the same class of bugs, and
+      whether words now belonging in the new leaves (music/art/traffic)
+      got missed or mis-bucketed under the old taxonomy.
 - [ ] Science parent (Physics/Chemistry/Biology leaves) currently has ~1
       word tagged (Japanese "biology") — will need real content once
       higher levels (which actually contain science vocab) get tagged.
+
+## Options menu
+- [ ] Check export/import function — flagged for review, not yet verified
+      against current data shape (categories arrays, POS field, per-level
+      schema changes made this session).
+
+
 
 ## Session hygiene
 - [ ] This chat has been running very long (multiple big features across
