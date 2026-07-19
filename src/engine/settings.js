@@ -180,6 +180,17 @@ export function filterByLevel(entries, levels) {
   if (!levels || levels.length === 0) return entries
   return entries.filter(e => levels.includes(e.level))
 }
+
+/**
+ * Filter entries by selected topic-category leaves. Returns all entries if
+ * categories is null/empty. A word matches if it carries ANY of the
+ * selected leaf tags (not all) — e.g. selecting "food"+"animals" shows
+ * words tagged either one.
+ */
+export function filterByCategory(entries, categories) {
+  if (!categories || categories.length === 0) return entries
+  return entries.filter(e => categories.some(c => e.categories?.includes(c)))
+}
 export function applyDarkMode(mode) {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   const isDark = mode === 'dark' || (mode === 'auto' && prefersDark)

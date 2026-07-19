@@ -18,7 +18,7 @@ import { useRef, useLayoutEffect, useState } from 'react'
  * Bounded to a sane range (0.6–1.4) so text never becomes illegible or
  * comically oversized with very few/short chips.
  */
-const MIN_SCALE = 0.15
+const MIN_SCALE = 0.08
 const MAX_SCALE = 1.4
 
 export default function ChipRow({ className = '', children }) {

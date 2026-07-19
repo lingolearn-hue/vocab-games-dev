@@ -74,6 +74,20 @@
   flex-wrap: wrap;
 }
 
+.vb-category-filter {
+  padding: 0 1.2rem 0.5rem;
+  flex-shrink: 0;
+}
+.vb-category-filter-parents .chip-row-inner {
+  gap: calc(0.35rem * var(--chip-row-scale, 1));
+}
+.vb-category-filter-leaves {
+  padding: 0.35rem 0 0;
+}
+.vb-category-filter-leaves .chip-row-inner {
+  gap: calc(0.3rem * var(--chip-row-scale, 1));
+}
+
 .vb-select {
   flex: 1;
   min-width: 0;

@@ -266,7 +266,7 @@
   padding: 0.6rem 1rem 0.4rem;
 }
 .gr-filter-levels .chip-row-inner {
-  gap: 0.4rem;
+  gap: calc(0.4rem * var(--chip-row-scale, 1));
 }
 
 /* Type + Topic rows — labeled, single-line horizontal scroll */

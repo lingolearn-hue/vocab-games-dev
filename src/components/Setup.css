@@ -89,6 +89,24 @@
   gap: calc(0.35rem * var(--chip-row-scale, 1));
 }
 
+/* ── Category filter ── */
+.category-filter {
+  padding: 0.3rem 1.2rem 0.2rem;
+}
+.category-filter-parents .chip-row-inner {
+  gap: calc(0.35rem * var(--chip-row-scale, 1));
+}
+.category-filter-leaves {
+  padding: 0.35rem 0 0;
+}
+.category-filter-leaves .chip-row-inner {
+  gap: calc(0.3rem * var(--chip-row-scale, 1));
+}
+.category-leaf-chip {
+  background: #eef2ff;
+}
+[data-theme="dark"] .category-leaf-chip { background: #1a1f2e; }
+
 /* ── Stats bar ── */
 .stats-bar {
   margin: 0 1.2rem 0.5rem;

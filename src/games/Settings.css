@@ -87,7 +87,7 @@
   flex: 1;
 }
 .st-chips .chip-row-inner {
-  gap: 0.35rem;
+  gap: calc(0.35rem * var(--chip-row-scale, 1));
 }
 
 /* Segmented control */

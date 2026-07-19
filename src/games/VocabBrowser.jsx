@@ -5,6 +5,7 @@ import { getAllMnemonics } from '../engine/mnemonics'
 import { displayEntry } from '../engine/vocab'
 import RubyText from '../components/RubyText'
 import HelpButton from '../components/HelpButton'
+import CategoryChooser from '../components/CategoryChooser'
 import './VocabBrowser.css'
 
 const GLOBAL_COLORS = {
@@ -20,6 +21,7 @@ export default function VocabBrowser() {
   const [filterLevel,  setFilterLevel]  = useState('all')
   const [filterPos,    setFilterPos]    = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [filterCategory, setFilterCategory] = useState(null)
   const [showTrans,    setShowTrans]    = useState(true)
   const [showScores,   setShowScores]   = useState(true)
   const [expandedId,   setExpandedId]   = useState(null)  // entry id with mnemonic expanded
@@ -50,6 +52,7 @@ export default function VocabBrowser() {
     return activeEntries.filter(e => {
       if (filterLevel !== 'all' && e.level !== filterLevel) return false
       if (filterPos   !== 'all' && e.pos   !== filterPos)   return false
+      if (filterCategory && !filterCategory.some(c => e.categories?.includes(c))) return false
 
       const lScore = leitnerScores[e.id] ?? 0
       const status = lScore === 0 ? 'unseen' : lScore >= 5 ? 'mastered' : 'learning'
@@ -63,7 +66,7 @@ export default function VocabBrowser() {
       }
       return true
     })
-  }, [activeEntries, scores, search, filterLevel, filterPos, filterStatus])
+  }, [activeEntries, scores, search, filterLevel, filterPos, filterStatus, filterCategory])
 
   // Reset window when filtered list changes
   // eslint-disable-next-line react-hooks/set-state-in-effect -- resets pagination whenever the filtered list changes
@@ -126,6 +129,14 @@ export default function VocabBrowser() {
           {posOptions.map(p => <option key={p} value={p}>{p === 'all' ? 'All POS' : p}</option>)}
         </select>
       </div>
+
+      {/* Category filter */}
+      <CategoryChooser
+        entries={activeEntries}
+        value={filterCategory}
+        onChange={setFilterCategory}
+        className="vb-category-filter"
+      />
 
       {/* Display toggles */}
       <div className="vb-toggles">

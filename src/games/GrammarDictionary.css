@@ -71,7 +71,7 @@
   min-width: 0;
 }
 .gd-level-filter .chip-row-inner {
-  gap: 0.35rem;
+  gap: calc(0.35rem * var(--chip-row-scale, 1));
 }
 
 .gd-filter-label {
@@ -89,7 +89,7 @@
   min-width: 0;
 }
 .gd-category-filter .chip-row-inner {
-  gap: 0.3rem;
+  gap: calc(0.3rem * var(--chip-row-scale, 1));
 }
 
 .gd-chip {

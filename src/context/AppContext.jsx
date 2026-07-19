@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { loadList, mergeLists, loadSentences } from '../engine/vocab'
 import { getAllScores, setScore, recordCorrect, recordWrong, recordMaster, resetToLearning } from '../engine/srs'
-import { loadSettings, saveSettings, applyDarkMode, getGameLevels, filterByLevel, LEVEL_ORDER } from '../engine/settings'
+import { loadSettings, saveSettings, applyDarkMode, getGameLevels, filterByLevel, filterByCategory, LEVEL_ORDER } from '../engine/settings'
 import { seedMnemonics } from '../engine/mnemonics'
 
 const AVAILABLE_LISTS = [
@@ -178,9 +178,14 @@ export function AppProvider({ children }) {
   // visibleEntries is what display/browsing screens (Setup stats, Vocab
   // Browser, Stats) should show — same vulgar-content filtering
   // getEntriesForGame applies for the games themselves.
-  const visibleEntries = useMemo(
+  const vulgarFilteredEntries = useMemo(
     () => showVulgar ? activeEntries : activeEntries.filter(e => !e.categories?.includes('vulgar')),
     [activeEntries, showVulgar]
+  )
+
+  const visibleEntries = useMemo(
+    () => filterByCategory(vulgarFilteredEntries, settings.categories?.global),
+    [vulgarFilteredEntries, settings.categories]
   )
 
   // Filters out entries tagged 'vulgar' (profanity/sensitive-biological terms;
@@ -191,9 +196,10 @@ export function AppProvider({ children }) {
   const getEntriesForGame = useCallback((game) => {
     const base = sessionEntries ?? activeEntries
     const clean = showVulgar ? base : base.filter(e => !e.categories?.includes('vulgar'))
+    const withCategory = filterByCategory(clean, settings.categories?.global)
     const levels = sessionEntries ? null : getGameLevels(settings, game)
-    const filtered = filterByLevel(clean, levels)
-    return { entries: filtered.length > 0 ? filtered : clean, isEmpty: filtered.length === 0 && levels !== null }
+    const filtered = filterByLevel(withCategory, levels)
+    return { entries: filtered.length > 0 ? filtered : withCategory, isEmpty: filtered.length === 0 && levels !== null }
   }, [activeEntries, sessionEntries, settings, showVulgar])
 
   // Sorted unique levels present in the active entries — canonical order per language
@@ -237,6 +243,7 @@ export function AppProvider({ children }) {
       ensureLoaded,
       activeEntries, sessionEntries, setSessionEntries, vocabLoading,
       visibleEntries,
+      vulgarFilteredEntries,
       activeSentences,
       direction,
       showReading, setShowReading,

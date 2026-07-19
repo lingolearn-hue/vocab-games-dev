@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { filterByLevel } from '../engine/settings'
 import LevelChips from './LevelChips'
+import CategoryChips from './CategoryChips'
 import Tutorial from './Tutorial'
 import './Setup.css'
 import './ReadingToggle.css'
@@ -75,7 +76,7 @@ function GroupCard({ title, subtitle, icon, games, canStart, setScreen, isOpen, 
 
 export default function Setup() {
   const {
-    availableLists, scores, activeEntries, visibleEntries, setScreen,
+    availableLists, scores, activeEntries, visibleEntries, vulgarFilteredEntries, setScreen,
     activeLanguage, setActiveLanguage, settings,
   } = useApp()
 
@@ -89,6 +90,15 @@ export default function Setup() {
   const filteredEntries = useMemo(
     () => filterByLevel(visibleEntries, settings.levels?.global ?? null),
     [visibleEntries, settings.levels?.global]
+  )
+
+  // Same level scope, but WITHOUT the category filter applied — this is what
+  // CategoryChips needs to see so its own chips don't vanish the moment a
+  // category gets selected (it must know everything available at this level,
+  // not just what's currently passing the category filter).
+  const categoryScopeEntries = useMemo(
+    () => filterByLevel(vulgarFilteredEntries, settings.levels?.global ?? null),
+    [vulgarFilteredEntries, settings.levels?.global]
   )
 
   const languages   = getLanguages(availableLists)
@@ -145,6 +155,9 @@ export default function Setup() {
       {/* Level filter */}
       <LevelChips />
 
+      {/* Category filter */}
+      <CategoryChips entries={categoryScopeEntries} />
+
       {/* Status bar */}
       {canStart && (
         <div className="stats-bar">
@@ -198,7 +211,7 @@ export default function Setup() {
         <p className="hint">{activeLanguage ? 'Loading vocabulary…' : 'Tap the flag above to choose a language.'}</p>
       )}
 
-      <div className="setup-version">v0.63ak</div>
+      <div className="setup-version">v0.63an</div>
 
       {tutorialOpen && <Tutorial onDone={() => setTutorialOpen(false)} />}
     </div>

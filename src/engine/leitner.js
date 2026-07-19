@@ -89,6 +89,17 @@ function _pickHighestBox(entryIds, scores) {
   return null
 }
 
+/** Picks the next box to open when the current one empties: searches
+ *  downward (current-1 → 0) first, matching the documented "next box
+ *  below opens" design, so a card just promoted upward isn't immediately
+ *  re-served. Falls back upward only if nothing remains below. */
+function _pickNextBoxBelow(entryIds, scores, current) {
+  const counts = _boxCounts(entryIds, scores)
+  for (let b = current - 1; b >= 0; b--) if (counts[b] > 0) return b
+  for (let b = current + 1; b <= 4; b++) if (counts[b] > 0) return b
+  return null
+}
+
 /** Local calendar-date string (YYYY-MM-DD) used for the day lock. */
 function _today() {
   const d = new Date()
@@ -326,7 +337,7 @@ function _openPass(session, scores) {
 
 function _advancePass(session, scores, allEntryIds) {
   const ids = allEntryIds ?? session.entryIds
-  const next = _pickHighestBox(ids, scores)
+  const next = _pickNextBoxBelow(ids, scores, session.currentPass)
   session.currentPass = next ?? session.currentPass
   _openPass(session, scores)
 }
