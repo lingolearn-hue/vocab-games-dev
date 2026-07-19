@@ -28,10 +28,8 @@ KEYWORDS = {
     'politics': r'\b(politic|politics|political|government|president|minister|parliament|election|elect|vote|voting|voter|legal|legislation|policy|democracy|democratic|republic|senate|congress|mayor|ambassador|embassy|diplomat|diplomatic|treaty|peace treaty|party member|political party|campaign|protest|rally|reform|constitution|citizenship|head of state|welfare state|federal state|nation-state)\b',
     'music': r'\b(music|musical|song|sing|singer|singing|melody|tune|rhythm|beat|band|orchestra|choir|chorus|instrument|guitar|piano|violin|drum|drums|trumpet|flute|concert|album|lyrics|composer|compose|conductor|note \(music\)|chord|opera|symphony|wind orchestra|brass band|dj|playlist|rapper|rap music)\b',
     'art': r'\b(art|artist|artistic|painting|paint|painter|sculpture|sculptor|gallery|museum|exhibition|architecture|architect|piazza|plaza|monument|statue|canvas|masterpiece|portrait|drawing|sketch|craft|handicraft|design \(art\))\b',
-    'quantifiers': r'\b(many|much|few|a little|a little bit|some|all of|every|each|several|enough|sufficient|more|less|most|least|amount|quantity|number of|plenty|entire|whole|half|dozen|approximately|roughly)\b',
-    'numbers': r"\b(one(?!'s)|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|twenty|thirty|forty|fifty|hundred|thousand|million|billion|zero|number|numeral|digit|figure|count|counting|first|second|third|fourth|fifth|dozen)\b",
-    'questions': r'\b(who|what|when|where|why|which|whom|whose)\b',
-    'connectors': r'\b(because|therefore|however|although|though|since|whereas|thus|hence|moreover|furthermore|nevertheless|otherwise|meanwhile|besides|so that|in order to|despite|unless|in addition|as well as|consequently|likewise|instead)\b',
+    'quantity': r"\b(many|much|few|a little|a little bit|some|all of|every|each|several|enough|sufficient|more|less|most|least|amount|quantity|number of|plenty|entire|whole|half|dozen|approximately|roughly|one(?!'s)|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|twenty|thirty|forty|fifty|hundred|thousand|million|billion|zero|number|numeral|digit|figure|count|counting|first|second|third|fourth|fifth|dozen)\b",
+    'function_words': r'\b(who|what|when|where|why|which|whom|whose|because|therefore|however|although|though|since|whereas|thus|hence|moreover|furthermore|nevertheless|otherwise|meanwhile|besides|so that|in order to|despite|unless|in addition|as well as|consequently|likewise|instead)\b',
     'grammar': r'\b(verb|noun|adjective|adverb|pronoun|preposition|conjunction|definite article|indefinite article|tense|plural|singular|grammatical subject|grammatical object|clause|sentence|grammar|grammatical|syntax|conjugation|declension|suffix|prefix|vowel|consonant)\b',
     'physics': r'\b(physics|energy|force|gravity|velocity|speed|mass|motion|momentum|electric|electricity|magnet|magnetic|wave|frequency|heat|thermal|pressure|atom|atomic|particle|radiation|voltage|current|circuit|friction)\b',
     'chemistry': r'\b(chemistry|chemical|element|compound|reaction|acid|alkaline|base|molecule|molecular|solution|mixture|gas|liquid|solid state|oxygen|hydrogen|carbon|nitrogen|metal|alloy|catalyst)\b',
@@ -81,9 +79,9 @@ def classify(translations, pos):
     if pos == 'verb':
         return ['verbs']
     if pos == 'conj':
-        return ['connectors']
+        return ['function_words']
     if pos == 'numeral':
-        return ['numbers']
+        return ['quantity']
     return ['concepts']
 
 

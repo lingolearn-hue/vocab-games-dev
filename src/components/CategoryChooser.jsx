@@ -6,18 +6,23 @@ import './ChipRow.css'
 
 /**
  * Two-level topic filter: a parent row (Nature, People, Life, ...) plus an
- * on-demand leaf row that only appears once exactly one parent is active,
- * letting you drill from "Nature" down to just "Animals".
+ * on-demand leaf row that only appears once a parent is active, letting you
+ * drill from "Nature" down to just "Animals".
  *
  * `value` is the flat array of selected LEAF ids (or null = no filter) —
  * the same shape filterByCategory/settings.categories.global expects.
  * `lang` selects which language the chip labels are shown in (the target
  * language being studied), falling back to English if untranslated.
- * Selecting a parent selects all of its present leaves at once; selecting
- * a second parent broadens any already-active parent back to its full
- * leaf set first (so drilling into one topic doesn't silently narrow a
- * topic you'd already broadened out of). Leaf-level narrowing only makes
- * sense with a single parent active, so the leaf row hides otherwise.
+ *
+ * Parent row is single-select: tapping a parent selects its full leaf set,
+ * replacing whatever was active before; tapping the already-active parent
+ * again clears back to no filter. Only one parent can be drilled into at a
+ * time, so there's no "clear filter" button needed at this level — the
+ * toggle-off IS the clear action.
+ *
+ * Leaf row (shown once a parent is active) stays multi-select — narrowing
+ * within a topic (e.g. Animals + Plants within Nature) is still useful —
+ * and gets its own "✕" chip to jump straight back to no filter at all.
  */
 export default function CategoryChooser({ entries, value, onChange, lang = 'en', className = 'category-filter' }) {
   const presentLeaves = useMemo(() => {
@@ -35,29 +40,15 @@ export default function CategoryChooser({ entries, value, onChange, lang = 'en',
 
   if (parents.length === 0) return null
 
-  const activeParents = parents.filter(p => p.leaves.some(l => value?.includes(l.id)))
+  const activeParent = parents.find(p => p.leaves.some(l => value?.includes(l.id))) ?? null
 
   function toggleParent(parent) {
-    const leafIds = parent.leaves.map(l => l.id)
-    const isActive = leafIds.some(id => value?.includes(id))
-
-    if (isActive) {
-      const next = (value ?? []).filter(id => !leafIds.includes(id))
-      onChange(next.length ? next : null)
+    if (parent === activeParent) {
+      onChange(null)
       return
     }
-
-    // Broaden any already-active parent(s) to their full leaf set before
-    // adding this one, so a previously-drilled-into topic doesn't stay
-    // narrowed once we're in multi-parent mode.
-    let broadened = [...(value ?? [])]
-    for (const p of activeParents) {
-      broadened = Array.from(new Set([...broadened, ...p.leaves.map(l => l.id)]))
-    }
-    onChange(Array.from(new Set([...broadened, ...leafIds])))
+    onChange(parent.leaves.map(l => l.id))
   }
-
-  const drilledParent = activeParents.length === 1 ? activeParents[0] : null
 
   return (
     <div className={className}>
@@ -65,7 +56,7 @@ export default function CategoryChooser({ entries, value, onChange, lang = 'en',
         {parents.map(p => (
           <button
             key={p.id}
-            className={`level-chip ${activeParents.includes(p) ? 'active' : ''}`}
+            className={`level-chip ${p === activeParent ? 'active' : ''}`}
             onClick={() => toggleParent(p)}
           >
             {resolveLabel(p.labels, lang)}
@@ -73,14 +64,23 @@ export default function CategoryChooser({ entries, value, onChange, lang = 'en',
         ))}
       </ChipRow>
 
-      {drilledParent && (
+      {activeParent && (
         <ChoiceChips
-          options={drilledParent.leaves.map(l => l.id)}
+          options={activeParent.leaves.map(l => l.id)}
           value={value}
           onChange={onChange}
           getLabel={id => resolveLabel(LEAF_INFO[id].leafLabels, lang)}
           chipClassName="level-chip category-leaf-chip"
           className={`${className}-leaves`}
+          prefixChip={
+            <button
+              className="level-chip category-clear-chip"
+              onClick={() => onChange(null)}
+              aria-label="Clear topic filter"
+            >
+              ✕
+            </button>
+          }
         />
       )}
     </div>

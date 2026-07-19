@@ -57,6 +57,18 @@ button:focus:not(:focus-visible) { outline: none; }
 [data-theme="dark"] .level-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
 [data-theme="dark"] .level-chip:hover:not(.active) { border-color: #4f7ef8; color: #4f7ef8; }
 
+/* Clear-filter chip (category topic filter) — visually distinct from topic
+   chips (dashed border, no fill) so it doesn't read as just another option */
+.category-clear-chip {
+  background: transparent;
+  border-style: dashed;
+  color: #999;
+  font-weight: 900;
+}
+.category-clear-chip:hover { border-color: #e05252; color: #e05252; background: #fff0f0; }
+[data-theme="dark"] .category-clear-chip { color: #777; }
+[data-theme="dark"] .category-clear-chip:hover { border-color: #e05252; color: #e05252; background: #2a1414; }
+
 /* POS chip reuses the exact same visual language as level-chip */
 .pos-chip {
   padding: calc(0.3rem * var(--chip-row-scale, 1)) calc(0.7rem * var(--chip-row-scale, 1));

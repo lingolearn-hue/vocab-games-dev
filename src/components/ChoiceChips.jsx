@@ -19,8 +19,13 @@ import './ChipRow.css'
  *    "all selected" and "no filter" mean the same thing.
  *
  * Chips are auto-scaled (via ChipRow) to always fit on one row.
+ *
+ * `prefixChip`: optional extra node rendered before the mapped options,
+ * inside the same ChipRow — so it scales together with the chips instead
+ * of sitting outside the row's auto-fit measurement. Used by
+ * CategoryChooser for its leaf-level "clear filter" button.
  */
-export default function ChoiceChips({ options, value, onChange, getLabel = String, chipClassName = 'level-chip', className = 'level-filter' }) {
+export default function ChoiceChips({ options, value, onChange, getLabel = String, chipClassName = 'level-chip', className = 'level-filter', prefixChip = null }) {
   if (!options?.length) return null
 
   function isActive(opt) {
@@ -45,6 +50,7 @@ export default function ChoiceChips({ options, value, onChange, getLabel = Strin
 
   return (
     <ChipRow className={className}>
+      {prefixChip}
       {options.map(opt => (
         <button
           key={opt}

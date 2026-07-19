@@ -37,6 +37,13 @@ const MAX_SCORE   = 5
 export const LEITNER_GAMES = ['flashcard', 'pairmatch', 'stroke']
 const RECOGNITION_GAMES = LEITNER_GAMES.filter(g => g !== 'stroke')
 
+// Single source of truth for every localStorage key this engine writes.
+// Backup/export/import/reset logic MUST use this instead of a hardcoded
+// list — new games added to LEITNER_GAMES are picked up automatically.
+export function leitnerStorageKeys() {
+  return LEITNER_GAMES.flatMap(g => [SCORES_KEY(g), SESSION_KEY(g)])
+}
+
 // ── Persistence ───────────────────────────────────────────────────────────────
 
 function readScores(game='flashcard') {

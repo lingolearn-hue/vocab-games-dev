@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useApp } from '../context/AppContext'
+import { leitnerStorageKeys } from '../engine/leitner'
 import './Settings.css'
 
 export default function Settings() {
@@ -22,7 +23,7 @@ export default function Settings() {
     })
   }
 
-  const BACKUP_KEYS = ['vocabScores', 'vocabSettings', 'vocabMnemonics', 'vocabMnemonicsSeeded', 'grammarScores', 'activeLanguage', 'rc-high']
+  const BACKUP_KEYS = ['vocabScores', 'vocabSettings', 'vocabMnemonics', 'vocabMnemonicsSeeded', 'grammarScores', 'activeLanguage', 'rc-high', 'adventureProgress', ...leitnerStorageKeys()]
 
   function exportBackup() {
     const data = {}
@@ -58,7 +59,10 @@ export default function Settings() {
   function resetAllScores() {
     if (!confirm('Reset ALL scores? This cannot be undone.')) return
     localStorage.removeItem('vocabScores')
+    localStorage.removeItem('grammarScores')
+    localStorage.removeItem('rc-high')
     localStorage.removeItem('adventureProgress')
+    for (const key of leitnerStorageKeys()) localStorage.removeItem(key)
     window.location.reload()
   }
 
