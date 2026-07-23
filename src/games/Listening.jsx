@@ -150,6 +150,46 @@ export default function Listening() {
   const currentEntry = queue[index] ?? null
   const prompt = currentEntry ? displayEntry(currentEntry, activeLanguage) : null
 
+  // Media Session: lock-screen / notification-shade playback controls. This
+  // gives play/pause/skip controls without unlocking the phone, but note it
+  // does NOT reliably keep speech playing once the screen locks or the tab
+  // is backgrounded — that would need real audio files behind an <audio>
+  // element, which is a much bigger undertaking (pre-generated TTS audio,
+  // hosting, etc.) than this app's static-hosting architecture supports
+  // today. This is a UX nicety on top of foreground playback, not a fix
+  // for background playback.
+  const handlersRef = useRef({})
+  useEffect(() => { handlersRef.current = { handlePlay, handlePause, handleSkip } })
+
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    navigator.mediaSession.setActionHandler('play',         () => handlersRef.current.handlePlay())
+    navigator.mediaSession.setActionHandler('pause',        () => handlersRef.current.handlePause())
+    navigator.mediaSession.setActionHandler('previoustrack', () => handlersRef.current.handleSkip(-1))
+    navigator.mediaSession.setActionHandler('nexttrack',      () => handlersRef.current.handleSkip(1))
+    return () => {
+      navigator.mediaSession.setActionHandler('play', null)
+      navigator.mediaSession.setActionHandler('pause', null)
+      navigator.mediaSession.setActionHandler('previoustrack', null)
+      navigator.mediaSession.setActionHandler('nexttrack', null)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    if (!currentEntry) return
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:  currentEntry.entry,
+      artist: currentEntry.translation?.[0] ?? '',
+      album:  boxMode === 'all' ? `Listening · Box ${currentEntry._box}` : `Listening · Box ${boxMode}`,
+    })
+  }, [currentEntry, boxMode])
+
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'
+  }, [playing])
+
   if (!speechSupported()) {
     return (
       <div className="ls-screen">
