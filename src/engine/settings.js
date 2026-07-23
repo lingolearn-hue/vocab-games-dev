@@ -73,6 +73,9 @@ export const DEFAULTS = {
   readingOnly: false,
   facetsByBox: false,
   autoExampleOnUnknown: false,
+  // Preferred TTS voice per language, by voiceURI. null/missing = browser
+  // default choice for that language (see engine/speech.js).
+  voicePreferences: {},
   answerFields: {
     global:    { prompt: 'entry', answer: 'translation' },
     flashcard: null,

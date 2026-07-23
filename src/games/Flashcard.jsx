@@ -149,7 +149,7 @@ export default function Flashcard() {
     if (autoPlay && currentEntry) {
       const text = effDirection === 'entry->translation' ? currentEntry.entry : currentEntry.translation?.[0]
       if (text) {
-        import('../engine/speech').then(({ speak }) => speak(text, language))
+        import('../engine/speech').then(({ speak }) => speak(text, language, { voiceURI: settings.voicePreferences?.[language] }))
       }
     }
   }, [currentEntry?.id, autoPlay, effDirection])

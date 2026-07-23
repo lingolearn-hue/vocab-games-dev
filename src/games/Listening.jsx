@@ -1,0 +1,238 @@
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useApp } from '../context/AppContext'
+import { getBox } from '../engine/leitner'
+import { getExampleSentence } from '../engine/examples'
+import { speakAndWait, stop as stopSpeech, isSupported as speechSupported } from '../engine/speech'
+import { displayEntry } from '../engine/vocab'
+import RubyText from '../components/RubyText'
+import HelpButton from '../components/HelpButton'
+import './Listening.css'
+
+const GAP_SHORT = 350   // between word / translation / sentence
+const GAP_LONG  = 900   // after the sentence, before moving to the next word
+const BOX_MODES = ['all', 0, 1, 2, 3, 4]
+
+function delay(ms, tokenRef, token) {
+  return new Promise(resolve => {
+    const id = setTimeout(resolve, ms)
+    // if playback gets paused/cancelled mid-wait, don't bother waiting out the timer
+    const check = setInterval(() => {
+      if (tokenRef.current !== token) { clearTimeout(id); clearInterval(check); resolve() }
+    }, 50)
+    setTimeout(() => clearInterval(check), ms + 10)
+  })
+}
+
+function shuffle(arr) {
+  const a = arr.slice()
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+export default function Listening() {
+  const { getEntriesForGame, activeLanguage, goBack, settings } = useApp()
+
+  const [boxMode,   setBoxMode]   = useState('all')     // 'all' | 0 | 1 | 2 | 3 | 4
+  const [reshuffle, setReshuffle] = useState(0)
+  const [playing,   setPlaying]   = useState(false)
+  const [index,     setIndex]     = useState(0)
+  const [phase,     setPhase]     = useState('idle')    // 'idle' | 'word' | 'translation' | 'sentence' | 'gap'
+  const [sentence,  setSentence]  = useState(null)
+
+  const { entries: poolEntries } = getEntriesForGame('listening')
+  const poolKey = useMemo(() => poolEntries.map(e => e.id).join(','), [poolEntries])
+
+  // Box 0-4 only — box 5 (mastered) is intentionally excluded, that's the
+  // whole point of this game: hear the words you haven't fully learned yet.
+  const queue = useMemo(() => {
+    const withBox = poolEntries
+      .map(e => ({ ...e, _box: getBox(e.id, 'flashcard') }))
+      .filter(e => e._box < 5)
+
+    if (boxMode === 'all') {
+      return [0, 1, 2, 3, 4].flatMap(b => shuffle(withBox.filter(e => e._box === b)))
+    }
+    return shuffle(withBox.filter(e => e._box === boxMode))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- poolKey (not poolEntries) is the real dependency: getEntriesForGame returns a fresh array identity every render, which would otherwise reshuffle on every unrelated re-render (e.g. every phase change during playback); reshuffle is a manual re-roll trigger, not a real dependency either
+  }, [poolKey, boxMode, reshuffle])
+
+  const queueRef = useRef(queue)
+  useEffect(() => { queueRef.current = queue }, [queue])
+  const tokenRef = useRef(0)
+
+  function stopAndReset() {
+    tokenRef.current++
+    stopSpeech()
+    setPlaying(false)
+    setPhase('idle')
+    setIndex(0)
+    setSentence(null)
+  }
+
+  function selectBoxMode(mode) {
+    stopAndReset()
+    setBoxMode(mode)
+  }
+
+  function doReshuffle() {
+    stopAndReset()
+    setReshuffle(n => n + 1)
+  }
+
+  const playFrom = useCallback(async (startIndex, token) => {
+    let idx = startIndex
+    while (tokenRef.current === token) {
+      const entry = queueRef.current[idx]
+      if (!entry) break
+      setIndex(idx)
+
+      setPhase('word')
+      await speakAndWait(entry.entry, activeLanguage, { voiceURI: settings.voicePreferences?.[activeLanguage] })
+      if (tokenRef.current !== token) break
+      await delay(GAP_SHORT, tokenRef, token)
+      if (tokenRef.current !== token) break
+
+      setPhase('translation')
+      await speakAndWait(entry.translation[0], 'en', { voiceURI: settings.voicePreferences?.en })
+      if (tokenRef.current !== token) break
+      await delay(GAP_SHORT, tokenRef, token)
+      if (tokenRef.current !== token) break
+
+      const ex = await getExampleSentence(entry.listId, entry.entry, entry.pos)
+      if (tokenRef.current !== token) break
+      if (ex) {
+        setSentence(ex)
+        setPhase('sentence')
+        await speakAndWait(ex, activeLanguage, { voiceURI: settings.voicePreferences?.[activeLanguage] })
+        if (tokenRef.current !== token) break
+      } else {
+        setSentence(null)
+      }
+
+      await delay(GAP_LONG, tokenRef, token)
+      idx = (idx + 1) % queueRef.current.length
+    }
+  }, [activeLanguage, settings])
+
+  function handlePlay() {
+    if (queue.length === 0) return
+    const token = ++tokenRef.current
+    setPlaying(true)
+    playFrom(index, token)
+  }
+
+  function handlePause() {
+    tokenRef.current++
+    stopSpeech()
+    setPlaying(false)
+    setPhase('idle')
+  }
+
+  function handleSkip(dir) {
+    tokenRef.current++
+    stopSpeech()
+    const next = (index + dir + queue.length) % queue.length
+    setIndex(next)
+    setSentence(null)
+    if (playing) {
+      const token = ++tokenRef.current
+      playFrom(next, token)
+    } else {
+      setPhase('idle')
+    }
+  }
+
+  useEffect(() => () => { tokenRef.current++; stopSpeech() }, [])
+
+  const currentEntry = queue[index] ?? null
+  const prompt = currentEntry ? displayEntry(currentEntry, activeLanguage) : null
+
+  if (!speechSupported()) {
+    return (
+      <div className="ls-screen">
+        <div className="ls-header">
+          <button className="ls-back" onClick={goBack}>← Back</button>
+          <h2>Listening</h2>
+        </div>
+        <div className="ls-unsupported">
+          <p><strong>Audio isn't available on this device.</strong></p>
+          <p>This game needs text-to-speech support, which your current browser doesn't have.</p>
+          <ul>
+            <li>Your browser doesn't support text-to-speech</li>
+            <li>You're in an in-app browser (e.g. WeChat, Instagram) — try opening this site in Chrome or Safari directly</li>
+            <li>No voices are installed for this language</li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="ls-screen">
+      <div className="ls-header">
+        <button className="ls-back" onClick={goBack}>← Back</button>
+        <h2>🎧 Listening</h2>
+        <HelpButton
+          title="Listening"
+          description="Hands-free audio review: hears the word, its translation, then an example sentence (if one exists) for each word in your current filter, skipping mastered words. No scoring — just passive listening reinforcement."
+          buttons={[
+            { icon: 'All boxes / Box N', label: 'Box filter', desc: 'Cycle through every unmastered box top-down, or loop just one box on repeat' },
+            { icon: '🔀', label: 'Reshuffle', desc: 'Re-randomize the order within each box' },
+          ]}
+        />
+      </div>
+
+      <div className="ls-box-row">
+        {BOX_MODES.map(b => (
+          <button
+            key={String(b)}
+            className={`ls-box-chip ${boxMode === b ? 'active' : ''}`}
+            onClick={() => selectBoxMode(b)}
+          >
+            {b === 'all' ? 'All boxes' : `Box ${b}`}
+          </button>
+        ))}
+        <button className="ls-reshuffle" title="Reshuffle" onClick={doReshuffle}>🔀</button>
+      </div>
+
+      {queue.length === 0 ? (
+        <p className="ls-empty">
+          {boxMode === 'all'
+            ? 'No unmastered words in the current filter — nothing left to review here.'
+            : `No words in box ${boxMode} for the current filter.`}
+        </p>
+      ) : (
+        <>
+          <div className="ls-progress">Word {index + 1} of {queue.length}{boxMode === 'all' ? ` · box ${currentEntry?._box}` : ''}</div>
+
+          <div className="ls-card">
+            <div className={`ls-line ls-word ${phase === 'word' ? 'active' : ''}`}>
+              <RubyText text={prompt?.main} reading={prompt?.sub} visible={!!prompt?.sub} size="lg" />
+            </div>
+            <div className={`ls-line ls-translation ${phase === 'translation' ? 'active' : ''}`}>
+              {currentEntry?.translation[0]}
+            </div>
+            {sentence && (
+              <div className={`ls-line ls-sentence ${phase === 'sentence' ? 'active' : ''}`}>
+                {sentence}
+              </div>
+            )}
+          </div>
+
+          <div className="ls-controls">
+            <button className="ls-ctrl-btn" onClick={() => handleSkip(-1)} aria-label="Previous">⏮</button>
+            {playing ? (
+              <button className="ls-ctrl-btn ls-play-btn" onClick={handlePause} aria-label="Pause">⏸</button>
+            ) : (
+              <button className="ls-ctrl-btn ls-play-btn" onClick={handlePlay} aria-label="Play">▶</button>
+            )}
+            <button className="ls-ctrl-btn" onClick={() => handleSkip(1)} aria-label="Next">⏭</button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
