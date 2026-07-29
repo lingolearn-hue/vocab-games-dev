@@ -1,5 +1,19 @@
 # TODO / Future Improvements
 
+## Repo state (as of this writing — check git log for current truth)
+- `vocab-games-dev` (`main` branch): **v0.63az** — has everything, including
+  Listening game, voice picker, Japanese example-sentence fix, jitter fixes.
+- `vocab-games` (production, `main` branch): **v0.65** — was fully resynced
+  from dev-check once (see below), and that push also included the
+  custom-passage persistence, both jitter fixes, and the mature-vocab
+  removal. It does **not** yet have this session's later work: the
+  Listening game, the voice picker, or the Japanese example-sentence fix —
+  those only made it to `vocab-games-dev`. Next production push should
+  carry all of it forward.
+- Both repos' `dev`/`master` branches (stale, pre-dating a lot of this work)
+  were deleted — see "Groundskeeping" below. Production now only has `main`
+  and `gh-pages`.
+
 ## Data quality
 - [x] German `pos` field cleanup — done. `Vogelsang` fixed (`unclear`→`noun`),
       `adjektiv`→`adj` (79 words) and `num`→`numeral` (5 words) unified.
@@ -25,11 +39,24 @@
       Superseded by the real `es-en.json`/`zh-en.json` long ago.
 - [x] Vulgarity/sensitive-term scan across all 6 vocab lists — done. Profanity
       + sensitive biological terms tagged `vulgar` in `categories` (filtered
-      out by default, toggle in Settings → Content). Identity-based slurs
-      (`marica` es, `玻璃` zh) removed outright. Mistagged gloss fixed
-      (`だらしない` ja had a stray "a slut" sense in its translation).
+      out always, everywhere — this was a Settings toggle at one point,
+      removed since the product decision is just to hide this content).
+      Identity-based slurs (`marica` es, `玻璃` zh) removed outright.
+      Mistagged gloss fixed (`だらしない` ja had a stray "a slut" sense in
+      its translation).
 - [x] German example sentences — 100% coverage, all levels.
-- [x] Japanese example sentences — 100% coverage, all JLPT levels (N5-N1).
+- [x] Japanese example sentences — 100% coverage, all JLPT levels (N5-N1) —
+      but this broke silently after the Japanese POS-tagging pass above and
+      had to be fixed again: sentences were extracted before Japanese vocab
+      had real `pos` values, so every stored key was `<lemma>::unknown`.
+      Once real pos values landed, `getExampleSentence()`'s lookup key
+      changed to `<lemma>::<realpos>` and stopped matching anything — every
+      single Japanese sentence lookup silently returned `null`, no error
+      anywhere. Fixed by trying the real-pos key first, falling back to
+      `::unknown` (see `engine/examples.js`). German/Chinese don't have this
+      problem (already keyed with real pos when generated). Worth
+      remembering for any future language where POS tags get added/changed
+      *after* example sentences already exist.
 - [x] Chinese example sentences — 100% coverage through HSK1-6.
 - [ ] Chinese HSK7 (~577 words, mostly idioms/advanced vocab) + "old-X" legacy
       level tail (~39 words) still missing example sentences — the only
@@ -109,7 +136,7 @@
       missed on the first pass and still emitted old ids).
 - [x] Parent rebalance (round 3): moved `health`→Life, `media`→Culture,
       `technology`→Science (all three parents now land at 4-5 leaves each,
-      versus Society's original 7). Taxonomy now: **8 parents, 30 leaves**
+      versus Society's original 7). Taxonomy now: **8 parents, 35 leaves**
       — Nature(4), People(4), Life(5), Places(4), Society(4), Culture(5),
       Science(4), Abstract(5).
 - [x] Category filter UX: parent row is now single-select (tap active parent
@@ -121,6 +148,23 @@
       now uses `vulgarFilteredEntries` + its own two `<select>` dropdowns,
       matching its existing status/level/POS dropdown style instead of
       chips).
+- [x] Meaning-accuracy audit (German/Japanese/Chinese, all previously-tagged
+      levels): a keyword tagger working off the English gloss can tag a
+      word correctly *for that gloss* while being flatly wrong for what the
+      source word actually means, since one English translation array can
+      list several senses. ~35 real fixes found this way — German `Werk`
+      ("work, factory, plant") tagged `plants` off the botanical sense of
+      "plant"; Chinese `和` ("and", one of the most common words in the
+      language) tagged `clothing` because a secondary CC-CEDICT sense is
+      "to suit"; Japanese `行う` ("to carry out") tagged `countries` with
+      no discernible connection at all. Also caught and fixed 3 outright
+      translation-data bugs surfaced by this same process (Chinese `比`,
+      `药`, `胖` had the wrong sense/reading selected in the source data,
+      not just a tagging problem). This audit predates and is broader than
+      the "check existing categories" item below — see README's "Category
+      system" → "Tagging quality" section for the general pattern, and
+      `tools/tag_categories.py`'s `IDIOM_SCRUBS` list for the
+      English-side-polysemy fixes this *doesn't* cover.
 - [ ] Continue category tagging: German B2/C1/C2, Chinese HSK4-7, Spanish,
       French, English (entirely untagged). Reuse `tools/tag_categories.py`
       as a starting point but expect a fresh round of spot-check-driven
@@ -129,15 +173,72 @@
 - [ ] Check existing categories: A1/A2 (German), N5/N4 (Japanese), HSK1-3
       (Chinese) were tagged before both taxonomy restructures (Culture
       parent, traffic/music/art leaves, calendar→time, the quantity/
-      function_words merges, health/media/technology re-parenting) and
-      before the polysemy-bug lessons learned during B1. Worth a fresh spot
-      check to see if any of that earlier work has the same class of bugs,
-      and whether words now belonging in the newer leaves (music/art/
-      traffic/quantity/function_words) got missed or mis-bucketed under the
-      taxonomy as it existed when they were tagged.
+      function_words merges, health/media/technology re-parenting). The
+      meaning-accuracy audit above already re-checked these levels for
+      tagging *correctness*; what's still open is specifically whether any
+      words now belonging in the newer leaves (music/art/traffic/quantity/
+      function_words) got missed or mis-bucketed under the taxonomy as it
+      existed when they were originally tagged.
 - [ ] Science parent (Physics/Chemistry/Biology/Technology leaves) is still
       light on real content outside Technology — will fill in naturally as
       higher levels (which contain more hard-science vocab) get tagged.
+
+## Audio / Listening game
+- [x] `SpeakButton.jsx` no longer disappears when TTS is unsupported (some
+      in-app browsers like WeChat's, older Android WebViews, and
+      privacy-hardened browsers strip `speechSynthesis` entirely) — a
+      vanished button with no explanation read as a bug report from one
+      user ("the left play button doesn't even render on my phone"). Now
+      renders greyed out, and tapping it shows a small tooltip with 3
+      possible reasons instead of doing nothing.
+- [x] Per-language voice picker in Settings → Voice: one dropdown per
+      language with at least one installed voice (languages with none
+      hidden entirely). Persists to `settings.voicePreferences[lang]`,
+      already covered by existing export/import since it's part of the
+      `vocabSettings` blob. See README's "Audio / text-to-speech" section
+      for the iOS-Safari synchronous-call-stack subtlety this had to work
+      around.
+- [x] New game: **Listening** — hands-free audio playback cycling word →
+      translation → example sentence (karaoke-style on-screen text synced
+      to each spoken segment) for every unmastered word (box 0-4) in the
+      current filter, box-ordered top-down or looped on a single box.
+      Deliberately not part of `LEITNER_GAMES` — passive listening
+      reinforcement, not a scored recall test. Has Media Session
+      integration (lock-screen play/pause/skip/metadata) for a nicer
+      foreground experience; does **not** reliably survive the screen
+      locking or the tab backgrounding, since that needs real `<audio>`
+      element output for the OS to grant background-audio status, not raw
+      `speechSynthesis` calls — true background playback would need
+      pre-generated audio files, a substantially bigger undertaking than
+      this app's static-hosting architecture supports today.
+- [x] Graded Reader's pasted/custom text now persists (`vocabCustomPassage`
+      in `localStorage`, restored on mount, covered by export/import) — was
+      pure in-memory React state before, silently lost on refresh or
+      navigating away.
+- [ ] Voice preferences and the Listening game's audio pacing have only
+      been verified in a sandboxed headless-Chromium environment with zero
+      real installed voices (mocked data only). Worth a real-device check
+      — especially whether voice selection actually applies correctly with
+      genuine native `SpeechSynthesisVoice` objects, and how Listening's
+      timing/pacing feels with real (non-instant) speech synthesis.
+
+## UI jitter fixes (WeChat WebView)
+- [x] `ChipRow.jsx` horizontal vibration on WeChat's in-app browser — a
+      `ResizeObserver` feedback loop (measures width → sets a scale CSS var
+      → that changes rendered width → re-triggers the observer). Usually
+      absorbed by a small settle threshold, but WeChat's WebView has looser
+      sub-pixel layout precision than desktop Chrome, so it could oscillate
+      between two near-identical scale values instead of settling. Fixed by
+      coalescing bursts of callbacks into one measurement per animation
+      frame (`requestAnimationFrame`) plus a wider threshold.
+- [x] `zoomGuard.js` vertical vibration — same feedback-loop shape: it
+      watches `visualViewport` for accidental pinch-zoom and resets the
+      viewport meta tag, but the reset is itself a viewport change that can
+      re-trigger the listener. Fixed with a two-reading confirmation
+      (don't act on a single possibly-noisy sample) plus a cooldown after
+      each reset. See README's "Known device/browser quirks" section — if
+      a future bug reads as "something vibrates, especially on WeChat,"
+      check for this same pattern first.
 
 ## Options menu
 - [x] Checked export/import function — found a real bug: `BACKUP_KEYS` in
@@ -178,9 +279,10 @@
       carries durable facts/preferences across chats; this TODO + the repo
       itself is the source of truth a new chat should read first.
 
-- [ ] Main repo (`vocab-games`) `dev` branch is stale (~v0.46, pre-dates all
-      the lost-session recovery work) — decide whether to retire it or
-      fast-forward it from the current `main`/recovered line.
+- [x] Main repo (`vocab-games`) `dev` branch was stale (~v0.46, pre-dates all
+      the lost-session recovery work) — deleted. Also found and deleted a
+      `master` branch (even older, ~v9, pre-dates the rename to `main`).
+      Main repo now only has `main` and `gh-pages`, both current.
 - [ ] Document the `vendor/language-decks/` + `tools/extract-examples.js`
       pattern as "the process" for future language/example data work
       (currently only documented in `vendor/language-decks/README.md`).

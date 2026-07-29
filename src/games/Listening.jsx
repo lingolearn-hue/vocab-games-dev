@@ -6,6 +6,7 @@ import { speakAndWait, stop as stopSpeech, isSupported as speechSupported } from
 import { displayEntry } from '../engine/vocab'
 import RubyText from '../components/RubyText'
 import HelpButton from '../components/HelpButton'
+import ChipRow from '../components/ChipRow'
 import './Listening.css'
 
 const GAP_SHORT = 350   // between word / translation / sentence
@@ -89,6 +90,15 @@ export default function Listening() {
       if (!entry) break
       setIndex(idx)
 
+      // Fetch (and show) the example sentence immediately, before speaking
+      // anything — previously this was fetched right before it was spoken
+      // (after both word and translation had already played), so it only
+      // ever appeared partway through a word's turn instead of alongside
+      // the word and translation from the start.
+      const ex = await getExampleSentence(entry.listId, entry.entry, entry.pos)
+      if (tokenRef.current !== token) break
+      setSentence(ex)
+
       setPhase('word')
       await speakAndWait(entry.entry, activeLanguage, { voiceURI: settings.voicePreferences?.[activeLanguage] })
       if (tokenRef.current !== token) break
@@ -101,15 +111,10 @@ export default function Listening() {
       await delay(GAP_SHORT, tokenRef, token)
       if (tokenRef.current !== token) break
 
-      const ex = await getExampleSentence(entry.listId, entry.entry, entry.pos)
-      if (tokenRef.current !== token) break
       if (ex) {
-        setSentence(ex)
         setPhase('sentence')
         await speakAndWait(ex, activeLanguage, { voiceURI: settings.voicePreferences?.[activeLanguage] })
         if (tokenRef.current !== token) break
-      } else {
-        setSentence(null)
       }
 
       await delay(GAP_LONG, tokenRef, token)
@@ -147,8 +152,61 @@ export default function Listening() {
 
   useEffect(() => () => { tokenRef.current++; stopSpeech() }, [])
 
+  // Screen Wake Lock: keep the display on while actively playing, so the
+  // screen locking doesn't interrupt a hands-free listening session. Not
+  // supported everywhere (notably older Safari) — degrades to normal
+  // screen-timeout behavior where unavailable, not a hard requirement.
+  const wakeLockRef = useRef(null)
+  useEffect(() => {
+    if (!('wakeLock' in navigator)) return
+
+    let cancelled = false
+
+    async function acquire() {
+      try {
+        const lock = await navigator.wakeLock.request('screen')
+        if (cancelled) { lock.release(); return }
+        wakeLockRef.current = lock
+      } catch {
+        // Wake lock requests can legitimately fail (e.g. low battery on some
+        // platforms, or the document isn't visible at request time) — not
+        // fatal, playback just proceeds without it.
+      }
+    }
+
+    function release() {
+      wakeLockRef.current?.release()
+      wakeLockRef.current = null
+    }
+
+    if (playing) {
+      acquire()
+    } else {
+      release()
+    }
+
+    // Wake locks are automatically released by the browser when a tab is
+    // hidden — re-request on becoming visible again if we should still hold one.
+    function onVisibilityChange() {
+      if (playing && document.visibilityState === 'visible' && !wakeLockRef.current) acquire()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      cancelled = true
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      release()
+    }
+  }, [playing])
+
   const currentEntry = queue[index] ?? null
-  const prompt = currentEntry ? displayEntry(currentEntry, activeLanguage) : null
+  // displayEntry() returns a plain string (e.g. "der Hund"), not a
+  // {main, sub} object — build that ourselves, same as Flashcard.jsx's
+  // getPrompt() does. Missing this meant prompt.main/.sub were always
+  // undefined and the target-language word silently never rendered.
+  const prompt = currentEntry
+    ? { main: displayEntry(currentEntry, activeLanguage), sub: currentEntry.reading || null }
+    : null
 
   // Media Session: lock-screen / notification-shade playback controls. This
   // gives play/pause/skip controls without unlocking the phone, but note it
@@ -225,18 +283,19 @@ export default function Listening() {
         />
       </div>
 
-      <div className="ls-box-row">
+      <ChipRow className="ls-box-row">
         {BOX_MODES.map(b => (
           <button
             key={String(b)}
             className={`ls-box-chip ${boxMode === b ? 'active' : ''}`}
             onClick={() => selectBoxMode(b)}
           >
-            {b === 'all' ? 'All boxes' : `Box ${b}`}
+            {b === 'all' ? 'All' : b}
           </button>
         ))}
         <button className="ls-reshuffle" title="Reshuffle" onClick={doReshuffle}>🔀</button>
-      </div>
+      </ChipRow>
+      <p className="ls-box-caption">No progress tracking here — box just picks which words to play, playback only.</p>
 
       {queue.length === 0 ? (
         <p className="ls-empty">
