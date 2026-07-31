@@ -112,8 +112,12 @@ generate a flashcard set by topic instead of just by level.
   active parent again clears the filter — no separate "clear" button needed
   at that level. The leaf row (once a parent is active) stays **multi-select**
   and has its own "✕" clear chip. See the file's header comment for the exact
-  interaction rules. `CategoryChips.jsx` wraps it for the global/Setup-screen
-  filter (`settings.categories.global`).
+  interaction rules. `CategoryChips.jsx` wraps it for the Setup-screen
+  filter, keyed **per language** (`settings.categories[activeLanguage]`,
+  not a single shared slot) — switching languages shows that language's
+  own filter (starting unfiltered the first time), and switching back
+  restores whatever was set before, rather than one language's topic
+  filter leaking onto another.
 - **Vocab Browser is intentionally independent of the global filter** — it
   consumes `vulgarFilteredEntries` (respects the vulgar-content filter, not
   the topic filter) and implements its own two `<select>` dropdowns (parent,
@@ -188,31 +192,40 @@ whatever's installed on the visitor's device/browser.
   TTS support / in-app browser like WeChat / no voices installed for the
   language) instead of silently doing nothing. A vanished button reads as a
   bug report; a visibly-disabled one reads as an understood platform limit.
-- Settings → Voice has a per-language dropdown of installed voices
-  (`getVoicesForLanguage()`), only shown for languages that have at least
-  one. Selection persists to `settings.voicePreferences[lang]` and is picked
-  up by every `speak()`/`speakAndWait()` call site. Voices load
-  asynchronously in most browsers (`voiceschanged` event) — `getVoices()`
-  handles that and caches the result; `main.jsx` warms this cache on app
-  start so the *first* speak-button tap can still use the synchronous
-  fast-path (some browsers, notably iOS Safari, silently ignore
-  `speechSynthesis.speak()` if it's not called synchronously within the
-  user-gesture handler — an async `.then()` after a `getVoices()` promise
-  risks missing that window).
+- Deliberately **never sets `utterance.voice`** — always leaves voice choice
+  to the browser/OS default for the given language. A per-language voice
+  picker (Settings → Voice, `settings.voicePreferences`) was built and then
+  removed: there's no reliable way for a webpage to query "the OS's
+  configured system TTS voice" as a distinct concept, only a `.default`
+  flag per voice (a browser-engine guess, not necessarily what the user
+  actually configured at the OS level — notably unreliable on
+  Android/Chrome), so the picker added real complexity without a
+  dependable payoff. If this gets revisited, start from git history around
+  the removal rather than rebuilding from scratch — the async-voice-loading
+  and iOS-Safari-synchronous-call-stack issues it had to handle are still
+  real and will resurface.
 - **Listening** (`src/games/Listening.jsx`) is a hands-free audio-review
-  game: cycles word → translation → example sentence for every unmastered
-  word (box 0-4, box 5 excluded) in the current filter, box-ordered
-  top-down or looped on a single box. Deliberately **not** part of
-  `LEITNER_GAMES` — it's passive listening reinforcement, not a scored
-  recall test. Has Media Session integration (lock-screen play/pause/skip +
-  metadata) for a nicer foreground experience, but that does **not**
-  reliably keep speech playing once the screen locks or the tab
-  backgrounds — Media Session's background-audio exemption is granted
-  based on real `<audio>`/`<video>` element output, not raw
-  `SpeechSynthesisUtterance` calls. True background playback would need
-  pre-generated audio files behind a real `<audio>` element, which is a
-  much bigger undertaking than this static-hosting architecture supports
-  today.
+  game: cycles through every unmastered word (box 0-4, box 5 excluded) in
+  the current filter, box-ordered top-down or looped on a single box.
+  Deliberately **not** part of `LEITNER_GAMES` — it's passive listening
+  reinforcement, not a scored recall test. Has Media Session integration
+  (lock-screen play/pause/skip + metadata) for a nicer foreground
+  experience, but that does **not** reliably keep speech playing once the
+  screen locks or the tab backgrounds — Media Session's background-audio
+  exemption is granted based on real `<audio>`/`<video>` element output,
+  not raw `SpeechSynthesisUtterance` calls. True background playback would
+  need pre-generated audio files behind a real `<audio>` element, which is
+  a much bigger undertaking than this static-hosting architecture supports
+  today. Also has Screen Wake Lock support (keeps the display on while
+  actively playing, degrades gracefully where unsupported).
+  - **Playback order is user-customizable**, directly in the game screen:
+    a sequence of `word`/`translation`/`sentence` steps
+    (`settings.listeningSequence`, default one of each in that order),
+    edited via tap-to-add / tap-to-remove chips — repeats and omissions are
+    both allowed (e.g. word/word/translation to hear the word twice before
+    the translation, or word/translation with no sentence at all). Editing
+    the sequence stops any active playback; an empty sequence disables Play
+    rather than silently doing nothing.
 - **Example sentence lookup gotcha**: `getExampleSentence()` keys sentences
   by `<lemma>::<pos>`, and tries a `::unknown` fallback if the real-pos key
   doesn't match. This fallback is load-bearing, not decorative — Japanese's

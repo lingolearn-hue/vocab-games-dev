@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useApp } from '../context/AppContext'
 import { speak, isSupported } from '../engine/speech'
 import './SpeakButton.css'
 
@@ -15,7 +14,6 @@ import './SpeakButton.css'
  * explanation reads as an understood platform limitation instead.
  */
 export default function SpeakButton({ text, language, size = 'md', className = '' }) {
-  const { settings } = useApp()
   const [speaking, setSpeaking] = useState(false)
   const [showHint, setShowHint] = useState(false)
 
@@ -30,7 +28,7 @@ export default function SpeakButton({ text, language, size = 'md', className = '
       return
     }
     setSpeaking(true)
-    speak(text, language, { voiceURI: settings.voicePreferences?.[language] })
+    speak(text, language)
     // Visual feedback for ~1.5s
     setTimeout(() => setSpeaking(false), 1500)
   }

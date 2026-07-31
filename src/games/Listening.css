@@ -57,6 +57,68 @@
   line-height: 1.3;
 }
 
+.ls-sequence {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+.ls-sequence-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  min-height: 1.6rem;
+  align-items: center;
+}
+.ls-sequence-empty {
+  font-size: 0.72rem;
+  color: #999;
+  font-style: italic;
+}
+.ls-seq-chip {
+  padding: 0.3rem 0.6rem;
+  border: 1.5px solid #4f7ef8;
+  border-radius: 14px;
+  background: #f0f4ff;
+  color: #4f7ef8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ls-seq-chip:hover { background: #4f7ef8; color: #fff; }
+.ls-seq-chip--word        { border-color: #4f7ef8; }
+.ls-seq-chip--translation { border-color: #2fa86b; color: #2fa86b; background: #eefaf3; }
+.ls-seq-chip--translation:hover { background: #2fa86b; color: #fff; }
+.ls-seq-chip--sentence    { border-color: #b06fd8; color: #b06fd8; background: #f6effc; }
+.ls-seq-chip--sentence:hover { background: #b06fd8; color: #fff; }
+
+.ls-sequence-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.ls-seq-add-btn, .ls-seq-reset-btn {
+  padding: 0.3rem 0.6rem;
+  border: 1.5px dashed #ccc;
+  border-radius: 14px;
+  background: transparent;
+  color: #666;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ls-seq-add-btn:hover { border-color: #4f7ef8; color: #4f7ef8; }
+.ls-seq-reset-btn { border-style: solid; color: #999; }
+.ls-seq-reset-btn:hover { border-color: #e05252; color: #e05252; }
+
+.ls-ctrl-disabled-note {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+}
+
 .ls-progress {
   text-align: center;
   font-size: 0.78rem;
@@ -146,3 +208,10 @@
 [data-theme="dark"] .ls-unsupported { color: #ccc; }
 [data-theme="dark"] .ls-empty { color: #999; }
 [data-theme="dark"] .ls-progress { color: #999; }
+[data-theme="dark"] .ls-sequence { border-color: #222; }
+[data-theme="dark"] .ls-sequence-empty { color: #777; }
+[data-theme="dark"] .ls-seq-chip--word        { background: #1a2340; }
+[data-theme="dark"] .ls-seq-chip--translation { background: #12291d; }
+[data-theme="dark"] .ls-seq-chip--sentence    { background: #26182e; }
+[data-theme="dark"] .ls-seq-add-btn, [data-theme="dark"] .ls-seq-reset-btn { border-color: #444; color: #999; }
+[data-theme="dark"] .ls-ctrl-disabled-note { color: #777; }

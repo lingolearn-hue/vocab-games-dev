@@ -191,13 +191,14 @@
       user ("the left play button doesn't even render on my phone"). Now
       renders greyed out, and tapping it shows a small tooltip with 3
       possible reasons instead of doing nothing.
-- [x] Per-language voice picker in Settings → Voice: one dropdown per
-      language with at least one installed voice (languages with none
-      hidden entirely). Persists to `settings.voicePreferences[lang]`,
-      already covered by existing export/import since it's part of the
-      `vocabSettings` blob. See README's "Audio / text-to-speech" section
-      for the iOS-Safari synchronous-call-stack subtlety this had to work
-      around.
+- [x] Per-language voice picker in Settings → Voice was built, then
+      **removed** — there's no reliable way for a webpage to query "the
+      OS's configured system TTS voice," only a `.default` flag per voice
+      (a browser-engine guess, unreliable especially on Android/Chrome), so
+      the picker added real complexity (async voice loading, an
+      iOS-Safari synchronous-call-stack workaround, per-language dropdown
+      UI) without a dependable payoff. `speak()`/`speakAndWait()` reverted
+      to never setting `utterance.voice` — always the browser/OS default.
 - [x] New game: **Listening** — hands-free audio playback cycling word →
       translation → example sentence (karaoke-style on-screen text synced
       to each spoken segment) for every unmastered word (box 0-4) in the
@@ -210,17 +211,28 @@
       element output for the OS to grant background-audio status, not raw
       `speechSynthesis` calls — true background playback would need
       pre-generated audio files, a substantially bigger undertaking than
-      this app's static-hosting architecture supports today.
+      this app's static-hosting architecture supports today. Also has
+      Screen Wake Lock support (keeps the display on while playing).
+- [x] Listening's playback order is user-customizable directly in the game
+      screen: tap-to-add/tap-to-remove chips build a sequence of
+      word/translation/sentence steps (`settings.listeningSequence`),
+      repeats and omissions both allowed. Editing stops active playback;
+      an empty sequence disables Play with an explanation instead of
+      silently doing nothing.
+- [x] Category filter is now per-language (`settings.categories[lang]`,
+      not one shared `global` slot) — switching languages shows that
+      language's own filter (unfiltered the first time), switching back
+      restores whatever was set before, instead of one language's topic
+      filter leaking onto another.
 - [x] Graded Reader's pasted/custom text now persists (`vocabCustomPassage`
       in `localStorage`, restored on mount, covered by export/import) — was
       pure in-memory React state before, silently lost on refresh or
       navigating away.
-- [ ] Voice preferences and the Listening game's audio pacing have only
-      been verified in a sandboxed headless-Chromium environment with zero
-      real installed voices (mocked data only). Worth a real-device check
-      — especially whether voice selection actually applies correctly with
-      genuine native `SpeechSynthesisVoice` objects, and how Listening's
-      timing/pacing feels with real (non-instant) speech synthesis.
+- [ ] The Listening game's audio pacing and sequence editor have only been
+      verified in a sandboxed headless-Chromium environment with zero real
+      installed voices. Worth a real-device check for how the timing/pacing
+      feels with real (non-instant) speech synthesis, and whether Wake Lock
+      / Media Session actually behave as expected outside a test harness.
 
 ## UI jitter fixes (WeChat WebView)
 - [x] `ChipRow.jsx` horizontal vibration on WeChat's in-app browser — a

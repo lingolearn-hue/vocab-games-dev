@@ -9,9 +9,11 @@ import HelpButton from '../components/HelpButton'
 import ChipRow from '../components/ChipRow'
 import './Listening.css'
 
-const GAP_SHORT = 350   // between word / translation / sentence
-const GAP_LONG  = 900   // after the sentence, before moving to the next word
+const GAP_SHORT = 350   // between sequence steps
+const GAP_LONG  = 900   // after the last step, before moving to the next word
 const BOX_MODES = ['all', 0, 1, 2, 3, 4]
+const DEFAULT_SEQUENCE = ['word', 'translation', 'sentence']
+const STEP_LABELS = { word: 'Word', translation: 'Translation', sentence: 'Sentence' }
 
 function delay(ms, tokenRef, token) {
   return new Promise(resolve => {
@@ -34,7 +36,7 @@ function shuffle(arr) {
 }
 
 export default function Listening() {
-  const { getEntriesForGame, activeLanguage, goBack, settings } = useApp()
+  const { getEntriesForGame, activeLanguage, goBack, settings, updateSettings } = useApp()
 
   const [boxMode,   setBoxMode]   = useState('all')     // 'all' | 0 | 1 | 2 | 3 | 4
   const [reshuffle, setReshuffle] = useState(0)
@@ -42,6 +44,18 @@ export default function Listening() {
   const [index,     setIndex]     = useState(0)
   const [phase,     setPhase]     = useState('idle')    // 'idle' | 'word' | 'translation' | 'sentence' | 'gap'
   const [sentence,  setSentence]  = useState(null)
+
+  const sequence = settings.listeningSequence ?? DEFAULT_SEQUENCE
+  const sequenceRef = useRef(sequence)
+  useEffect(() => { sequenceRef.current = sequence })
+
+  function updateSequence(next) {
+    stopAndReset()
+    updateSettings(s => ({ ...s, listeningSequence: next }))
+  }
+  function addStep(step) { updateSequence([...sequence, step]) }
+  function removeStep(i) { updateSequence(sequence.filter((_, idx) => idx !== i)) }
+  function resetSequence() { updateSequence(DEFAULT_SEQUENCE) }
 
   const { entries: poolEntries } = getEntriesForGame('listening')
   const poolKey = useMemo(() => poolEntries.map(e => e.id).join(','), [poolEntries])
@@ -91,39 +105,38 @@ export default function Listening() {
       setIndex(idx)
 
       // Fetch (and show) the example sentence immediately, before speaking
-      // anything — previously this was fetched right before it was spoken
-      // (after both word and translation had already played), so it only
-      // ever appeared partway through a word's turn instead of alongside
-      // the word and translation from the start.
+      // anything, so word/translation/sentence are all visible together
+      // from the start of this word's turn rather than the sentence
+      // appearing partway through.
       const ex = await getExampleSentence(entry.listId, entry.entry, entry.pos)
       if (tokenRef.current !== token) break
       setSentence(ex)
 
-      setPhase('word')
-      await speakAndWait(entry.entry, activeLanguage, { voiceURI: settings.voicePreferences?.[activeLanguage] })
-      if (tokenRef.current !== token) break
-      await delay(GAP_SHORT, tokenRef, token)
-      if (tokenRef.current !== token) break
-
-      setPhase('translation')
-      await speakAndWait(entry.translation[0], 'en', { voiceURI: settings.voicePreferences?.en })
-      if (tokenRef.current !== token) break
-      await delay(GAP_SHORT, tokenRef, token)
-      if (tokenRef.current !== token) break
-
-      if (ex) {
-        setPhase('sentence')
-        await speakAndWait(ex, activeLanguage, { voiceURI: settings.voicePreferences?.[activeLanguage] })
+      for (const step of sequenceRef.current) {
         if (tokenRef.current !== token) break
+        if (step === 'sentence' && !ex) continue  // no sentence available for this word — skip silently, no gap
+        if (step === 'word') {
+          setPhase('word')
+          await speakAndWait(entry.entry, activeLanguage)
+        } else if (step === 'translation') {
+          setPhase('translation')
+          await speakAndWait(entry.translation[0], 'en')
+        } else if (step === 'sentence') {
+          setPhase('sentence')
+          await speakAndWait(ex, activeLanguage)
+        }
+        if (tokenRef.current !== token) break
+        await delay(GAP_SHORT, tokenRef, token)
       }
+      if (tokenRef.current !== token) break
 
       await delay(GAP_LONG, tokenRef, token)
       idx = (idx + 1) % queueRef.current.length
     }
-  }, [activeLanguage, settings])
+  }, [activeLanguage])
 
   function handlePlay() {
-    if (queue.length === 0) return
+    if (queue.length === 0 || sequence.length === 0) return
     const token = ++tokenRef.current
     setPlaying(true)
     playFrom(index, token)
@@ -275,10 +288,11 @@ export default function Listening() {
         <h2>🎧 Listening</h2>
         <HelpButton
           title="Listening"
-          description="Hands-free audio review: hears the word, its translation, then an example sentence (if one exists) for each word in your current filter, skipping mastered words. No scoring — just passive listening reinforcement."
+          description="Hands-free audio review: hears each word in your custom order (word/translation/sentence, repeats and omissions both allowed) for every word in your current filter, skipping mastered words. No scoring — just passive listening reinforcement."
           buttons={[
             { icon: 'All boxes / Box N', label: 'Box filter', desc: 'Cycle through every unmastered box top-down, or loop just one box on repeat' },
             { icon: '🔀', label: 'Reshuffle', desc: 'Re-randomize the order within each box' },
+            { icon: '+ Word / + Translation / + Sentence', label: 'Play order', desc: 'Tap to append to the sequence; tap a chip in the sequence to remove it' },
           ]}
         />
       </div>
@@ -296,6 +310,33 @@ export default function Listening() {
         <button className="ls-reshuffle" title="Reshuffle" onClick={doReshuffle}>🔀</button>
       </ChipRow>
       <p className="ls-box-caption">No progress tracking here — box just picks which words to play, playback only.</p>
+
+      <div className="ls-sequence">
+        <div className="ls-sequence-chips">
+          {sequence.length === 0 ? (
+            <span className="ls-sequence-empty">No items — add at least one below to enable playback</span>
+          ) : (
+            sequence.map((step, i) => (
+              <button
+                key={i}
+                className={`ls-seq-chip ls-seq-chip--${step}`}
+                onClick={() => removeStep(i)}
+                title="Tap to remove"
+              >
+                {STEP_LABELS[step]} ✕
+              </button>
+            ))
+          )}
+        </div>
+        <div className="ls-sequence-add">
+          <button className="ls-seq-add-btn" onClick={() => addStep('word')}>+ Word</button>
+          <button className="ls-seq-add-btn" onClick={() => addStep('translation')}>+ Translation</button>
+          <button className="ls-seq-add-btn" onClick={() => addStep('sentence')}>+ Sentence</button>
+          {(sequence.length !== DEFAULT_SEQUENCE.length || sequence.some((s, i) => s !== DEFAULT_SEQUENCE[i])) && (
+            <button className="ls-seq-reset-btn" onClick={resetSequence}>Reset</button>
+          )}
+        </div>
+      </div>
 
       {queue.length === 0 ? (
         <p className="ls-empty">
@@ -323,7 +364,9 @@ export default function Listening() {
 
           <div className="ls-controls">
             <button className="ls-ctrl-btn" onClick={() => handleSkip(-1)} aria-label="Previous">⏮</button>
-            {playing ? (
+            {sequence.length === 0 ? (
+              <span className="ls-ctrl-disabled-note">Add an item above to play</span>
+            ) : playing ? (
               <button className="ls-ctrl-btn ls-play-btn" onClick={handlePause} aria-label="Pause">⏸</button>
             ) : (
               <button className="ls-ctrl-btn ls-play-btn" onClick={handlePlay} aria-label="Play">▶</button>
