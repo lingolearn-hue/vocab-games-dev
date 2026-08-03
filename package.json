@@ -12,7 +12,8 @@
   "dependencies": {
     "hanzi-writer": "^3.7.3",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "wanakana": "^5.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

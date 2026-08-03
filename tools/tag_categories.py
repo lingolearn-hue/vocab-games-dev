@@ -66,11 +66,11 @@ IDIOM_SCRUBS = [
     'water treatment plant',  # infrastructure, not the botanical "plant"
     'to bore',             # "to drill", not the emotion "bored"
     'dog owner', 'cat owner', 'pet owner', 'of a pet',  # a person, not the animal
+    'of course',           # figure of speech, not an academic "course"
 ]
 
 
-def classify(translations, pos):
-    text = ' '.join(translations).lower()
+def _match_text(text):
     for phrase in IDIOM_SCRUBS:
         text = text.replace(phrase, ' ')
     text = text.translate(PAREN_STRIP_CHARS)
@@ -78,8 +78,10 @@ def classify(translations, pos):
     for leaf in LEAF_ORDER:
         if COMPILED[leaf].search(text):
             hits.append(leaf)
-    if hits:
-        return hits
+    return hits
+
+
+def _fallback(pos):
     if pos == 'verb':
         return ['verbs']
     if pos == 'conj':
@@ -87,6 +89,45 @@ def classify(translations, pos):
     if pos == 'numeral':
         return ['quantity']
     return ['concepts']
+
+
+def classify(translations, pos):
+    """
+    Classify primarily by the TARGET word's actual meaning — approximated
+    by translations[0], the primary/first-listed sense — rather than by
+    matching keywords against every listed sense bag-of-words style.
+
+    This matters: a translation array can list several senses of the same
+    string (e.g. German "Werk" = "work, factory, plant"), and the old
+    approach of joining them all into one blob and matching any keyword
+    against any sense meant a RARE or SECONDARY sense could hijack the
+    category — "Werk" got tagged 'plants' off the botanical meaning of
+    "plant" even though the word is about a factory/workplace. That's not
+    a keyword-precision bug (which IDIOM_SCRUBS below fixes), it's a
+    category-of-bug: matching on the wrong sense entirely, of a word whose
+    PRIMARY sense would have given the right answer.
+
+    Secondary senses are still checked as a fallback if the primary sense
+    alone gives no match at all — something is usually better than
+    'concepts' by default — but words classified only via a secondary
+    sense are inherently lower-confidence than a primary-sense match, and
+    deserve extra attention in spot-checks.
+    """
+    if not translations:
+        return _fallback(pos)
+
+    primary_text = translations[0].lower()
+    hits = _match_text(primary_text)
+    if hits:
+        return hits
+
+    if len(translations) > 1:
+        secondary_text = ' '.join(translations[1:]).lower()
+        hits = _match_text(secondary_text)
+        if hits:
+            return hits
+
+    return _fallback(pos)
 
 
 def run(path, level):
