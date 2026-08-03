@@ -128,25 +128,88 @@ generate a flashcard set by topic instead of just by level.
   `AppContext.jsx` wires it in alongside the existing level/vulgar filters.
 
 **Tagging coverage** (as of this writing — check `TODO.md` for current
-status): German A1/A2/B1, Japanese N5/N4, Chinese HSK1-3 are tagged, and
+status): German A1/A2/B1, Japanese N5/N4/N3, Chinese HSK1-3 are tagged, and
 have been through a manual accuracy audit on top of the automated pass (see
 "Tagging quality" below). Everything above that (German B2-C2, Chinese
-HSK4-7, Spanish, French, English) is untagged — untagged words are simply
-unaffected by category filters, so this is safe to leave partial and expand
-over time.
+HSK4-7, Spanish, French, English) is either untagged or only partially
+reviewed by the newer LLM pipeline — untagged words are simply unaffected
+by category filters, so this is safe to leave partial and expand over time.
 
-If you're tagging a new level/language: start from `tools/tag_categories.py`
-(a reusable keyword-based tagger against the English translation — language-
-agnostic, so the same ruleset works across source languages) rather than
-writing one from scratch. Expect a fresh round of spot-check-driven fixes
-per language/level regardless — a purely keyword-driven pass tends to (a)
-dump too much into the generic `concepts` fallback bucket if the ruleset
-isn't specific enough, and (b) hit single-word polysemy false positives
-(e.g. "bank" the money kind vs. river kind) that only surface by sampling
-real output and reading it. Both happened repeatedly during German B1
-tagging — see `IDIOM_SCRUBS` in the tagger script and chat history for the
-pattern of fixes. Always spot-check a random sample before trusting a pass,
-especially at >1000 words.
+There are **two different pipelines** for tagging/fixing category data,
+built at different points and suited to different jobs. Both write to the
+same `categories` array in the vocab JSON — neither is "the" canonical one,
+pick whichever fits the task.
+
+### Pipeline 1 (older): keyword tagger — `tools/tag_categories.py`
+
+Bulk-tags an entire untagged level in one pass by matching English keyword
+regexes against each word's translation. Language-agnostic (works off the
+English gloss, so the same ruleset applies across source languages) and
+fast — this is how German A1/A2/B1, Japanese N5-N3, and Chinese HSK1-3 all
+got their *first* pass of coverage.
+
+Two real classes of bug to expect, both requiring a spot-check-and-fix
+loop (see `IDIOM_SCRUBS` in the script and chat history for the ~100+
+fixes accumulated there):
+1. **English-side keyword collisions** — a single ambiguous English word
+   matches the wrong category (e.g. "mouse" the animal vs. the computer
+   peripheral, "course" in "golf course" vs. "of course"). `IDIOM_SCRUBS`
+   phrase-level exclusions fix most of these.
+2. **Cross-element sense collisions** — a translation array like
+   `["porcelain", "china"]` or `["spring", "fountain"]` has two senses that
+   only make sense *together*, but the classifier's primary/secondary-sense
+   split (see `classify()`'s docstring) checks them as separate texts, so a
+   phrase-level scrub can't catch it. These need a small dedicated
+   pre-filter in `classify()` itself — see the `porcelain`/`china` and
+   `spring`/`fountain` handling for the pattern to follow if this recurs.
+
+Always spot-check a random sample before trusting a pass, especially at
+>1000 words — a purely keyword-driven pass tends to dump too much into the
+generic `concepts` fallback bucket if the ruleset isn't specific enough
+(this happened with German A2's first pass, and B1 sits at a genuine ~55%
+concepts even after heavy tuning — B1's vocabulary really is more abstract,
+not just under-tuned).
+
+### Pipeline 2 (newer): LLM-review — `tools/extract_for_llm_review.py` + `tools/apply_llm_categories.py`
+
+Built specifically to fix Pipeline 1's fundamental blind spot: a keyword
+tagger can only ever reason about the *English gloss*, never the actual
+target-language word — which is exactly the root cause of the "Tagging
+quality" bugs described below. This pipeline instead has an LLM read the
+real target word (its spelling, reading, part of speech) and classify it
+directly, no keyword matching involved.
+
+There's no API call — this is "Option A" from the design discussion: an
+LLM (Claude, in conversation) reviews a batch and reasons about each word
+directly, since the reviewer already *is* the classifier. The mechanics:
+
+```
+python3 tools/extract_for_llm_review.py de B1 --start 0 --count 300
+# prints a numbered list: entry, reading, pos, translation, current categories
+```
+
+The LLM reviews the printed batch and writes back a decisions file — JSON
+with an optional trailing `// XX` comment per line (stripped before
+parsing, since plain JSON has no comment syntax) noting the reasoning
+basis and confidence: first letter **T**=clear from the Target word itself,
+**G**=had to lean on the English Gloss, **C**=Compound/context reasoning;
+second letter **H**/**M**/**L** for confidence. E.g. `// TH` = read the
+target word directly, high confidence.
+
+```
+python3 tools/apply_llm_categories.py de decisions.json --level B1
+```
+
+Best suited for: words sitting in the generic Abstract-parent leaves
+(`verbs`/`function_words`/`quantity`/`concepts`/`grammar`) that Pipeline 1
+couldn't find a topic for, or words with no category at all. Not a full
+replacement for Pipeline 1 — bulk-tagging a fresh untagged level from
+scratch this way would take many, many review passes; use Pipeline 1 for
+first-pass coverage and Pipeline 2 to clean up what it couldn't reach.
+Real yield rates observed so far: German A1 7.6%, A2 19.3%, B1 ~14% (most
+of what's in Abstract at A1 especially is *correctly* there — numerals,
+pronouns, basic verbs — so a lower yield isn't a failure, it's the
+expected outcome of a level that was already well-tagged).
 
 ### Tagging quality: English-gloss tagging can miss the source word's actual meaning
 
@@ -160,11 +223,10 @@ German `Werk` ("work, factory, plant") got tagged `plants` off the botanical
 sense of "plant" even though the word means factory/workplace; Chinese `和`
 ("and") got tagged `clothing` because one of its many CC-CEDICT senses is
 "to suit". This class of bug is *not* caught by the keyword-precision work
-in `tag_categories.py` — that fixes English-side polysemy (ambiguous English
-words), not source-word-vs-gloss mismatches, which need a human who can read
-the source language (or at least cross-check against the word's other
-listed senses/reading) to catch. Worth another audit pass whenever a
-language's tagging is revisited.
+in `tag_categories.py` (Pipeline 1) — that fixes English-side polysemy
+(ambiguous English words), not source-word-vs-gloss mismatches. Pipeline 2
+(the LLM-review pipeline above) was built specifically to address this —
+it reads the actual target word instead of pattern-matching its gloss.
 
 ## Data backup / storage discipline
 
