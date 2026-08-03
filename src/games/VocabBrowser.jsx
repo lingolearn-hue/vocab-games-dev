@@ -225,6 +225,16 @@ export default function VocabBrowser() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        {search && (
+          <button
+            className="vb-search-clear"
+            onClick={() => setSearch('')}
+            aria-label="Clear search"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Filters */}
