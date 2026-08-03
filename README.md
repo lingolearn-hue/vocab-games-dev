@@ -277,6 +277,24 @@ fits on one line on narrow phones without wrapping. If a chip row doesn't
 fit, check that its container isn't also adding fixed (non-scaled)
 padding/gap/border that `ChipRow`'s width measurement doesn't account for.
 
+## Data quality audit
+
+`tools/audit_vocab.py` screens every language/level's vocab for structural
+completeness (does `pos`/`categories`/`translation`/`reading`/example
+sentence/mnemonic exist — not whether it's *correct*, a different and
+harder problem, see "Tagging quality" above) and writes a sortable/
+filterable self-contained HTML report:
+
+```
+python3 tools/audit_vocab.py
+# writes tools/audit_report.json and tools/audit_report.html (gitignored — regenerate as needed)
+```
+
+`Concepts %` is tracked as its own column, separate from the broader
+`Categories %`, specifically so a level where most words fell into the
+generic fallback bucket (the German B1 problem — see "Category system"
+above) is visible at a glance rather than needing an ad-hoc check.
+
 ## Testing
 
 No automated test suite — verification is done with ad-hoc Playwright/

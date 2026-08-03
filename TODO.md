@@ -97,6 +97,41 @@
       language. If revisited, pilot with German only first (most developed
       list) before committing to all five.
 
+## Data quality audit tooling
+- [x] `tools/audit_vocab.py` + `tools/generate_audit_html.py` — a
+      screening + statistics pass over every language/level's vocab,
+      checking whether `pos`/`categories`/`translation`/`reading`/example
+      sentences/mnemonics exist (structural completeness, not accuracy —
+      see README's "Category system" → "Tagging quality" for why those are
+      different problems). Outputs a sortable/filterable self-contained
+      HTML table (`tools/audit_report.html`, gitignored — regenerate with
+      `python3 tools/audit_vocab.py`). `Concepts %` is tracked as its own
+      column (inverted color-coding — high is bad) separate from the
+      broader `Categories %`, specifically to make the German-B1-style
+      "half the level fell into the generic fallback bucket" problem
+      visible at a glance without needing an ad-hoc check each time.
+- [x] `classify()` in `tools/tag_categories.py` now prioritizes
+      `translations[0]` (the primary/first-listed sense) over the old
+      approach of joining every sense into one blob and matching keywords
+      against any of them — the latter is what let a rare secondary sense
+      hijack the category (German `Werk` = "work, factory, plant" got
+      tagged `plants` off the botanical sense of "plant" even though the
+      word means factory/workplace). Secondary senses are still checked as
+      a fallback if the primary sense alone gives no match. This is a
+      structural improvement for *future* tagging passes; deliberately not
+      retroactively applied to already-tagged levels (compared old vs new
+      output against already-tagged German A1-B1 and found 458
+      differences — a genuine mixed bag, not a clean win, so left as-is
+      rather than bulk-overwritten without the same spot-check rigor
+      everything else here got).
+- [x] Fixed 61 already-tagged verbs sitting in the generic `verbs` fallback
+      despite having an obvious single-topic meaning (52 German + 9
+      Japanese) — e.g. `heiraten`→family, `singen`/`歌う`→music,
+      `backen`/`焼く`→food, `malen`/`zeichnen`→art. Found via a signal-word
+      scan (`tools/audit_vocab.py`-adjacent, done ad-hoc in chat, not yet a
+      permanent script) — worth productizing as a real check if this
+      pattern needs checking again for other languages/levels.
+
 ## Category system (topic tagging)
 - [x] Taxonomy designed: 8 parents with ~25 leaves initially, per-language
       display labels. Lives in `src/engine/categories.js` — see its header
@@ -165,11 +200,26 @@
       system" → "Tagging quality" section for the general pattern, and
       `tools/tag_categories.py`'s `IDIOM_SCRUBS` list for the
       English-side-polysemy fixes this *doesn't* cover.
+- [x] Japanese N3 (2,112 words) — tagged via `tools/tag_categories.py` +
+      iterative spot-check-and-fix (several rounds, same process as German
+      B1). Landed at 50.3% concepts — noticeably higher than N5/N4's
+      ~18-23%, consistent with N3 being a genuinely harder/more abstract
+      vocabulary tier (same shape as German B1's jump to ~55%). Found and
+      fixed ~30 more keyword collisions along the way, several revealing a
+      real limitation of the primary/secondary-sense-split architecture:
+      a phrase spanning two separate translation array elements (e.g.
+      `["porcelain", "china"]`, `["spring", "fountain"]`) can't be caught
+      by a simple `IDIOM_SCRUBS` string-replace anymore, since primary and
+      secondary senses are checked as separate texts, never joined into
+      one string to scrub. Handled via small dedicated pre-filters in
+      `classify()` for the specific pairs found — that pattern (not another
+      generic scrub) is the fix if this recurs.
 - [ ] Continue category tagging: German B2/C1/C2, Chinese HSK4-7, Spanish,
       French, English (entirely untagged). Reuse `tools/tag_categories.py`
       as a starting point but expect a fresh round of spot-check-driven
       fixes per language/level — polysemy bugs are language- and
-      vocab-specific.
+      vocab-specific; N3 alone needed ~30 new fixes on top of everything
+      already found during German B1.
 - [ ] Check existing categories: A1/A2 (German), N5/N4 (Japanese), HSK1-3
       (Chinese) were tagged before both taxonomy restructures (Culture
       parent, traffic/music/art leaves, calendar→time, the quantity/
