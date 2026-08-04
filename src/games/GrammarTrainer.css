@@ -480,7 +480,7 @@
 [data-theme="dark"] .gt-filter-bar { border-color: #222; }
 [data-theme="dark"] .gt-chip      { border-color: #333; color: #666; }
 [data-theme="dark"] .gt-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
-[data-theme="dark"] .gt-explanation { background: #1a1a1a; border-color: #333; color: #888; }
+[data-theme="dark"] .gt-explanation { background: #1a1a1a; border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gt-sentence  { background: #1e1e1e; border-color: #333; color: #ddd; }
 [data-theme="dark"] .gt-sentence.correct { background: #182d24; }
 [data-theme="dark"] .gt-sentence.wrong   { background: #2d1a19; }
@@ -496,7 +496,7 @@
 [data-theme="dark"] .gt-tile--bank { background: #2a2a2a; color: #ccc; }
 [data-theme="dark"] .gt-reset-btn { background: #2a2a2a; color: #666; }
 [data-theme="dark"] .gt-pattern-title { color: #f0f0f0; }
-[data-theme="dark"] .gt-wrong-feedback { background: #2d1a19; color: #aaa; }
+[data-theme="dark"] .gt-wrong-feedback { background: #2d1a19; color: var(--dt2); }
 [data-theme="dark"] .gt-gear { border-color: #333; }
 
 /* Type selector */

@@ -68,16 +68,18 @@
 
 .vb-search-clear {
   position: absolute;
-  right: 1.7rem;
+  right: 1.4rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 0.85rem;
-  color: #999;
+  font-size: 1.7rem;
+  color: var(--dt2);
   cursor: pointer;
   padding: 0.3rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
 }
 .vb-search-clear:hover { color: #555; }
 
@@ -305,7 +307,7 @@
 [data-theme="dark"] .vb-title    { color: #f0f0f0; }
 [data-theme="dark"] .vb-search   { background: #1e1e1e; border-color: #333; color: #eee; }
 [data-theme="dark"] .vb-search:focus { border-color: #4f7ef8; }
-[data-theme="dark"] .vb-search-clear { color: #777; }
+[data-theme="dark"] .vb-search-clear { color: var(--dt2); }
 [data-theme="dark"] .vb-search-clear:hover { color: #ccc; }
 [data-theme="dark"] .vb-select   { background: #1e1e1e; border-color: #333; color: #ccc; }
 [data-theme="dark"] .vb-tog      { background: #1e1e1e; border-color: #333; color: #555; }
@@ -319,5 +321,5 @@
   text-align: center;
   padding: 1rem;
   font-size: 0.72rem;
-  color: #999;
+  color: var(--dt2);
 }

@@ -68,6 +68,7 @@ export default function VocabBrowser() {
   const { vulgarFilteredEntries: activeEntries, activeLanguage, showReading, setScreen, goBack, scoreActions, scores } = useApp()
 
   const [search,       setSearch]       = useState('')
+  const searchInputRef = useRef(null)
   const [filterLevel,  setFilterLevel]  = useState('all')
   const [filterPos,    setFilterPos]    = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -219,6 +220,7 @@ export default function VocabBrowser() {
       {/* Search */}
       <div className="vb-search-wrap">
         <input
+          ref={searchInputRef}
           className="vb-search"
           type="text"
           placeholder="Search entry, reading, translation…"
@@ -228,7 +230,10 @@ export default function VocabBrowser() {
         {search && (
           <button
             className="vb-search-clear"
-            onClick={() => setSearch('')}
+            onClick={() => {
+              setSearch('')
+              searchInputRef.current?.focus()
+            }}
             aria-label="Clear search"
             title="Clear search"
           >

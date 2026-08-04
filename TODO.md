@@ -1,15 +1,14 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.63az** — has everything, including
-  Listening game, voice picker, Japanese example-sentence fix, jitter fixes.
-- `vocab-games` (production, `main` branch): **v0.65** — was fully resynced
-  from dev-check once (see below), and that push also included the
-  custom-passage persistence, both jitter fixes, and the mature-vocab
-  removal. It does **not** yet have this session's later work: the
-  Listening game, the voice picker, or the Japanese example-sentence fix —
-  those only made it to `vocab-games-dev`. Next production push should
-  carry all of it forward.
+- `vocab-games` (production, `main` branch): **v0.66aa** — full resync from
+  dev (Listening game, category taxonomy overhaul, POS tagging, audit
+  tooling, Vocab Browser search ranking, per-language category filters,
+  Media Session + Wake Lock) plus this session's dark-mode secondary-text
+  brightness fix.
+- `vocab-games-dev` (`main` branch): v0.63bh at last check — has some later
+  work (dark-mode fix applied there separately) not yet folded back into
+  this resync. Verify via git log before assuming parity.
 - Both repos' `dev`/`master` branches (stale, pre-dating a lot of this work)
   were deleted — see "Groundskeeping" below. Production now only has `main`
   and `gh-pages`.
@@ -283,6 +282,16 @@
       installed voices. Worth a real-device check for how the timing/pacing
       feels with real (non-instant) speech synthesis, and whether Wake Lock
       / Media Session actually behave as expected outside a test harness.
+
+## Dark-mode text brightness
+- [x] Secondary/muted text on dark backgrounds was too dim (`--dt2: #b0b0b0`,
+      plus ~16 components hardcoding their own dim grays — `#777`/`#888`/
+      `#999`/`#aaa`/`#b0b0b0` — instead of using the shared variable).
+      Fixed: `--dt1` brightened to `#f7f7f7`, `--dt2` brightened to `#dcdcdc`,
+      and every hardcoded stray value consolidated onto `var(--dt2)` so the
+      two-tier system in `src/index.css` is now actually followed everywhere
+      (including Adventure/RaceCar's always-dark screens, which don't gate
+      on `[data-theme="dark"]` since they're dark regardless of theme).
 
 ## UI jitter fixes (WeChat WebView)
 - [x] `ChipRow.jsx` horizontal vibration on WeChat's in-app browser — a

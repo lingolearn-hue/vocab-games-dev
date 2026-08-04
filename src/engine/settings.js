@@ -78,6 +78,10 @@ export const DEFAULTS = {
   // (e.g. ['word','word','translation'] to hear the word twice before the
   // translation, or ['word','translation'] to skip sentences entirely).
   listeningSequence: ['word', 'translation', 'sentence'],
+  // Per-language TTS voice override, keyed by internal language id. Value is
+  // a voiceURI (stable per-voice identifier from the Web Speech API), or
+  // null to use the browser/OS default voice for that language.
+  voices: { zh: null, ja: null, de: null, es: null, fr: null, en: null },
   answerFields: {
     global:    { prompt: 'entry', answer: 'translation' },
     flashcard: null,

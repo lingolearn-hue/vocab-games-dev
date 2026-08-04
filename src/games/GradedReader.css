@@ -367,22 +367,22 @@
 
 [data-theme="dark"] .gr-screen         { background: #111; }
 [data-theme="dark"] .gr-header         { border-color: #222; }
-[data-theme="dark"] .gr-back           { color: #b0b0b0; }
+[data-theme="dark"] .gr-back           { color: var(--dt2); }
 [data-theme="dark"] .gr-back:hover     { color: #f0f0f0; }
 [data-theme="dark"] .gr-title          { color: #f0f0f0; }
 [data-theme="dark"] .gr-filters        { background: #111; border-color: #222; }
-[data-theme="dark"] .gr-tag-chip       { border-color: #333; color: #b0b0b0; }
+[data-theme="dark"] .gr-tag-chip       { border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gr-tag-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
 [data-theme="dark"] .gr-passage-card   { background: #1a1a1a; border-color: #222; }
 [data-theme="dark"] .gr-passage-card:hover { background: #222; }
 [data-theme="dark"] .gr-passage-title  { color: #f0f0f0; }
-[data-theme="dark"] .gr-passage-tag    { background: #2a2a2a; color: #777; }
+[data-theme="dark"] .gr-passage-tag    { background: #2a2a2a; color: var(--dt2); }
 [data-theme="dark"] .gr-text           { color: #f0f0f0; }
-[data-theme="dark"] .gr-translation    { background: #1a1a1a; border-color: #333; color: #888; }
+[data-theme="dark"] .gr-translation    { background: #1a1a1a; border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gr-screen         { background: #111; }
 [data-theme="dark"] .gr-filters        { background: #111; border-color: #222; }
 [data-theme="dark"] .gr-tag-row-label  { color: #555; }
-[data-theme="dark"] .gr-tag-chip       { border-color: #333; color: #b0b0b0; }
+[data-theme="dark"] .gr-tag-chip       { border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gr-passage-card   { background: #1a1a1a; border-color: #222; }
 [data-theme="dark"] .gr-passage-title  { color: #f0f0f0; }
 [data-theme="dark"] .gr-passage-card:hover { background: #222; }
@@ -411,7 +411,7 @@
   background: none;
   border: none;
   font-size: 0.8rem;
-  color: #999;
+  color: var(--dt2);
   cursor: pointer;
   padding: 0.2rem 0.3rem;
   -webkit-appearance: none;
