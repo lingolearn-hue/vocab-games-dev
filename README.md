@@ -127,13 +127,15 @@ generate a flashcard set by topic instead of just by level.
 - `filterByCategory()` in `src/engine/settings.js` applies the filter;
   `AppContext.jsx` wires it in alongside the existing level/vulgar filters.
 
-**Tagging coverage** (as of this writing — check `TODO.md` for current
-status): German A1/A2/B1, Japanese N5/N4/N3, Chinese HSK1-3 are tagged, and
-have been through a manual accuracy audit on top of the automated pass (see
-"Tagging quality" below). Everything above that (German B2-C2, Chinese
-HSK4-7, Spanish, French, English) is either untagged or only partially
-reviewed by the newer LLM pipeline — untagged words are simply unaffected
-by category filters, so this is safe to leave partial and expand over time.
+**Tagging coverage** (check `TODO.md` for current status): all six vocab
+lists are now 100% category-tagged. Manual spot-check depth varies a lot
+by language — see `tools/review-status/{lang}-review.json` for exactly
+which words have been reviewed. Untagged-vs-reviewed is no longer the
+right framing; reviewed-vs-unreviewed is.
+
+Spot-checking category tags follows a fixed procedure — see
+[`REVIEW.md`](./REVIEW.md), which also covers the review-status
+tracking system, the resweep script, and known risky keyword patterns.
 
 There are **two different pipelines** for tagging/fixing category data,
 built at different points and suited to different jobs. Both write to the
