@@ -239,6 +239,66 @@
       help buttons open correctly in real-browser Playwright, not just
       code review.
 
+## Category tagging — completed (was: German/Japanese/Chinese partial only)
+- [x] Pulled in from a delegated session (commit b69e171): all 6 vocab
+      lists are now 100% category-tagged (previously only German A1/A2/B1,
+      Japanese N5-N3, Chinese HSK1-3 were). Spanish and French went through
+      a full pipeline pass for the first time. Manual spot-check depth
+      varies a lot by language — see `tools/review-status/{lang}-review.json`
+      for exactly which words have been reviewed: Japanese 900 words
+      checked, German 40, Chinese 45. `README.md`/`REVIEW.md` now frame
+      this correctly as "reviewed vs. unreviewed" rather than "tagged vs.
+      untagged." New tooling from that session: `REVIEW.md` (spot-check
+      procedure), `tools/resweep_concepts.py` (re-classifies everything
+      currently dumped in the generic "concepts" fallback, skipping
+      anything already manually reviewed so it can't clobber deliberate
+      overrides), and meaningfully expanded keyword lists + new
+      `IDIOM_SCRUBS` entries in `tools/tag_categories.py` fixing real
+      polysemy bugs.
+
+## Grammatical gender / article engines (French + German)
+- [x] French gained a `pluraleTantum` field (words only used in plural,
+      e.g. "vacances") from the delegated session, plus a new
+      `src/engine/frenchArticle.js` (handles le/la/l'/les/des, h-aspiré
+      vowel-elision exceptions, epicene nouns) — built but not wired into
+      the UI yet at the time it landed. Wired it into `displayEntry()`
+      now, plus built a `germanArticle.js` on the same pattern (der/die/
+      das, plurale tantum, epicene) and added `pluraleTantum` to German
+      too, since it needed it for the same reason.
+- [x] Fixed German's 26 `gender: "Unknown"` sentinel entries properly
+      instead of leaving the placeholder: 9 are genuinely epicene
+      ("Freiwillige"/"Abgeordnete"-style adjectival nouns where der/die
+      depends on who's being referred to, not the word itself — same
+      pattern as French's epicene case), 15 are plurale tantum
+      ("Geschwister", "Eheleute", "Cornflakes", etc. — always "die"), and
+      2 (a numeral, a holiday name) genuinely take no article at all.
+      `displayEntry()` for German defaults epicene nouns to masculine for
+      display purposes (the standard dictionary convention when a specific
+      referent isn't tracked) — same convention applied to French.
+- [x] **Found a separate, more serious pre-existing data bug while wiring
+      this in**: 1,863 of 10,604 French nouns (17.6%) have a corrupted
+      `gender` field — instead of 'm'/'f'/'epicene' it contains the
+      elided-article text itself (e.g. "l'enfant", "l'abaissement" sitting
+      in the gender slot), evidently from a prior import gone wrong. This
+      affects even basic A1 vocabulary ("homme", "arbre"). The real
+      gender info for these words is gone, not just mislabeled — nothing
+      in the current data to recover it from. `displayEntry()` treats
+      anything other than a literal 'm'/'f'/'epicene' as "no article,"
+      which is exactly these entries' pre-existing behavior — this pass
+      doesn't make them worse, just doesn't silently pretend to fix data
+      it can't actually repair. Properly fixing this needs re-deriving
+      gender from an external French source (same shape of project as the
+      category-tagging pass) — not attempted here, flagged for later.
+- [ ] Spanish has **zero** gender data — every noun's gender field is
+      `None`. Bigger prerequisite gap than pluraleTantum itself (would
+      need a full tagging pass from scratch, not a quick add). Left alone.
+- [x] Verified in real-browser Playwright, not just the underlying logic:
+      "die Geschwister", "der Freiwillige", "das Auto", "Zehntausend" (no
+      article) all correct for German; "le chat", "la maison", "l'ami",
+      "l'annonce" (proper elision) all correct for French; and confirmed
+      the corrupted-data fallback actually triggers safely on "homme"/
+      "arbre" rather than crashing or showing a wrong article.
+
 ## Motivation / retention
 - [ ] Streak/heatmap using the day-lock mechanism — box selection is already
       day-aware, so "days practiced" data is basically already there.

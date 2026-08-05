@@ -1,3 +1,6 @@
+import { getFrenchArticle } from './frenchArticle'
+import { getGermanArticle } from './germanArticle'
+
 // ── Loader ────────────────────────────────────────────────────────────────────
 
 /**
@@ -20,6 +23,7 @@ export async function loadList(path) {
     level:       k.indexOf('level'),
     gender:      k.indexOf('gender'),
     measureWord: k.indexOf('measureWord'),
+    pluraleTantum: k.indexOf('pluraleTantum'),
   }
 
   const entries = raw.entries.map((arr, i) => {
@@ -34,6 +38,7 @@ export async function loadList(path) {
       level:        idx.level >= 0 ? arr[idx.level] : null,
       gender:       idx.gender >= 0 ? arr[idx.gender] : null,
       measureWord:  idx.measureWord >= 0 ? arr[idx.measureWord] : null,
+      pluraleTantum: idx.pluraleTantum >= 0 ? !!arr[idx.pluraleTantum] : false,
       listId:       raw.id,
     }
   })
@@ -114,6 +119,7 @@ export function buildReverseList(sourceList, sourceLangId, sourceLangLabel) {
     level: g.level,
     gender: null,
     measureWord: null,
+    pluraleTantum: false,
     listId: id,
   }))
 
@@ -173,21 +179,59 @@ export function buildGenericQuestion(template, entry, direction) {
 // ── Article display helper ────────────────────────────────────────────────────
 
 const ARTICLES = {
-  de: { m: 'der', f: 'die', n: 'das' },
-  es: { m: 'el',  f: 'la'           },
-  fr: { m: 'le',  f: 'la'           },
+  es: { m: 'el',  f: 'la' },
 }
+
+// German/French epicene nouns (e.g. "Freiwillige"/"artiste") depend on the
+// referent's sex, which isn't tracked per-entry in the vocab data — no
+// vocab list here stores "who this specific card refers to." Defaulting
+// to masculine for display purposes is the standard dictionary convention
+// (the same thing a print dictionary does when citing an epicene headword
+// out of context) — not a claim about which form is more "correct."
+const DEFAULT_REFERENT_GENDER = 'm'
 
 /**
  * Returns the display string for a vocab entry, prepending the article
  * for gendered languages (de/es/fr) when the entry is a noun with a gender.
  * e.g. entry='Auto', gender='n', language='de' → 'das Auto'
+ *
+ * de/fr route through their own article engines (germanArticle.js /
+ * frenchArticle.js) since both need more than a flat gender->article
+ * lookup: plurale-tantum nouns always take the plural article regardless
+ * of any notional singular gender, epicene nouns need a referent gender,
+ * and French additionally needs vowel-sound elision (le/la -> l').
+ *
+ * French's gender field has a known data-quality problem — ~1,863 of
+ * 10,604 nouns (17.6%) have a corrupted value from a prior import (the
+ * elided article text itself got stored instead of m/f, e.g. "l'enfant"
+ * sitting in the gender slot) — see TODO.md. Only 'm'/'f'/'epicene' are
+ * treated as valid; anything else (including that corrupted data) falls
+ * through to "no article shown," which is exactly today's behavior for
+ * those entries — this fix doesn't make them worse, it just doesn't
+ * silently repair data it can't actually recover.
  */
 export function displayEntry(entry, language) {
   if (!entry) return ''
+  if (entry.pos !== 'noun') return entry.entry
+
+  if (language === 'de') {
+    if (entry.gender !== 'epicene' && !['m','f','n'].includes(entry.gender) && !entry.pluraleTantum) {
+      return entry.entry
+    }
+    const article = getGermanArticle(entry.gender, entry.pluraleTantum, 'definite', DEFAULT_REFERENT_GENDER)
+    return article ? article + ' ' + entry.entry : entry.entry
+  }
+
+  if (language === 'fr') {
+    if (entry.gender !== 'epicene' && !['m','f'].includes(entry.gender) && !entry.pluraleTantum) {
+      return entry.entry
+    }
+    const article = getFrenchArticle(entry.entry, entry.gender, entry.pluraleTantum, 'definite', DEFAULT_REFERENT_GENDER)
+    return article ? article + (article.endsWith("'") ? '' : ' ') + entry.entry : entry.entry
+  }
+
   const articleMap = ARTICLES[language]
-  if (!articleMap) return entry.entry
-  if (!entry.gender || entry.pos !== 'noun') return entry.entry
+  if (!articleMap || !entry.gender) return entry.entry
   const article = articleMap[entry.gender]
   if (!article) return entry.entry
   return article + ' ' + entry.entry
