@@ -69,14 +69,175 @@
       recall") — box already implies which facet was tested, so this is
       mostly a reporting task on existing data.
 
+## Graded Reader — further ideas
+- [x] Auto-scroll during read-aloud, so the active sentence stays in view
+      on long passages — makes read-aloud usable hands-free, not just as an
+      on-screen follow-along. Implemented via a `sentenceRefs` array +
+      `scrollIntoView({behavior:'smooth', block:'center'})` on
+      `readingIndex` change. Verified in real-browser Playwright: scrollTop
+      advanced 0→956px tracking playback on a long passage.
+- [x] Reading progress on the passage list ("✓ N of M finished") using the
+      "Finished" tracking already built — sits above the filters. Not a
+      day-to-day streak (that'd need date-based tracking, not attempted),
+      just a completion count against the full per-language library.
+- [x] "Continue where you left off" — a banner above the filters resumes
+      the last-opened library passage (title + scroll position), backed by
+      a `vocabLastPassage` localStorage key updated on open and on scroll.
+      Verified: banner correctly absent until a passage has been opened,
+      shows the right title, and restores scroll position exactly on
+      resume (confirmed via direct scrollTop injection — the restore
+      mechanism itself is exact; an initial test showing a ~50px gap
+      turned out to be a race in the test script's manual scroll timing,
+      not an app bug).
+- [ ] Difficulty auto-suggestion — recommend a "next passage" based on
+      Leitner mastery of the current one's vocab, so leveling up through
+      the library feels guided rather than pure browsing.
+- [ ] Inline example-sentence reinforcement in the word-tap popup — if a
+      tapped word also has a curated example sentence elsewhere in the
+      vocab data, show it alongside the translation. Data mostly already
+      exists per-language; just needs wiring into the popup.
+- [x] Sentence-level translation on tap (not just the full-passage EN
+      toggle) — went with naive index-pairing (split source and English
+      text into sentences, zip by position) since no per-sentence
+      translation data exists, just one flat `translation` string per
+      passage. Scanned all passages first to check the real risk: sentence
+      counts mismatch 2/36 (German), 1/36 (Spanish), 4/39 (Chinese), 0/36
+      (English) — but 9/36 (25%!) for Japanese. Guarded per-passage: tap-
+      to-translate only activates when both sides split into the same
+      sentence count; otherwise silently unavailable for that passage
+      (full-passage EN toggle still works regardless, since it doesn't
+      depend on alignment). Verified both branches in real-browser
+      Playwright: a matched Japanese passage correctly shows the sentence
+      translation on tap, a mismatched one correctly shows zero tappable
+      sentences.
+- [ ] Real cover art instead of the placeholder — needs an image pipeline
+      (generation or curation), nontrivial scope, not started.
+- [ ] User-authored passages beyond one-off paste — a lightweight passage
+      editor to write/save entries to a personal reading list.
+- [ ] Comprehension check after finishing a passage (a couple of quick
+      recall questions) — closes the loop between "read" and "actually
+      understood," similar to Adventure's content-phase pattern.
+
+## Graded Reader UI overhaul
+- [x] Filter chips (Level / Type / Topic) didn't visually align — root cause
+      was two-fold: `.gr-filters` referenced `--border`/`--surface`/
+      `--text-secondary`, none of which were defined anywhere in the
+      codebase, so the panel silently had no border or background; and the
+      separate Type/Topic chip rows had a label column pushing them right of
+      the Level row. Fixed: removed the undefined vars (concrete colors +
+      existing dark-theme overrides instead), and collapsed Type+Topic into
+      one flat, unlabeled tag row — all three rows (Level/Search/Tags) now
+      share the same 1rem padding and align (verified in real-browser
+      Playwright: all three measured at the same x-position and width).
+- [x] Replaced the two labeled chip rows with a single free-form search box
+      that also matches against tag labels ("auto-tag detection") — typing
+      e.g. "psychology" now surfaces topic-tagged passages without a
+      dedicated chip for every topic. Chip row kept alongside for
+      quick-tap filtering; search and chips combine.
+- [x] Also fixed while in the file: the Paste tab's "Read →" button had
+      `#555` text on a `#4f7ef8` background — nearly invisible. Now white.
+- [x] Added a "Vocab Quiz" floating button, bottom-right of the reading
+      screen, showing the passage's vocab count. Tapping it resolves the
+      passage's matched vocab to full entries and launches a Flashcard
+      session scoped to just those words via `setSessionEntries` — same
+      mechanism Adventure's vocab-lesson phase already used.
+- [x] Added a small square placeholder (dashed border, 🖼️ icon) top-left of
+      the reading view, reserving a spot for future passage artwork —
+      purely decorative for now, no image-loading system behind it yet.
+
+## Lemmatizer (German + Japanese)
+- [x] Previously blocked: spaCy's German model (`de_core_news_sm`) couldn't
+      be downloaded due to network allowlist restrictions. Now works — the
+      allowlist added `release-assets.githubusercontent.com`, which is
+      exactly what spaCy model wheels are hosted on. Installed via
+      `pip install --break-system-packages "https://github.com/explosion/
+      spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-
+      3.8.0-py3-none-any.whl"` (spaCy's own `download` command doesn't pass
+      `--break-system-packages` through, so the direct wheel URL is needed
+      in this environment). Fugashi (Japanese) installed fine as before —
+      it was never the blocked one.
+- [x] Discovered `public/campaign/lemmatize.py` already existed — a
+      complete, well-built module (de/fr/es via spaCy, ja via fugashi, zh
+      via jieba) already wired into `convert.py --lemmatize`, just never
+      runnable before. Ran it for real: `python3 convert.py --all
+      --lemmatize` regenerated genuine `surfaceForms` for all 6 German
+      Adventure campaign chapters (40–150 pairs per section, e.g.
+      `isst→essen`, `Menschen→Mensch`).
+- [x] Built `tools/generate_reader_surface_forms.py` to extend the same
+      lemmatization to the Graded Reader (which never used surface-form
+      matching at all, for any language, before this). Reuses
+      `campaign/lemmatize.py`. Generated 628 German + 670 Japanese surface
+      forms from actual reader-passage text, cross-checked against real
+      vocab entries. Output: `public/reader/surface-forms.json`.
+- [x] Wired it into `GradedReader.jsx` via a new `loadSurfaceForms()` in
+      `engine/reader.js` — inflected words in reading passages (e.g. "aßen"
+      → essen, "habe" → haben) now resolve to their dictionary-form vocab
+      entry, both in the highlighted text and in the Vocab Quiz word count.
+- [x] **Found and fixed a real, previously-silent bug while wiring this
+      up**: `TextWithLookup.jsx`'s own internal `augmentedLookup` (used by
+      Adventure Mode) treated `buildLookup()`'s return value as a plain
+      object (`base[surface]`, `{...base}`) when it's actually a `Map`.
+      This silently produced a broken lookup whenever `surfaceForms` was
+      non-empty — but it was never triggered before, since every campaign
+      chapter's `surfaceForms` was empty (lemmatization was blocked). The
+      moment real German surface-form data got generated above, Adventure
+      Mode would have crashed on the next chapter read (`t.has is not a
+      function`) — caught via real-browser Playwright testing, not code
+      review, exactly the kind of bug that review alone misses. Fixed both
+      `TextWithLookup.jsx` and `GradedReader.jsx`'s own copy of the same
+      merge logic to build a proper `Map`. Verified working end-to-end in
+      both Graded Reader and Adventure Mode after the fix (e.g. tapping
+      "Lieber" in an Adventure letter correctly resolves to lemma "lieb").
+- [ ] Quality notes, honestly: German lemmatization has real gaps on
+      irregular verbs (e.g. "aßen" from *essen* wasn't reduced and got
+      mistagged NOUN) and some noun plurals. Japanese fugashi output is
+      mostly clean but has residual tokenization ambiguity on kana-only
+      (no-kanji) beginner text — e.g. "がくせい" (student) can get
+      mis-split into "がく"+"せい", coincidentally matching unrelated
+      one-kanji vocab entries. Filtered out all single-kana matches (18
+      dropped) as the worst/most obvious case; longer mis-splits aren't
+      caught. Not a blocker, but don't assume 100% precision.
+- [ ] French/Spanish spaCy models untested — same install approach should
+      work (`fr_core_news_sm`, `es_core_news_sm` via the same GitHub
+      release-wheel pattern) but not verified in this session. Chinese
+      lemmatization is really just jieba word segmentation (Chinese
+      doesn't inflect) — also untested here, though the module supports it.
+
+- [x] Added read-aloud audio — a 🔊/⏸ button in the reading header speaks
+      the passage sentence-by-sentence via `speakAndWait()` (not as one
+      long utterance, so play/pause has a clean sentence boundary and the
+      UI can show progress). Each sentence highlights while spoken (soft
+      background wash, doesn't fight the SRS-status text colors). Respects
+      the existing per-language voice picker and the Listening game's
+      speed setting (`settings.listeningSpeechRate`) for consistency.
+      Correctly stops (calls `speechSynthesis.cancel()`) when navigating
+      away mid-playback or switching passages — verified via a mocked-TTS
+      Playwright test, since headless Chromium has zero real voices
+      installed so genuine playback timing can't be tested directly (same
+      known limitation already logged for the Listening game).
+- [x] Added `splitSentences()` to `engine/reader.js` for this — Latin
+      punctuation (.!?) for most languages, full-width (。！？) for CJK.
+
 ## Content coverage
 - [x] Japanese N4/N5 "thin coverage" — turned out to be a data bug, not a
       real gap. 2,128 of 7,972 words had the wrong JLPT level (mostly N3
       words mistagged N2). Rebuilt every level directly from the elzup
       source CSVs. Corrected distribution: N5: 749, N4: 682, N3: 2,131,
       N2: 1,741, N1: 2,669 (was N5: 532, N4: 7, N3: 401, N2: 3,409, N1: 2,951).
-- [ ] `?` help buttons not yet added to Adventure/AdventureChapter, Settings,
-      Stats screens.
+- [x] Added `?` help buttons to Adventure, AdventureChapter, Settings, and
+      Stats — the four screens that had none. Also audited every existing
+      help button for accuracy against current features (several games have
+      gained controls since their help text was written) and fixed the
+      stale ones: Graded Reader's library-view help was completely outdated
+      (didn't mention search/tags/finished-tracking/Vocab Quiz/continue-
+      reading); Listening was missing the Speed slider; VocabBrowser didn't
+      mention its status/level/POS/topic filters or Trans/Scores toggles at
+      all; Flashcard was missing the 🔊 Auto toggle; PairMatch was missing
+      the "Same word type" toggle. RaceCar, GapFill, GrammarTrainer,
+      MatchingDrills, StrokeOrder, Typing, Dialogue, and GrammarDictionary
+      were all still accurate, left as-is. Verified all 4 new + 5 updated
+      help buttons open correctly in real-browser Playwright, not just
+      code review.
 
 ## Motivation / retention
 - [ ] Streak/heatmap using the day-lock mechanism — box selection is already
@@ -89,12 +250,21 @@
       vbvss199's `english.json` directly (20,708 words, real CEFR/POS/example
       sentences) — open design question is what goes in `translation` since
       the word already *is* English (duplicate word / definition / skip).
-- [ ] Considered "reverse index" idea (pick a source language, learn English
-      via its existing translation glosses) — decided against for now:
-      requires 5 new generated files + per-source reverse indexes + new
-      "pick source language" UI concept, uneven/unknown match rates per
-      language. If revisited, pilot with German only first (most developed
-      list) before committing to all five.
+- [x] Built the "reverse index" idea: picking English now opens a "Learn
+      English from…" chooser (first-launch overlay and the Setup language
+      dropdown both route through it) offering the other five languages as
+      a base. Built client-side, on the fly, via `buildReverseList()` in
+      `engine/vocab.js` — no new data files or build step: it groups a
+      source list's entries by normalised English translation, merging
+      collisions (multiple source words sharing one English translation)
+      into a single card's `translation` array. Verified in real-browser
+      Playwright across first-launch, returning-user, and reload-restore
+      paths; German source produced 20,405 English cards from 20,221 source
+      entries — sane 1:1-ish ratio.
+- [ ] Reverse-built English cards have no reading and no example sentences
+      (those belong to the source word, not the merged English card).
+      Needs a dedicated English sentence list to fix properly — deferred,
+      not started.
 
 ## Data quality audit tooling
 - [x] `tools/audit_vocab.py` + `tools/generate_audit_html.py` — a
@@ -282,6 +452,9 @@
       installed voices. Worth a real-device check for how the timing/pacing
       feels with real (non-instant) speech synthesis, and whether Wake Lock
       / Media Session actually behave as expected outside a test harness.
+- [x] Added a Speed slider (0.5×–1.5×, step 0.1) to the Listening game,
+      stored as `settings.listeningSpeechRate` and passed as the `rate`
+      option on every `speakAndWait()` call for that session.
 
 ## Dark-mode text brightness
 - [x] Secondary/muted text on dark backgrounds was too dim (`--dt2: #b0b0b0`,
@@ -325,6 +498,13 @@
       principle that was already written down but not followed here.
 
 ## Groundskeeping
+- [ ] Noticed while adding Graded Reader's Vocab Quiz button: `sessionEntries`
+      (used by Adventure's vocab-lesson phase, and now also the reader) is
+      never reset to `null` anywhere — once set, it silently keeps scoping
+      Flashcard/etc. to that subset until something else overwrites it,
+      even after leaving Adventure or the Reader normally. Pre-existing,
+      not introduced here, but worth a proper fix (e.g. clear it in
+      `goBack()` or whenever leaving a session-scoped game).
 - [x] Removed dead code found via `eslint`/grep sweep: `PosChips.jsx`
       (unused component, superseded by inline `<select>` dropdowns
       elsewhere) and its only consumer, `posLabel()`/`POS_LABELS` in
@@ -332,10 +512,11 @@
       comment references to both. `storyOutro` and `artifact` in
       `AdventureChapter.jsx` — computed, never read anywhere, removed
       (the `artifact` prop chain through `ChapterHub` too).
-- [ ] `AdventureChapter.jsx`'s `setDoneParts` is still unused (only
-      `doneParts` is read) — looks like an incomplete feature (some 'vocab'/
-      'grammar' single-item phase completion tracking never got wired up),
-      not simple dead code, so left alone rather than removed.
+- [x] `AdventureChapter.jsx`'s `setDoneParts` was unused — the Vocab/Grammar
+      hub buttons never got their ✓ checkmark since nothing marked those
+      single-item phases done. Fixed: `doneParts` state lifted to the outer
+      `AdventureChapter` component; backing out of the Vocab or Grammar
+      sub-view (via "← Chapter") now marks that phase done.
 - [ ] Pre-existing `react-hooks/purity` and `react-hooks/refs` lint errors
       in `Flashcard.jsx` and `GrammarTrainer.jsx` (`Math.random()` inside
       `useMemo`, a ref read during render) — not touched this pass, out of

@@ -63,6 +63,70 @@ export function mergeLists(lists) {
   })
 }
 
+// ── Reverse-build (English from a source language) ─────────────────────────
+
+/**
+ * Builds a synthetic "English learned from <source language>" list by
+ * flipping an already-loaded source list: each English translation becomes
+ * the card's `entry`, and the original source word(s) become `translation`.
+ *
+ * Since many source words can share an English translation (e.g. German
+ * "groß" and "riesig" both translating to "big"), and a single source word
+ * can have multiple English translations, this groups by normalised English
+ * text and merges all matching source words into one card's translation
+ * array — so you never get duplicate English cards, just one card per
+ * distinct English word with every valid source-language equivalent
+ * attached.
+ *
+ * Limitation (tracked in TODO): reverse cards have no reading and no
+ * example sentences — those belong to the source word, not the merged
+ * English card, and a proper fix needs a dedicated English sentence list.
+ */
+export function buildReverseList(sourceList, sourceLangId, sourceLangLabel) {
+  const groups = new Map()  // normalised english -> { display, sourceWords, pos, level, categories }
+
+  for (const e of sourceList.entries) {
+    for (const en of e.translation) {
+      if (!en) continue
+      const key = en.trim().toLowerCase()
+      if (!key) continue
+      if (!groups.has(key)) {
+        groups.set(key, {
+          display: en.trim(),
+          sourceWords: new Set(),
+          pos: e.pos,
+          level: e.level,
+          categories: e.categories ?? [],
+        })
+      }
+      groups.get(key).sourceWords.add(e.entry)
+    }
+  }
+
+  const id = `en-rev-${sourceLangId}`
+  const entries = [...groups.values()].map((g, i) => ({
+    id: `${id}::${i}`,
+    entry: g.display,
+    reading: null,
+    translation: [...g.sourceWords],
+    pos: g.pos,
+    categories: g.categories,
+    level: g.level,
+    gender: null,
+    measureWord: null,
+    listId: id,
+  }))
+
+  return {
+    id,
+    language: 'en',
+    native: `English (from ${sourceLangLabel})`,
+    hasReading: false,
+    levels: [...new Set(entries.map(e => e.level).filter(Boolean))].sort(),
+    entries,
+  }
+}
+
 // ── Sentence loader ───────────────────────────────────────────────────────────
 
 /**

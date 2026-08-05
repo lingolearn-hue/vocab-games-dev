@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useApp } from '../context/AppContext'
-import { buildLookup, tokenise, loadReaderPassages } from '../engine/reader'
+import { buildLookup, tokenise, loadReaderPassages, loadSurfaceForms, splitSentences } from '../engine/reader'
+import { speakAndWait, stop as stopSpeech, isSupported as speechSupported } from '../engine/speech'
 import { TextWithLookup } from '../components/TextWithLookup'
 import LevelChooser from '../components/LevelChooser'
 import HelpButton from '../components/HelpButton'
@@ -25,6 +26,26 @@ function tagLabel(tag) {
 }
 
 const CUSTOM_PASSAGE_KEY = 'vocabCustomPassage'
+const FINISHED_KEY = 'vocabFinishedPassages'
+const LAST_PASSAGE_KEY = 'vocabLastPassage'
+
+function loadLastPassage() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAST_PASSAGE_KEY) || 'null')
+    return saved && typeof saved === 'object' && saved.id ? saved : null
+  } catch {
+    return null
+  }
+}
+
+function loadFinishedPassages() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FINISHED_KEY) || '[]')
+    return new Set(Array.isArray(saved) ? saved : [])
+  } catch {
+    return new Set()
+  }
+}
 
 function loadSavedCustomPassage() {
   try {
@@ -36,9 +57,10 @@ function loadSavedCustomPassage() {
 }
 
 export default function GradedReader() {
-  const { activeEntries, loadedLists, selectedIds, showReading, scores, goBack, activeLanguage } = useApp()
+  const { activeEntries, loadedLists, selectedIds, showReading, scores, goBack, activeLanguage, setScreen, setSessionEntries, settings } = useApp()
 
   const [passages,        setPassages]        = useState([])
+  const [surfaceForms,    setSurfaceForms]     = useState({})
   const [loading,         setLoading]         = useState(true)
   const [activePassage,   setActivePassage]   = useState(null)
   const [pastedText,      setPastedText]      = useState(() => loadSavedCustomPassage().text)
@@ -48,7 +70,29 @@ export default function GradedReader() {
   const [showTranslation, setShowTranslation] = useState(false)
   const [activeTags,      setActiveTags]      = useState(new Set())
   const [search,          setSearch]          = useState('')
+  // Passage ids (already namespaced by language, e.g. "de-p1") the user has
+  // marked as finished — persisted across sessions. Only library passages
+  // get this treatment; custom pasted text has no stable id worth tracking.
+  const [finishedPassages, setFinishedPassages] = useState(loadFinishedPassages)
+  // "Continue reading" — last-opened library passage id + scroll position,
+  // so reopening the Reader can offer to jump back in rather than always
+  // dumping back to the library list. Custom pasted text isn't tracked
+  // (no stable id worth persisting across sessions).
+  const [lastPassage, setLastPassage] = useState(loadLastPassage)
+  const readingBodyRef = useRef(null)
   const textAreaRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem(FINISHED_KEY, JSON.stringify([...finishedPassages]))
+  }, [finishedPassages])
+
+  function toggleFinished(id) {
+    setFinishedPassages(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   // Persist the pasted/custom text as the user types, so it survives a
   // refresh or navigating away — this was previously pure in-memory state
@@ -66,6 +110,31 @@ export default function GradedReader() {
   }, [activeLanguage, selectedIds, loadedLists])
 
   const lookup = useMemo(() => buildLookup(activeEntries), [activeEntries])
+
+  // Merge in surface-form (inflected → dictionary form) matches so reading
+  // stats/the Vocab Quiz count and the highlighted text agree — both use
+  // this augmented lookup rather than the raw one. buildLookup() returns a
+  // Map with lowercased keys, so this has to match that convention (an
+  // earlier version of this used plain-object access here, which silently
+  // produced a broken lookup — caught via a real-browser crash, not code
+  // review — since tokenise()/TextWithLookup expect a Map with .has/.get).
+  const augmentedLookup = useMemo(() => {
+    const langForms = surfaceForms[language] ?? {}
+    if (!Object.keys(langForms).length) return lookup
+    const merged = new Map(lookup)
+    for (const [surface, lemma] of Object.entries(langForms)) {
+      const surfaceKey = surface.toLowerCase()
+      const lemmaKey = lemma.toLowerCase()
+      if (!merged.has(surfaceKey) && lookup.has(lemmaKey)) {
+        merged.set(surfaceKey, { ...lookup.get(lemmaKey), _surface: surface })
+      }
+    }
+    return merged
+  }, [lookup, surfaceForms, language])
+
+  useEffect(() => {
+    loadSurfaceForms().then(setSurfaceForms)
+  }, [])
 
   useEffect(() => {
     if (!activeLanguage) return
@@ -110,9 +179,14 @@ export default function GradedReader() {
         if (![...activeTags].every(t => ptags.has(t))) return false
       }
       if (q) {
-        return p.title?.toLowerCase().includes(q) ||
-               p.text?.toLowerCase().includes(q) ||
-               p.titleTranslation?.toLowerCase().includes(q)
+        const textMatch = p.title?.toLowerCase().includes(q) ||
+                           p.text?.toLowerCase().includes(q) ||
+                           p.titleTranslation?.toLowerCase().includes(q)
+        // Auto-tag detection: typing a tag name (or part of one) — "beginner",
+        // "biography", a topic like "food" — filters by tag too, so search
+        // alone covers what used to need separate Type/Topic chip rows.
+        const tagMatch = (p.tags ?? []).some(t => tagLabel(t).toLowerCase().includes(q))
+        if (!textMatch && !tagMatch) return false
       }
       return true
     })
@@ -126,11 +200,31 @@ export default function GradedReader() {
     })
   }
 
-  function openPassage(p) {
+  function openPassage(p, restoreScroll) {
     setActivePassage(p)
     setCustomPassage(null)
     setShowTranslation(false)
+    const saved = { id: p.id, scrollTop: restoreScroll ? (loadLastPassage()?.scrollTop ?? 0) : 0 }
+    setLastPassage(saved)
+    localStorage.setItem(LAST_PASSAGE_KEY, JSON.stringify(saved))
   }
+
+  // Save scroll position for "continue reading" as the user scrolls the
+  // passage, and restore it (if resuming the same passage) once the DOM
+  // for the new passage has actually rendered.
+  useEffect(() => {
+    const el = readingBodyRef.current
+    if (!el || !activePassage) return
+    if (lastPassage?.id === activePassage.id && lastPassage.scrollTop > 0) {
+      el.scrollTop = lastPassage.scrollTop
+    }
+    function onScroll() {
+      const next = { id: activePassage.id, scrollTop: el.scrollTop }
+      localStorage.setItem(LAST_PASSAGE_KEY, JSON.stringify(next))
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [activePassage])
 
   function openCustom() {
     if (!pastedText.trim()) return
@@ -140,6 +234,91 @@ export default function GradedReader() {
   }
 
   const currentPassage = activePassage ?? customPassage
+
+  // Vocab actually appearing in this passage, resolved back to full entries —
+  // feeds the "Vocab Quiz" flashcard-session button below.
+  const passageEntries = useMemo(() => {
+    if (!currentPassage) return []
+    const spans = tokenise(currentPassage.text, augmentedLookup, language)
+    const ids = new Set(spans.filter(s => s.entry).map(s => s.entry.id))
+    return activeEntries.filter(e => ids.has(e.id))
+  }, [currentPassage, augmentedLookup, language, activeEntries])
+
+  function startVocabQuiz() {
+    if (passageEntries.length === 0) return
+    setSessionEntries(passageEntries)
+    setScreen('flashcard')
+  }
+
+  // ── Read-aloud ─────────────────────────────────────────────────────────
+  // Speaks the passage sentence-by-sentence (not as one long utterance) so
+  // the UI can highlight reading progress and so play/pause has a clean
+  // boundary to stop at rather than cutting off mid-sentence.
+  const [readingIndex, setReadingIndex] = useState(-1)  // -1 = not playing
+  const playingRef = useRef(false)
+
+  const sentences = useMemo(
+    () => currentPassage ? splitSentences(currentPassage.text, language) : [],
+    [currentPassage, language]
+  )
+  const sentenceRefs = useRef([])
+
+  // Sentence-level tap-to-translate — naive index-pairing between the
+  // source and English sentence splits (no per-sentence data exists; the
+  // `translation` field is one flat string per passage). Only trusted when
+  // both sides split into the same number of sentences: a real-passage
+  // scan found this holds ~75-95% of the time depending on language (worst
+  // case Japanese, 9/36 mismatched — translators don't always keep a 1:1
+  // sentence count with the source). When counts don't match, pairing is
+  // silently disabled for that passage rather than showing a wrong
+  // translation next to the right sentence; the full-passage EN toggle
+  // still works regardless since it doesn't depend on alignment.
+  const englishSentences = useMemo(
+    () => currentPassage?.translation ? splitSentences(currentPassage.translation, 'en') : [],
+    [currentPassage]
+  )
+  const sentenceTranslationsAligned = language !== 'en' &&
+    englishSentences.length > 0 && englishSentences.length === sentences.length
+  const [expandedSentence, setExpandedSentence] = useState(null)
+
+  function toggleSentenceTranslation(i) {
+    if (!sentenceTranslationsAligned) return
+    setExpandedSentence(prev => (prev === i ? null : i))
+  }
+
+  // Keep the currently-spoken sentence in view during read-aloud — without
+  // this, playback on a long passage would keep highlighting sentences the
+  // user has already scrolled past, defeating the point of a hands-free
+  // read-along.
+  useEffect(() => {
+    if (readingIndex < 0) return
+    sentenceRefs.current[readingIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [readingIndex])
+
+  async function playPassage() {
+    if (playingRef.current || sentences.length === 0) return
+    playingRef.current = true
+    const rate = settings.listeningSpeechRate ?? 0.9
+    for (let i = 0; i < sentences.length; i++) {
+      if (!playingRef.current) break
+      setReadingIndex(i)
+      await speakAndWait(sentences[i], language, { rate })
+    }
+    playingRef.current = false
+    setReadingIndex(-1)
+  }
+
+  function stopPassage() {
+    playingRef.current = false
+    stopSpeech()
+    setReadingIndex(-1)
+  }
+
+  // Stop any in-progress read-aloud when switching passages or leaving the screen
+  useEffect(() => {
+    setExpandedSentence(null)
+    return () => { playingRef.current = false; stopSpeech() }
+  }, [currentPassage])
 
   // ── List view ──────────────────────────────────────────────────────────────
   if (!currentPassage) {
@@ -154,7 +333,7 @@ export default function GradedReader() {
           </div>
           <HelpButton
             title="Graded Reader"
-            description="Read short passages at your level. Tap any word for its translation, and toggle the EN button while reading for a full translation."
+            description="Browse passages by level, search titles/text/topics, or paste your own text to read. Tap 📇 on a passage to quiz yourself on just its vocab, and tap ✓ Mark as Finished when you're done — your progress and last-read spot are saved automatically."
           />
         </div>
 
@@ -168,57 +347,65 @@ export default function GradedReader() {
               </div>
             ) : (
               <>
-                {/* ── Level chips — prominent row at top ── */}
+                {/* ── "Continue reading" — resume the last-opened passage,
+                     if it's still in this language's library ── */}
                 {(() => {
-                  const typeTags  = ['fiction','non-fiction','biography','essay'].filter(t => availableTags.includes(t))
-                  const topicTags = availableTags.filter(t => !typeTags.includes(t))
+                  if (!lastPassage) return null
+                  const resume = passages.find(p => p.id === lastPassage.id)
+                  if (!resume) return null
+                  return (
+                    <button className="gr-continue-banner" onClick={() => openPassage(resume, true)}>
+                      <span className="gr-continue-icon">📖</span>
+                      <span className="gr-continue-text">
+                        <span className="gr-continue-label">Continue reading</span>
+                        <span className="gr-continue-title">{resume.title}</span>
+                      </span>
+                      <span className="gr-continue-arrow">→</span>
+                    </button>
+                  )
+                })()}
+
+                {/* ── Reading progress summary ── */}
+                {passages.length > 0 && (
+                  <div className="gr-progress-summary">
+                    ✓ {passages.filter(p => finishedPassages.has(p.id)).length} of {passages.length} finished
+                  </div>
+                )}
+
+                {/* ── Filters — level chips, search, and a single flat tag row, all
+                     sharing the same horizontal padding so they read as one
+                     aligned block instead of separately-indented rows ── */}
+                {(() => {
                   if (availableLevels.length === 0 && availableTags.length === 0) return null
                   return (
                     <div className="gr-filters">
                       {availableLevels.length > 0 && (
                         <LevelChooser levels={availableLevels} value={activeLevels} onChange={setActiveLevels} className="gr-filter-levels" />
                       )}
-                      {(typeTags.length > 0 || topicTags.length > 0) && (
-                        <div className="gr-filter-tags">
-                          {typeTags.length > 0 && (
-                            <div className="gr-tag-row">
-                              <span className="gr-tag-row-label">Type</span>
-                              <div className="gr-tag-scroll">
-                                {typeTags.map(tag => (
-                                  <button key={tag} className={`gr-tag-chip ${activeTags.has(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
-                                    {tagLabel(tag)}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {topicTags.length > 0 && (
-                            <div className="gr-tag-row">
-                              <span className="gr-tag-row-label">Topic</span>
-                              <div className="gr-tag-scroll">
-                                {topicTags.map(tag => (
-                                  <button key={tag} className={`gr-tag-chip ${activeTags.has(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
-                                    {tagLabel(tag)}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {(activeTags.size > 0 || activeLevels) && (
-                        <button className="gr-tag-clear" onClick={() => { setActiveTags(new Set()); setActiveLevels(null) }}>✕ Clear filters</button>
-                      )}
                       <div className="gr-search-row">
                         <input
                           className="gr-search"
                           type="text"
-                          placeholder="Search titles or text…"
+                          placeholder="Search titles, text, or topics…"
                           value={search}
                           onChange={e => setSearch(e.target.value)}
                         />
-                        {search && <button className="gr-search-clear" onClick={() => setSearch('')}>✕</button>}
+                        {search && (
+                          <button className="gr-search-clear" onClick={() => setSearch('')} aria-label="Clear search">✕</button>
+                        )}
                       </div>
+                      {availableTags.length > 0 && (
+                        <div className="gr-tag-scroll">
+                          {availableTags.map(tag => (
+                            <button key={tag} className={`gr-tag-chip ${activeTags.has(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
+                              {tagLabel(tag)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {(activeTags.size > 0 || activeLevels || search) && (
+                        <button className="gr-tag-clear" onClick={() => { setActiveTags(new Set()); setActiveLevels(null); setSearch('') }}>✕ Clear filters</button>
+                      )}
                     </div>
                   )
                 })()}
@@ -240,14 +427,17 @@ export default function GradedReader() {
                       })
 
                       const renderCard = (p) => {
-                        const passageSpans = tokenise(p.text, lookup, language)
+                        const passageSpans = tokenise(p.text, augmentedLookup, language)
                         const matchedIds = [...new Set(passageSpans.filter(s => s.entry).map(s => s.entry.id))]
                         const knownCount = matchedIds.filter(id => (scores[id]?.global ?? 'unseen') !== 'unseen').length
                         return (
                           <button key={p.id} className="gr-passage-card" onClick={() => openPassage(p)}>
                             <div className="gr-passage-card-top">
                               <span className="gr-passage-title">{p.title}</span>
-                              {p.level && <span className="gr-passage-level">{p.level}</span>}
+                              <span className="gr-passage-card-badges">
+                                {finishedPassages.has(p.id) && <span className="gr-finished-check" title="Finished">✓</span>}
+                                {p.level && <span className="gr-passage-level">{p.level}</span>}
+                              </span>
                             </div>
                             {p.titleTranslation && <span className="gr-passage-subtitle">{p.titleTranslation}</span>}
                             <div className="gr-passage-card-bottom">
@@ -319,18 +509,44 @@ export default function GradedReader() {
       <div className="gr-header">
         <button className="gr-back" onClick={() => { setActivePassage(null); setCustomPassage(null) }}>← Back</button>
         <span className="gr-title gr-reading-title">{currentPassage.title}</span>
+        {speechSupported() && sentences.length > 0 && (
+          <button
+            className={`gr-play-btn ${readingIndex >= 0 ? 'is-playing' : ''}`}
+            onClick={readingIndex >= 0 ? stopPassage : playPassage}
+            title={readingIndex >= 0 ? 'Stop reading aloud' : 'Read passage aloud'}
+          >
+            {readingIndex >= 0 ? '⏸' : '🔊'}
+          </button>
+        )}
         {currentPassage.translation && (
           <button className={`gr-trans-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation(t => !t)}>EN</button>
         )}
         <HelpButton
           title="Graded Reader"
-          description="Read short passages at your level. Tap any word for its translation, and toggle the EN button while reading for a full translation."
+          description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, and tap 🔊 to have the passage read aloud sentence by sentence."
         />
       </div>
 
-      <div className="gr-body gr-reading-body">
+      <div className="gr-body gr-reading-body" ref={readingBodyRef}>
+        <div className="gr-cover-placeholder" aria-hidden="true">🖼️</div>
+
         <div className="gr-text">
-          <TextWithLookup text={currentPassage.text} language={language} lookup={lookup} scores={scores} showReading={showReading} />
+          {sentences.map((sentence, i) => (
+            <span
+              key={i}
+              ref={el => { sentenceRefs.current[i] = el }}
+              className={`gr-sentence ${readingIndex === i ? 'gr-sentence-active' : ''} ${sentenceTranslationsAligned ? 'gr-sentence-tappable' : ''}`}
+              onClick={sentenceTranslationsAligned ? () => toggleSentenceTranslation(i) : undefined}
+            >
+              <TextWithLookup text={sentence} language={language} lookup={augmentedLookup} scores={scores} showReading={showReading} />
+              {' '}
+              {expandedSentence === i && (
+                <span className="gr-sentence-translation" onClick={e => e.stopPropagation()}>
+                  {englishSentences[i]}
+                </span>
+              )}
+            </span>
+          ))}
         </div>
 
         {showTranslation && currentPassage.translation && (
@@ -343,6 +559,21 @@ export default function GradedReader() {
           <span className="gr-legend-item gr-legend--unseen">unseen</span>
           <span className="gr-legend-item gr-legend--unknown">not in list</span>
         </div>
+
+        {activePassage && (
+          <button
+            className={`gr-finish-btn ${finishedPassages.has(activePassage.id) ? 'is-finished' : ''}`}
+            onClick={() => toggleFinished(activePassage.id)}
+          >
+            {finishedPassages.has(activePassage.id) ? '✓ Finished' : 'Mark as Finished'}
+          </button>
+        )}
+
+        {passageEntries.length > 0 && (
+          <button className="gr-vocab-fab" onClick={startVocabQuiz} title="Practice this passage's vocab as flashcards">
+            📇 Vocab Quiz <span className="gr-vocab-fab-count">{passageEntries.length}</span>
+          </button>
+        )}
       </div>
     </div>
   )

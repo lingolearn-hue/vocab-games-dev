@@ -212,7 +212,7 @@ export default function VocabBrowser() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <HelpButton
             title="Vocab Browser"
-            description="Browse every word in the current list, search by entry, reading, or translation, and see your progress at a glance."
+            description="Browse every word in the current list and search by entry, reading, or translation. Filter by status, level, part of speech, or topic, and toggle Trans/Scores to control how much detail each row shows."
           />
         </div>
       </div>

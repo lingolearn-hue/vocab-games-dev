@@ -389,7 +389,7 @@ export default function Flashcard() {
           <AutoExampleToggle />
           <HelpButton
             title="Flashcard"
-            description="Swipe through cards to learn vocabulary. Swipe right for Known, left for Unknown, up to Master a word instantly, or down to see word details, a mnemonic, and an example sentence."
+            description="Swipe through cards to learn vocabulary. Swipe right for Known, left for Unknown, up to Master a word instantly, or down to see word details, a mnemonic, and an example sentence. Toggle 🔊 Auto to have each word spoken automatically as it comes up."
             buttons={[
               { icon: '⇵',  label: 'Reading only', desc: '(zh/ja) Show reading instead of hanzi/kanji' },
               { icon: '⇄',  label: 'Direction',    desc: 'Swap which side is the prompt — word or translation' },

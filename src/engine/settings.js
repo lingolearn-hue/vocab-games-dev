@@ -78,6 +78,11 @@ export const DEFAULTS = {
   // (e.g. ['word','word','translation'] to hear the word twice before the
   // translation, or ['word','translation'] to skip sentences entirely).
   listeningSequence: ['word', 'translation', 'sentence'],
+  // Playback speed multiplier for TTS in the Listening game. Passed straight
+  // through as SpeechSynthesisUtterance.rate — 1.0 is the browser's normal
+  // speaking rate; speech.js's own 0.9 default (slightly slower, for
+  // learners) is used elsewhere and left untouched by this setting.
+  listeningSpeechRate: 0.9,
   // Per-language TTS voice override, keyed by internal language id. Value is
   // a voiceURI (stable per-voice identifier from the Web Speech API), or
   // null to use the browser/OS default voice for that language.

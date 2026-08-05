@@ -98,6 +98,30 @@
   flex-wrap: wrap;
   gap: 0.35rem;
 }
+
+.ls-speed {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.ls-speed-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #555;
+  flex-shrink: 0;
+}
+.ls-speed-slider { flex: 1 1 auto; accent-color: #4f7ef8; }
+.ls-speed-value {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4f7ef8;
+  flex-shrink: 0;
+  width: 2.4rem;
+  text-align: right;
+}
 .ls-seq-add-btn, .ls-seq-reset-btn {
   padding: 0.3rem 0.6rem;
   border: 1.5px dashed #ccc;
@@ -209,6 +233,8 @@
 [data-theme="dark"] .ls-empty { color: var(--dt2); }
 [data-theme="dark"] .ls-progress { color: var(--dt2); }
 [data-theme="dark"] .ls-sequence { border-color: #222; }
+[data-theme="dark"] .ls-speed { border-color: #222; }
+[data-theme="dark"] .ls-speed-label { color: var(--dt2); }
 [data-theme="dark"] .ls-sequence-empty { color: var(--dt2); }
 [data-theme="dark"] .ls-seq-chip--word        { background: #1a2340; }
 [data-theme="dark"] .ls-seq-chip--translation { background: #12291d; }

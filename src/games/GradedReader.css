@@ -5,6 +5,7 @@
   max-width: 480px;
   margin: 0 auto;
   background: #fafafa;
+  position: relative;
 }
 
 /* Header */
@@ -81,6 +82,41 @@
 }
 .gr-trans-toggle.active { border-color: #4f7ef8; color: #4f7ef8; background: #eef2ff; }
 
+.gr-play-btn {
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 7px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  transition: all 0.12s;
+}
+.gr-play-btn.is-playing { border-color: #4f7ef8; background: #eef2ff; }
+
+/* Read-aloud sentence highlight — a soft background wash rather than
+   overriding the SRS-status text colors TextWithLookup already applies. */
+.gr-sentence {
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.gr-sentence-active { background: rgba(79,126,248,0.14); }
+.gr-sentence-tappable { cursor: pointer; }
+
+.gr-sentence-translation {
+  display: block;
+  margin: 0.15rem 0 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-left: 3px solid #4f7ef8;
+  background: #f5f7ff;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #444;
+  cursor: text;
+}
+
 /* Body */
 .gr-body {
   flex: 1;
@@ -115,6 +151,36 @@
   justify-content: space-between;
   gap: 0.5rem;
 }
+
+.gr-passage-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.gr-finished-check {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #22a06b;
+}
+
+.gr-finish-btn {
+  display: block;
+  margin: 1rem auto 0;
+  padding: 0.55rem 1.2rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 20px;
+  background: #fff;
+  color: #555;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.gr-finish-btn:hover { border-color: #22a06b; color: #22a06b; }
+.gr-finish-btn.is-finished { border-color: #22a06b; background: #e9f8f1; color: #22a06b; }
 
 .gr-passage-title {
   font-size: 1.1rem;
@@ -185,7 +251,7 @@
   -webkit-appearance: none;
   appearance: none;
   border-radius: 10px;
-  color: #555;
+  color: #fff;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -196,7 +262,58 @@
 
 /* Reading body */
 .gr-reading-body {
-  padding: 1.2rem 1.2rem 3rem;
+  padding: 1.2rem 1.2rem 5rem;
+  position: relative;
+}
+
+/* Small square placeholder — reserved spot for future passage artwork.
+   Purely decorative for now: dashed border marks it clearly as a
+   placeholder rather than a broken image. */
+.gr-cover-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 1.5px dashed #d8d8d8;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  float: left;
+  margin: 0 0.8rem 0.4rem 0;
+  flex-shrink: 0;
+}
+
+/* Floating "Vocab Quiz" button — bottom-right of the reading screen,
+   launches a flashcard session (via sessionEntries) scoped to just this
+   passage's vocab. Positioned relative to .gr-screen so it stays anchored
+   to the centered column rather than the raw viewport edge. */
+.gr-vocab-fab {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 24px;
+  background: #4f7ef8;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79,126,248,0.4);
+  -webkit-appearance: none;
+  appearance: none;
+  z-index: 5;
+}
+.gr-vocab-fab:hover { background: #3a6ae0; }
+.gr-vocab-fab-count {
+  background: rgba(255,255,255,0.25);
+  border-radius: 10px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.75rem;
 }
 
 /* Text */
@@ -252,66 +369,75 @@
   line-height: 1.6;
 }
 
+/* "Continue reading" banner */
+.gr-continue-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: calc(100% - 2rem);
+  margin: 0.8rem 1rem 0;
+  padding: 0.7rem 0.9rem;
+  border: none;
+  border-radius: 12px;
+  background: #eef2ff;
+  cursor: pointer;
+  text-align: left;
+  -webkit-appearance: none;
+}
+.gr-continue-icon { font-size: 1.3rem; flex-shrink: 0; }
+.gr-continue-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
+.gr-continue-label { font-size: 0.68rem; font-weight: 700; color: #4f7ef8; text-transform: uppercase; letter-spacing: 0.03em; }
+.gr-continue-title { font-size: 0.9rem; font-weight: 700; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gr-continue-arrow { font-size: 1.1rem; color: #4f7ef8; flex-shrink: 0; }
+
+/* Reading progress summary */
+.gr-progress-summary {
+  padding: 0.6rem 1rem 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #22a06b;
+}
+
 
 /* Dark mode */
 
 /* ── Filter system ─────────────────────────────────────────────── */
+/* Level chips, search, and the tag row all share the same 1rem horizontal
+   padding and vertical rhythm here, so they read as one aligned block
+   instead of separately-indented rows (previous bug: --border/--surface/
+   --text-secondary below were never defined anywhere in the codebase, so
+   this panel silently had no border or background at all). */
 .gr-filters {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  padding-bottom: 0.4rem;
 }
 
-/* Level chips — auto-scaled to fit by ChipRow, styled by the shared .level-chip rules */
 .gr-filter-levels {
-  padding: 0.6rem 1rem 0.4rem;
+  padding: 0.7rem 1rem 0.5rem;
 }
 .gr-filter-levels .chip-row-inner {
   gap: calc(0.4rem * var(--chip-row-scale, 1));
 }
 
-/* Type + Topic rows — labeled, single-line horizontal scroll */
-.gr-filter-tags {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.gr-tag-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 1rem;
-  overflow: hidden;
-}
-
-.gr-tag-row-label {
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  flex-shrink: 0;
-  min-width: 2.8rem;
-}
-
 .gr-tag-scroll {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.4rem;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-bottom: 1px;
+  padding: 0 1rem 0.3rem;
 }
 .gr-tag-scroll::-webkit-scrollbar { display: none; }
 
 .gr-tag-chip {
-  padding: 0.2rem 0.55rem;
+  padding: 0.3rem 0.7rem;
   border-radius: 20px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid #e0e0e0;
   background: none;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #555;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -324,12 +450,12 @@
 .gr-tag-clear {
   display: block;
   width: calc(100% - 2rem);
-  margin: 0.3rem 1rem 0.5rem;
-  padding: 0.25rem;
+  margin: 0.3rem 1rem 0;
+  padding: 0.35rem;
   border-radius: 20px;
   border: 1.5px solid #e5534b;
   background: none;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #e5534b;
   cursor: pointer;
@@ -364,28 +490,32 @@
 
 /* ── Dark mode ────────────────────────────────────────────────────────────── */
 
-
-[data-theme="dark"] .gr-screen         { background: #111; }
-[data-theme="dark"] .gr-header         { border-color: #222; }
-[data-theme="dark"] .gr-back           { color: var(--dt2); }
-[data-theme="dark"] .gr-back:hover     { color: #f0f0f0; }
-[data-theme="dark"] .gr-title          { color: #f0f0f0; }
-[data-theme="dark"] .gr-filters        { background: #111; border-color: #222; }
-[data-theme="dark"] .gr-tag-chip       { border-color: #333; color: var(--dt2); }
-[data-theme="dark"] .gr-tag-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
-[data-theme="dark"] .gr-passage-card   { background: #1a1a1a; border-color: #222; }
-[data-theme="dark"] .gr-passage-card:hover { background: #222; }
-[data-theme="dark"] .gr-passage-title  { color: #f0f0f0; }
-[data-theme="dark"] .gr-passage-tag    { background: #2a2a2a; color: var(--dt2); }
-[data-theme="dark"] .gr-text           { color: #f0f0f0; }
-[data-theme="dark"] .gr-translation    { background: #1a1a1a; border-color: #333; color: var(--dt2); }
-[data-theme="dark"] .gr-screen         { background: #111; }
-[data-theme="dark"] .gr-filters        { background: #111; border-color: #222; }
-[data-theme="dark"] .gr-tag-row-label  { color: #555; }
-[data-theme="dark"] .gr-tag-chip       { border-color: #333; color: var(--dt2); }
-[data-theme="dark"] .gr-passage-card   { background: #1a1a1a; border-color: #222; }
-[data-theme="dark"] .gr-passage-title  { color: #f0f0f0; }
-[data-theme="dark"] .gr-passage-card:hover { background: #222; }
+[data-theme="dark"] .gr-screen              { background: #111; }
+[data-theme="dark"] .gr-header              { border-color: #222; }
+[data-theme="dark"] .gr-back                { color: var(--dt2); }
+[data-theme="dark"] .gr-back:hover          { color: #f0f0f0; }
+[data-theme="dark"] .gr-title               { color: #f0f0f0; }
+[data-theme="dark"] .gr-filters             { background: #111; border-color: #222; }
+[data-theme="dark"] .gr-tag-chip            { border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .gr-tag-chip.active     { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
+[data-theme="dark"] .gr-passage-card        { background: #1a1a1a; border-color: #222; }
+[data-theme="dark"] .gr-passage-card:hover  { background: #222; }
+[data-theme="dark"] .gr-passage-title       { color: #f0f0f0; }
+[data-theme="dark"] .gr-passage-tag         { background: #2a2a2a; color: var(--dt2); }
+[data-theme="dark"] .gr-text                { color: #f0f0f0; }
+[data-theme="dark"] .gr-translation         { background: #1a1a1a; border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .gr-search              { background: #1a1a1a; border-color: #333; color: #f0f0f0; }
+[data-theme="dark"] .gr-cover-placeholder   { background: #1e1e1e; border-color: #333; }
+[data-theme="dark"] .gr-play-btn            { border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .gr-play-btn.is-playing { border-color: #4f7ef8; background: #1a2340; }
+[data-theme="dark"] .gr-sentence-active     { background: rgba(79,126,248,0.22); }
+[data-theme="dark"] .gr-sentence-translation { background: #1a2340; color: var(--dt2); }
+[data-theme="dark"] .gr-continue-banner     { background: #1a2340; }
+[data-theme="dark"] .gr-continue-title      { color: #f0f0f0; }
+[data-theme="dark"] .gr-progress-summary    { color: #3ecf8e; }
+[data-theme="dark"] .gr-finish-btn          { background: #1a1a1a; border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .gr-finish-btn:hover    { border-color: #22a06b; color: #22a06b; }
+[data-theme="dark"] .gr-finish-btn.is-finished { background: #10281c; border-color: #22a06b; color: #3ecf8e; }
 
 /* Search bar */
 .gr-search-row {
@@ -398,7 +528,7 @@
 .gr-search {
   flex: 1;
   padding: 0.45rem 0.7rem;
-  border: 1.5px solid var(--border, #ddd);
+  border: 1.5px solid #ddd;
   border-radius: 8px;
   font-size: 0.85rem;
   background: #fff;
@@ -418,6 +548,3 @@
   flex-shrink: 0;
 }
 .gr-search-clear:hover { color: #555; }
-
-
-[data-theme="dark"] .gr-search { background: #1a1a1a; border-color: #333; color: #f0f0f0; }

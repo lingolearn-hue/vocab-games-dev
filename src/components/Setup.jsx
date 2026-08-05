@@ -8,6 +8,7 @@ import './Setup.css'
 import './ReadingToggle.css'
 
 const LANGUAGE_FLAGS = { zh: '🇨🇳', es: '🇪🇸', de: '🇩🇪', ja: '🇯🇵', en: '🇬🇧', fr: '🇫🇷' }
+const LANGUAGE_NAMES = { zh: 'Chinese', es: 'Spanish', de: 'German', ja: 'Japanese', fr: 'French' }
 
 const DRILL_GAMES = [
   { id: 'flashcard', label: '🃏 Flashcard',  desc: 'Swipe to learn' },
@@ -80,10 +81,11 @@ function GroupCard({ title, subtitle, icon, games, canStart, setScreen, isOpen, 
 export default function Setup() {
   const {
     availableLists, scores, activeEntries, visibleEntries, vulgarFilteredEntries, setScreen,
-    activeLanguage, setActiveLanguage, settings,
+    activeLanguage, setActiveLanguage, reverseSourceLanguage, settings,
   } = useApp()
 
-  const [langPickerOpen, setLangPickerOpen] = useState(false)
+  const [langPickerOpen,    setLangPickerOpen]    = useState(false)
+  const [reverseMenuOpen,   setReverseMenuOpen]   = useState(false)
   const [openGroup,      setOpenGroup]      = useState('drills')
   const [tutorialOpen,   setTutorialOpen]   = useState(false)
 
@@ -107,7 +109,9 @@ export default function Setup() {
   const languages   = getLanguages(availableLists)
   const canStart    = activeEntries.length >= 3
   const currentFlag = activeLanguage ? LANGUAGE_FLAGS[activeLanguage] ?? '🌐' : '🌐'
-  const currentLangLabel = languages.find(l => l.language === activeLanguage)?.label ?? 'Choose language'
+  const currentLangLabel = activeLanguage === 'en' && reverseSourceLanguage
+    ? `English (from ${LANGUAGE_NAMES[reverseSourceLanguage] ?? reverseSourceLanguage})`
+    : languages.find(l => l.language === activeLanguage)?.label ?? 'Choose language'
 
   function avgScore() {
     if (filteredEntries.length === 0) return 0
@@ -142,16 +146,61 @@ export default function Setup() {
       {/* Language picker dropdown */}
       {langPickerOpen && (
         <div className="lang-picker">
-          {languages.map(lang => (
+          {languages.map(lang => {
+            if (lang.language === 'en') {
+              return (
+                <button
+                  key="en"
+                  className={`lang-picker-item ${activeLanguage === 'en' ? 'active' : ''}`}
+                  onClick={() => {
+                    if (activeLanguage === 'en') {
+                      setActiveLanguage(null)
+                      setLangPickerOpen(false)
+                    } else {
+                      setReverseMenuOpen(true)
+                    }
+                  }}
+                >
+                  <span>{LANGUAGE_FLAGS.en}</span>
+                  <span>{lang.label}</span>
+                </button>
+              )
+            }
+            return (
+              <button
+                key={lang.language}
+                className={`lang-picker-item ${activeLanguage === lang.language ? 'active' : ''}`}
+                onClick={() => { setActiveLanguage(activeLanguage === lang.language ? null : lang.language); setLangPickerOpen(false) }}
+              >
+                <span>{LANGUAGE_FLAGS[lang.language] ?? '🌐'}</span>
+                <span>{lang.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* "Learn English from…" — reverse-build source picker */}
+      {reverseMenuOpen && (
+        <div className="lang-picker lang-picker--reverse">
+          <div className="lang-picker-reverse-title">Learn English from…</div>
+          {languages.filter(l => l.language !== 'en').map(lang => (
             <button
               key={lang.language}
-              className={`lang-picker-item ${activeLanguage === lang.language ? 'active' : ''}`}
-              onClick={() => { setActiveLanguage(activeLanguage === lang.language ? null : lang.language); setLangPickerOpen(false) }}
+              className={`lang-picker-item ${activeLanguage === 'en' && reverseSourceLanguage === lang.language ? 'active' : ''}`}
+              onClick={() => {
+                setActiveLanguage('en', lang.language)
+                setReverseMenuOpen(false)
+                setLangPickerOpen(false)
+              }}
             >
               <span>{LANGUAGE_FLAGS[lang.language] ?? '🌐'}</span>
               <span>{lang.label}</span>
             </button>
           ))}
+          <button className="lang-picker-reverse-cancel" onClick={() => setReverseMenuOpen(false)}>
+            ← Back
+          </button>
         </div>
       )}
 

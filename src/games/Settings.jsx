@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { leitnerStorageKeys } from '../engine/leitner'
 import { getVoicesForLanguage, isSupported as speechSupported } from '../engine/speech'
+import HelpButton from '../components/HelpButton'
 import './Settings.css'
 
 const VOICE_LANGUAGES = [
@@ -92,6 +93,10 @@ export default function Settings() {
       <div className="st-header">
         <button className="st-back" onClick={goBack}>← Back</button>
         <span className="st-title">Settings</span>
+        <HelpButton
+          title="Settings"
+          description="Light/dark appearance, a per-language voice override for text-to-speech (useful when the browser default doesn't match your device's preferred voice), and data export/import/reset."
+        />
       </div>
 
       <div className="st-body">
