@@ -1,17 +1,37 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games` (production, `main` branch): **v0.66aa** — full resync from
-  dev (Listening game, category taxonomy overhaul, POS tagging, audit
-  tooling, Vocab Browser search ranking, per-language category filters,
-  Media Session + Wake Lock) plus this session's dark-mode secondary-text
-  brightness fix.
-- `vocab-games-dev` (`main` branch): v0.63bh at last check — has some later
-  work (dark-mode fix applied there separately) not yet folded back into
-  this resync. Verify via git log before assuming parity.
+- `vocab-games-dev` (`main` branch): **v0.66am** — this working copy's
+  actual current state; dev is where this session's work has been pushed
+  throughout (Graded Reader overhaul, lemmatizer fix, article engines,
+  Vocab Browser word-detail overlay, etc. — see the rest of this file).
+- `vocab-games` (production, `main` branch): **v0.66** — three commits
+  behind dev (v0.66aa/al/am not yet pushed there). Next production push
+  should carry all of this session's work forward.
 - Both repos' `dev`/`master` branches (stale, pre-dating a lot of this work)
   were deleted — see "Groundskeeping" below. Production now only has `main`
-  and `gh-pages`.
+  and `gh-pages`. `vocab-games-dev` also had a stale, unrelated `source`
+  branch (last touched at v0.63ac) — also deleted; `main` was always the
+  real working branch there.
+
+## Vocab Browser word-detail overlay
+- [x] Tapping a word row now opens a full detail overlay — translations,
+      POS/level, example sentence, and an editable mnemonic — matching
+      Flashcard's detail panel. Built as a new shared component,
+      `components/WordDetail.jsx` (+ `WordDetail.css`, own `wd-*` class
+      names), rather than literally reusing Flashcard's — Flashcard's
+      panel also drives its review flow (pendingAdvance, isRevealed,
+      Known/Unknown/Master actions) which don't apply in a browse context,
+      so forcing them into one shared component would've made both worse.
+      Kept visually/functionally identical for the shared parts instead.
+      Replaced the old row-level 💡 mnemonic-only inline expand (which only
+      showed the raw mnemonic text, no edit capability) — the mnemonic
+      indicator is still shown on the row, now just a static hint that
+      tapping the row opens the full detail. Verified in real-browser
+      Playwright: opens correctly, add/edit/save mnemonic flow persists
+      and shows correctly on reopen, and the row's own click-to-open
+      doesn't interfere with the independent Reset button (already had
+      `stopPropagation()`).
 
 ## Data quality
 - [x] German `pos` field cleanup — done. `Vogelsang` fixed (`unclear`→`noun`),
@@ -266,7 +286,50 @@
       `IDIOM_SCRUBS` entries in `tools/tag_categories.py` fixing real
       polysemy bugs.
 
-## Grammatical gender / article engines (French + German)
+## Grammatical gender / article engines (German + French + Spanish) + German conjugations
+- [x] Pulled in from a further-delegated session (commits edb31dd, 4f9f7c6):
+      Spanish gender went from 0% to 94.9% populated (~9,250 nouns, via
+      doozan/spanish_data + hand-verified suffix rules), French's corrupted-
+      gender problem shrank from 1,863 to 118 unresolved entries (via
+      Lexique383), and Spanish gained a `pluraleTantum` field. New German
+      verb conjugation data (`public/conjugations/de.json`, 2,758/3,136
+      verbs, Wiktionary-derived via german-verbs-database) plus a
+      lazy-load engine stub (`src/engine/conjugations.js`, mirrors
+      `examples.js`) — arrived as a stub, not wired into the UI yet.
+      `THIRD_PARTY_LICENSES.md` updated with detailed per-source
+      attribution for all of this (see the CC BY-SA discussion earlier in
+      this file/chat — properly scoped to the specific data, not the
+      whole project's license).
+- [x] Built `spanishArticle.js` (matching the germanArticle.js/
+      frenchArticle.js pattern) and wired it into `displayEntry()`, now
+      that Spanish actually has gender data to use — previously Spanish's
+      simple `{m:'el',f:'la'}` map existed but never had anything to look
+      up. Handles Spanish epicene nouns (226 of them — presidente,
+      estudiante, artista, etc.) and plurale tantum (2 — afueras,
+      felicidades).
+- [x] **Caught a real bug via real-browser testing, not code review**: my
+      first version of `spanishArticle.js` checked "no gender → no
+      article" *before* checking plurale tantum, so "afueras" showed no
+      article at all — plurale-tantum entries correctly have `gender:
+      null` (same convention as German/French), so that check needs to
+      come first, matching how `germanArticle.js` already orders it.
+      Fixed by reordering. Along the way also found `afueras` and
+      `felicidades` (Spanish's only 2 plurale-tantum entries) had
+      `gender: null` in the data itself, which — unlike German, where
+      plurale tantum always takes "die" regardless of gender — Spanish
+      actually needs (los vs. las) to pick the right plural article.
+      Both are feminine; hand-fixed directly since it was only 2 words.
+- [x] Wired `getConjugation()` into both **`WordDetail.jsx`** (Vocab
+      Browser's word overlay) and **`Flashcard.jsx`**'s own detail panel —
+      a new "🔤 Conjugation" section shows er/sie/es-present, Präteritum,
+      Partizip II, and the haben/sein auxiliary for German verbs, and
+      simply doesn't render for non-verbs or other languages (the fetch
+      resolves to null). Verified in real-browser Playwright on both
+      surfaces: "gehen" → geht/ging/gegangen/sein in Vocab Browser,
+      "anbeten" → betet an/betete an/angebetet/haben in Flashcard (had to
+      cycle through cards to land on a verb — Flashcard's card order isn't
+      predictable — but got there and confirmed the section renders
+      correctly, not just that the code compiles).
 - [x] French gained a `pluraleTantum` field (words only used in plural,
       e.g. "vacances") from the delegated session, plus a new
       `src/engine/frenchArticle.js` (handles le/la/l'/les/des, h-aspiré
@@ -296,12 +359,16 @@
       anything other than a literal 'm'/'f'/'epicene' as "no article,"
       which is exactly these entries' pre-existing behavior — this pass
       doesn't make them worse, just doesn't silently pretend to fix data
-      it can't actually repair. Properly fixing this needs re-deriving
+      it can't actually repair. **Update**: mostly resolved since — a
+      later delegated session used Lexique383 to re-derive gender for
+      these, taking it from 1,863 down to 118 (1.1%) unresolved. The 118
+      remaining presumably genuinely aren't in Lexique383 or are still
+      ambiguous there. Properly fixing this needs re-deriving
       gender from an external French source (same shape of project as the
       category-tagging pass) — not attempted here, flagged for later.
-- [ ] Spanish has **zero** gender data — every noun's gender field is
-      `None`. Bigger prerequisite gap than pluraleTantum itself (would
-      need a full tagging pass from scratch, not a quick add). Left alone.
+- [x] Spanish's gender-data gap (was 0%, flagged as "bigger prerequisite
+      gap than pluraleTantum itself, left alone") — resolved by a later
+      delegated session, now 94.9% populated. See the new section above.
 - [x] Verified in real-browser Playwright, not just the underlying logic:
       "die Geschwister", "der Freiwillige", "das Auto", "Zehntausend" (no
       article) all correct for German; "le chat", "la maison", "l'ami",

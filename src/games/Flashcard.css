@@ -444,12 +444,30 @@
 
 
 [data-theme="dark"] .fc-detail-example { color: var(--dt2); }
+[data-theme="dark"] .fc-conj-key       { color: var(--dt2); }
+[data-theme="dark"] .fc-conj-val       { color: #f0f0f0; }
 
 .fc-detail-example-empty {
   font-size: 0.85rem;
   color: var(--dt2);
   font-style: italic;
 }
+
+.fc-detail-conjugation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fc-conj-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.15rem 0;
+}
+
+.fc-conj-key { color: #555; }
+.fc-conj-val { font-weight: 600; color: #111; }
 
 .fc-mnemonic-seeded-badge {
   font-size: 0.62rem;

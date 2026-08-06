@@ -1,5 +1,6 @@
 import { getFrenchArticle } from './frenchArticle'
 import { getGermanArticle } from './germanArticle'
+import { getSpanishArticle } from './spanishArticle'
 
 // ── Loader ────────────────────────────────────────────────────────────────────
 
@@ -178,16 +179,13 @@ export function buildGenericQuestion(template, entry, direction) {
 
 // ── Article display helper ────────────────────────────────────────────────────
 
-const ARTICLES = {
-  es: { m: 'el',  f: 'la' },
-}
-
-// German/French epicene nouns (e.g. "Freiwillige"/"artiste") depend on the
-// referent's sex, which isn't tracked per-entry in the vocab data — no
-// vocab list here stores "who this specific card refers to." Defaulting
-// to masculine for display purposes is the standard dictionary convention
-// (the same thing a print dictionary does when citing an epicene headword
-// out of context) — not a claim about which form is more "correct."
+// German/French/Spanish epicene nouns (e.g. "Freiwillige"/"artiste"/
+// "estudiante") depend on the referent's sex, which isn't tracked per-entry
+// in the vocab data — no vocab list here stores "who this specific card
+// refers to." Defaulting to masculine for display purposes is the standard
+// dictionary convention (the same thing a print dictionary does when
+// citing an epicene headword out of context) — not a claim about which
+// form is more "correct."
 const DEFAULT_REFERENT_GENDER = 'm'
 
 /**
@@ -195,20 +193,22 @@ const DEFAULT_REFERENT_GENDER = 'm'
  * for gendered languages (de/es/fr) when the entry is a noun with a gender.
  * e.g. entry='Auto', gender='n', language='de' → 'das Auto'
  *
- * de/fr route through their own article engines (germanArticle.js /
- * frenchArticle.js) since both need more than a flat gender->article
- * lookup: plurale-tantum nouns always take the plural article regardless
- * of any notional singular gender, epicene nouns need a referent gender,
- * and French additionally needs vowel-sound elision (le/la -> l').
+ * All three route through their own article engines (germanArticle.js /
+ * frenchArticle.js / spanishArticle.js) rather than a flat gender->article
+ * lookup, since plurale-tantum nouns always take the plural article
+ * regardless of any notional singular gender, and epicene nouns need a
+ * referent gender. German/French additionally need vowel-sound elision
+ * (French le/la -> l'; German doesn't elide, but has a third gender).
  *
- * French's gender field has a known data-quality problem — ~1,863 of
- * 10,604 nouns (17.6%) have a corrupted value from a prior import (the
- * elided article text itself got stored instead of m/f, e.g. "l'enfant"
- * sitting in the gender slot) — see TODO.md. Only 'm'/'f'/'epicene' are
- * treated as valid; anything else (including that corrupted data) falls
- * through to "no article shown," which is exactly today's behavior for
- * those entries — this fix doesn't make them worse, it just doesn't
- * silently repair data it can't actually recover.
+ * French's gender field has a known data-quality problem — down to 118 of
+ * 10,604 nouns (1.1%, was 17.6% before a Lexique383-based resolution pass)
+ * still have a corrupted value from a prior import (the elided article
+ * text itself got stored instead of m/f, e.g. "l'enfant" sitting in the
+ * gender slot) — see TODO.md. Only 'm'/'f'/'epicene' are treated as valid;
+ * anything else (including that corrupted data) falls through to "no
+ * article shown," which is exactly today's behavior for those entries —
+ * this fix doesn't make them worse, it just doesn't silently repair data
+ * it can't actually recover.
  */
 export function displayEntry(entry, language) {
   if (!entry) return ''
@@ -230,9 +230,13 @@ export function displayEntry(entry, language) {
     return article ? article + (article.endsWith("'") ? '' : ' ') + entry.entry : entry.entry
   }
 
-  const articleMap = ARTICLES[language]
-  if (!articleMap || !entry.gender) return entry.entry
-  const article = articleMap[entry.gender]
-  if (!article) return entry.entry
-  return article + ' ' + entry.entry
+  if (language === 'es') {
+    if (entry.gender !== 'epicene' && !['m','f'].includes(entry.gender) && !entry.pluraleTantum) {
+      return entry.entry
+    }
+    const article = getSpanishArticle(entry.gender, entry.pluraleTantum, DEFAULT_REFERENT_GENDER)
+    return article ? article + ' ' + entry.entry : entry.entry
+  }
+
+  return entry.entry
 }
