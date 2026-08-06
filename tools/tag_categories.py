@@ -1,7 +1,7 @@
 import json, re, collections
 
 KEYWORDS = {
-    'animals': r'\b(animal|dog|cat|bird|fish|horse|cow|pig|sheep|goat|mouse|mice|rat|fox|wolf|bear|lion|tiger|elephant|monkey|snake|frog|toad|insect|bee|wasp|fly|butterfly|moth|spider|ant|duck|goose|chicken|hen|rooster|rabbit|deer|stag|squirrel|owl|eagle|hawk|falcon|whale|dolphin|shark|turtle|tortoise|worm|caterpillar|beetle|hedgehog|donkey|mule|paw|fur|beak|wing|tail|hoof|herd|flock|livestock|poultry|pet|puppy|kitten|dinosaur|reptile|mammal|rodent|predator|prey|zoo|wildlife|nest|cage|breed|snail|slug|crab|lobster|shrimp|jellyfish|seal|otter|beaver|bat|camel|llama|zebra|giraffe|hippo|rhino|penguin|swan|peacock|parrot|crow|raven|sparrow|pigeon|stork|angler|fisherman|beast)\b',
+    'animals': r'\b(animal|dog|cat|bird|fish|horse|cow|pig|sheep|goat|mouse|mice|rat|fox|wolf|bear|lion|tiger|elephant|monkey|snake|frog|toad|insect|bee|wasp|fly|butterfly|moth|spider|ant|duck|goose|chicken|hen|rooster|rabbit|deer|stag|squirrel|owl|eagle|hawk|falcon|whale|dolphin|shark|turtle|tortoise|worm|caterpillar|beetle|hedgehog|donkey|mule|paw|fur|beak|wing|tail|hoof|herd|flock|livestock|poultry|pet|puppy|kitten|dinosaur|reptile|mammal|rodent|predator|prey|zoo|wildlife|nest|cage|breed|snail|slug|crab|lobster|shrimp|jellyfish|seal|otter|beaver|bat|camel|llama|zebra|giraffe|hippo|rhino|penguin|swan|peacock|parrot|crow|raven|sparrow|pigeon|stork|angler|fisherman|beast|feather)\b',
     'plants': r'\b(plant|tree|tree trunk|flower|leaf|leaves|grass|lawn|forest|wood|root|seed|bloom|blossom|twig|bush|shrub|garden|herb|weed|moss|thorn|fern|petal|bark|oak|pine|fir|birch|maple|willow|rose|tulip|daisy|lily|orchid|cactus|vine|tree branch|harvest|crop|sprout|kale|cabbage|lettuce|spinach|parsley|basil|mint|clover|carnation|sage|daffodil|sunflower|ivy|hedge)\b',
     'weather': r'\b(weather|rain|rainy|snow|snowy|sun|sunny|sunshine|cloud|cloudy|wind|windy|breeze|gust of wind|storm|thunderstorm|hurricane|tornado|fog|foggy|mist|misty|ice|icy|frost|thunder|lightning|temperature|humid|humidity|drought|climate|forecast|hail|drizzle|rain shower|autumn|degrees celsius|degrees fahrenheit)\b',
     'landscape': r'\b(mountain|hill|hillside|valley|river|stream|creek|brook|lake|pond|sea|ocean|coast|coastal|beach|shore|shoreline|island|forest|jungle|desert|field|meadow|cliff|cave|waterfall|volcano|peak|summit|plateau|landscape|scenery|panorama|horizon|terrain|wilderness|glacier|earth|land|soil|eruption|longitude)\b',
@@ -11,7 +11,7 @@ KEYWORDS = {
     'appearance': r'\b(beautiful|beauty|gorgeous|handsome|pretty|ugly|tall|thin|slim|slender|fat|overweight|chubby|attractive|appearance|looks|good-looking|elegant|neat|tidy|messy|shabby|wrinkle|wrinkled|blond|blonde|bald|muscular|figure|posture|complexion|freckle|dimple|earring|facelift|makeup|jewelry|necklace|bracelet)\b',
     'food': r'\b(food|eat|eating|drink|drinking|meal|breakfast|lunch|dinner|supper|bread|meat|beef|pork|chicken|fish|vegetable|fruit|apple|banana|orange|grape|berry|potato|rice|pasta|noodle|noodles|soup|stew|salad|cheese|milk|butter|cream|egg|sugar|salt|pepper|spice|cinnamon|flour|cook|cooking|recipe|bake|baking|kitchen|restaurant|cafe|menu|taste|tasty|delicious|flavor|sour|hungry|thirsty|beverage|coffee|tea|wine|beer|juice|whiskey|whisky|snack|dessert|cake|cookie|chocolate|sausage|onion|garlic|tomato|cucumber|carrot|nut|honey|jam|dough|dish|ingredient|leftover|diet|vegan|vegetarian|veggie|nutrition|calorie|appetite|serving|portion|doughnut|donut|dumpling|marzipan|pastry|pretzel|pancake|waffle|drinker|coconut|cupcake|avocado|mango|pineapple|lemon|lime|peach|pear|strawberry|watermelon|almond|walnut|peanut|shrimp|seafood|lettuce|spinach|broth|sauce|mustard|mayonnaise|olive oil|yogurt|tortilla|taco|burrito|guacamole|bean|beans|pea|peas)\b',
     'clothing': r'\b(cloth|clothes|clothing|garment|shirt|blouse|trousers|pants|jeans|dress|skirt|jacket|coat|shoe|shoes|boot|sneaker|sock|hat|cap|glove|scarf|belt|button|zipper|sleeve|collar|fabric|textile|wear|wearing|fashion|sew|sewing|tailor|underwear|pocket|wool|cotton|silk|leather|suit|necktie|clothing style|uniform|costume|apron|pajama|swimsuit)\b',
-    'home': r'\b(house|home|apartment|flat|room|kitchen|bathroom|bedroom|living room|living space|dining room|hallway|entrance hall|lobby|attic|basement|cellar|door|window|wall|roof|floor|ceiling|furniture|table|chair|bed|sofa|couch|shelf|lamp|light bulb|chandelier|garden|yard|key|lock|stair|staircase|garage|balcony|terrace|household|curtain|carpet|rug|mirror|closet|wardrobe|drawer|blanket|pillow|towel|kitchen sink|oven|stove|fridge|refrigerator|dishwasher|washing machine|vacuum|broom|tenant|landlord|rent|renting|move house|moving house|move out|move in|changing residence|neighbor|neighborhood|fireplace|chimney|fence|steering wheel)\b',
+    'home': r'\b(house|home|apartment|flat|room|kitchen|bathroom|bedroom|living room|living space|dining room|hallway|entrance hall|lobby|attic|basement|cellar|door|window|wall|roof|floor|ceiling|furniture|table|chair|bed|sofa|couch|shelf|lamp|light bulb|chandelier|garden|yard|key|lock|stair|staircase|garage|balcony|terrace|household|curtain|carpet|rug|mirror|closet|wardrobe|drawer|blanket|pillow|towel|kitchen sink|oven|stove|fridge|refrigerator|dishwasher|washing machine|vacuum|broom|tenant|landlord|rent|renting|move house|moving house|move out|move in|changing residence|neighbor|neighborhood|fireplace|chimney|fence|steering wheel|gate)\b',
     'shopping': r'\b(shop|shopping|store|buy|buying|sell|selling|purchase|price|cost|money|pay|paying|payment|cash|receipt|discount|sale|customer|cashier|market|supermarket|mall|cart|basket|retail|expensive|cheap|invoice|restaurant bill|utility bill|small change|give change|currency|euro|dollar|credit card|refund|voucher|coupon|buyer|toy)\b',
     'time': r'\b(day|week|month|year|monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|april|may|june|july|august|september|october|november|december|today|tomorrow|yesterday|morning|afternoon|evening|night|midnight|noon|date|calendar|season|spring|summer|autumn|winter|holiday|birthday|anniversary|century|decade|weekday|weekend|payday|pentecost|whitsun|duration|availability|available|a while|a short time|a little while|for months|for years|so far|until now|by now|nowadays|hour|dawn|archaeology|archeology|clock)\b',
     'travel': r'\b(travel|traveling|trip|journey|vacation|tourist|tourism|airport|airplane|plane|flight|train|steam locomotive|locomotive|station|platform|ship|boat|ferry|cruise|hotel|hostel|luggage|suitcase|backpack|passport|visa|ticket|border|abroad|foreign country|destination|departure|arrival|excursion|itinerary|sightseeing|guide|resort|camping|tent|snowboard|ski|skiing|ride-sharing|wildlife park|voyage|lodging|aviation)\b',
@@ -32,7 +32,7 @@ KEYWORDS = {
     'function_words': r'\b(who|what|when|where|why|which|whom|whose|because|therefore|however|although|though|since|whereas|thus|hence|moreover|furthermore|nevertheless|otherwise|meanwhile|besides|so that|in order to|despite|unless|in addition|as well as|consequently|likewise|instead)\b',
     'grammar': r'\b(verb|noun|adjective|adverb|pronoun|preposition|postposition|grammatical particle|conjunction|definite article|indefinite article|tense|plural|singular|grammatical subject|grammatical object|clause|sentence|grammar|grammatical|syntax|conjugation|declension|suffix|prefix|vowel|consonant|phrase|kana)\b',
     'physics': r'\b(physics|energy|force|gravity|velocity|speed|atomic mass|body mass|motion|momentum|electric|electricity|magnet|magnetic|wave|frequency|heat|thermal|pressure|atom|atomic|subatomic particle|radiation|voltage|electric current|electrical current|circuit|friction|magnetism)\b',
-    'chemistry': r'\b(chemistry|chemical|element|compound|reaction|acid|alkaline|base|molecule|molecular|chemical solution|mixture|gas|liquid|solid state|oxygen|hydrogen|carbon|nitrogen|metal|alloy|catalyst|combustion)\b',
+    'chemistry': r'\b(chemistry|chemical|element|compound|reaction|acid|alkaline|base|molecule|molecular|chemical solution|mixture|gas|liquid|solid state|oxygen|hydrogen|carbon|nitrogen|metal|alloy|catalyst|combustion|copper)\b',
     'biology': r'\b(biology|biological|cell|cellular|organism|gene|genetic|dna|rna|evolution|evolutionary|ecosystem|bacteria|bacterium|virus|body organ|tissue|photosynthesis|chromosome|habitat|reproduction|microscope)\b',
 }
 
@@ -109,6 +109,23 @@ IDIOM_SCRUBS = [
     'to herd, to corner, to drive',  # figurative "corner someone", not herding animals
     'variation shift',             # a change, not a work shift
     'drive out',                   # to expel, not to operate a vehicle
+    'wear beard',                  # facial hair, not clothing
+    'uniform equal',               # "uniformly", not a garment
+    'as a verb it means',          # meta-linguistic gloss note, not grammar itself
+    'half of japan',                # a region, not a fraction
+    'shooting discharge',          # firing a weapon, not a job/medical discharge
+    'to cut (hair)',                # covers mowing/harvesting too, not just hair
+    'game of tag',                  # folklore figure, not sports
+    'article goods',                # a physical item, not a news article
+    '(foot) race',                  # foot-race idiom, not general athletics
+    'race (of people)',             # ethnicity, not a sports race
+    'goods; taste',                 # refinement/elegance, not culinary taste
+    'medical examination',          # a doctor's exam, not a school exam
+    'grade stage',                  # a phase/degree, not a school grade
+    'used as a verb',                # meta-linguistic gloss note, not grammar itself
+    'pursue (course)',              # a course of action, not an academic course
+    'stair grade',                   # a physical stair, not a school grade
+    'copper engraving',              # an art technique, not the metal itself
 ]
 
 
