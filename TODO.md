@@ -218,6 +218,16 @@
 - [x] Added `splitSentences()` to `engine/reader.js` for this — Latin
       punctuation (.!?) for most languages, full-width (。！？) for CJK.
 
+- [x] Fixed passage cards having differing horizontal widths in the
+      library list — `.gr-passage-card` is a `<button>` with `display:
+      flex` but no explicit `width`. Form controls don't follow normal
+      block-box "fill available width" behavior the way a `<div>` does;
+      they shrink-to-fit their content by default, so cards with longer
+      or shorter titles ended up at different widths (measured 247px to
+      352px before the fix). Added `width: 100%; box-sizing: border-box`.
+      Verified in real-browser Playwright: all cards now measure exactly
+      the same width.
+
 ## Content coverage
 - [x] Japanese N4/N5 "thin coverage" — turned out to be a data bug, not a
       real gap. 2,128 of 7,972 words had the wrong JLPT level (mostly N3
