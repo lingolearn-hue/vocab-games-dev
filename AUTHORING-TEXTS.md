@@ -170,10 +170,16 @@ One class is *not* auto-handled and still needs manual judgement: a
 quote mark sitting immediately before a sentence-ending period in
 English/German/Spanish (`do.' Only...`) suppresses the split there,
 since straight quotes don't distinguish open from close, making
-automatic correction unreliable. This has caused a handful of confirmed
-false positives (`s5`, `s7`, `p38`, `ft1`/es — see `REVIEW-TEXTS.md`) —
+automatic correction unreliable. This has caused a growing list of
+confirmed false positives (`s5`, `s7`, `p38`, `nf7`/es, and `ft1`/es,
+`ft2`/es, `ft4`/es, `ft5`/es+fr, `ft6`/ja+es — see `REVIEW-TEXTS.md`) —
 always manually inspect a flagged mismatch involving dialogue before
-assuming it's a real gap.
+assuming it's a real gap. In practice this is almost always English
+itself that's undercounting (its straight quotes plus a mid-sentence
+dialogue tag create the ambiguous case most often), so when only English
+looks "low" relative to several other languages agreeing with each
+other, that's a strong hint it's this pattern rather than a real gap in
+those other languages.
 
 ## File & schema conventions
 
@@ -233,10 +239,69 @@ later:
   language's version of a given story, so filtering/grouping works
   uniformly regardless of each language's own scale.
 
-## Current scope
+## Level strategy
 
-**Starting with A1 only.** Not committing yet to whether fairy tales
-become a full A1–C1 series per tale (matching My Friend/My Cat/The
-Market) or stay a single-level set — revisit once the A1 batch exists
-and we can see how it reads.
+Fairy tales are capped at **A1–B2**. No C1/C2 fairy tales — by that level,
+"retelling a children's story" stops being the right register; C1/C2
+content (if ever added for this genre) should shift to writing *about*
+tales (folklore, cultural comparison) rather than retelling them, and
+that's a separate future decision, not committed to here.
+
+**Pairing, not a six-level ladder.** Retelling the same tale six times
+(A1 through C1) goes stale fast — there's only so much narrative material
+in one story. Instead:
+
+- **A1 + B1 pair**: the same three tales, retold at both levels. A1 gets
+  the simple/present-tense version (see Level rules above); B1 retells
+  the identical plot with fuller sentence structure, past tense
+  narration, and the grammar headroom B1 allows — same events, richer
+  telling.
+- **A2 + B2 pair**: a *different* three tales get the same treatment —
+  one simple version at A2, one fuller retelling at B2.
+
+This means six tales total get fully developed (A1/B1 pair × 3 stories,
+A2/B2 pair × 3 different stories), rather than one tale stretched thin
+across every level.
+
+**Current status:**
+- **A1 + B1 pair** (origin: Germany): Little Red Riding Hood, The Bremen
+  Town Musicians, Hansel and Gretel. A1 versions exist for all three; B1
+  retellings are the next piece of work, not yet written.
+- **A2 + B2 pair**: Snow White, Cinderella, Rumpelstiltskin — chosen, not
+  yet written at either level. Still open: whether this trio stays
+  German/Grimm (matching the A1/B1 trio) or is the point to diversify
+  origin country.
+
+## Country strategy
+
+Goal: pull fairy tales from each of the six supported languages' own
+cultural traditions, so every language gets a turn as source culture, not
+just translation target. Germany is the first origin (all three current
+tales are Grimm). Suggested remaining five: Spain, France, Japan, China,
+and a specific English-language tradition (a named British/Irish tale or
+American folklore, rather than "generic English") — not finalized, open
+to discussion when we get there. Work one country at a time rather than
+committing to the full six-country matrix up front.
+
+## Non-fiction & biographies
+
+Worth trying earlier rather than later — not gated on finishing the
+fairy-tale pipeline first. A small pilot batch (a few titles, not a full
+build-out) is a reasonable thing to run in parallel, mainly to see
+whether the same process (English first, sentence-by-sentence
+translation, congruence check) holds up for a genre with a different
+register and no built-in repetition/simplicity crutches the way fairy
+tales have.
+
+Unlike fairy tales, non-fiction topics here don't need `origin:{country}`
+tagging — these are universal-knowledge subjects, not culture-specific
+tales, so no origin tag applies.
+
+**Pilot batch, decided:**
+- **A1 + B1 pair**: Elephants, Trees, Bread
+- **A2 + B2 pair**: My Body, The Ocean, Weather
+
+Same pairing logic as fairy tales (see Level strategy above) — each
+topic gets a simple version at the lower level and a fuller retelling
+at the higher level, not stretched across the full A1–C1 range.
 
