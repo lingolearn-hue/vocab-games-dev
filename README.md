@@ -134,7 +134,7 @@ which words have been reviewed. Untagged-vs-reviewed is no longer the
 right framing; reviewed-vs-unreviewed is.
 
 Spot-checking category tags follows a fixed procedure — see
-[`REVIEW.md`](./REVIEW.md), which also covers the review-status
+[`REVIEW-VOCAB.md`](./REVIEW-VOCAB.md), which also covers the review-status
 tracking system, the resweep script, and known risky keyword patterns.
 
 There are **two different pipelines** for tagging/fixing category data,
