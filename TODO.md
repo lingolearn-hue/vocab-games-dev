@@ -248,6 +248,38 @@
       Verified in real-browser Playwright: all cards now measure exactly
       the same width.
 
+## Graded Reader story content
+- [x] Pulled in from a delegated session (commit 39cc495): a new Little
+      Red Riding Hood fairy tale in all 6 languages — first entry in a new
+      fairy-tale genre, A1 level. New `AUTHORING-TEXTS.md` (writing/
+      translation rules, level-appropriateness guidance — e.g. A1 fairy
+      tales have to be deliberately restrained to present-tense/one-clause
+      sentences since fairy-tale register naturally wants to be B1+) and
+      `REVIEW-TEXTS.md` (content survey + sentence-congruence realignment
+      log for the original 36 passages). New `tools/check_reader_
+      congruence.py` — handles French closing-guillemet and Japanese/
+      Chinese closing-quote false-positive splits structurally, which the
+      simpler `splitSentences()` in `engine/reader.js` (used by the read-
+      aloud/sentence-tap-translate features I built) doesn't. Ran it:
+      only 7 mismatches remain across all 40×6 passages, down from what
+      I'd measured before this pull (worst case was Japanese at 25%).
+- [x] **Notable find while checking this**: `public/reader/fr-en.json`
+      didn't exist at all before this commit — the French Graded Reader
+      had zero passages this entire session. Never caught it because all
+      my earlier reader testing (read-aloud, sentence-translate, the
+      lemmatizer wiring) happened to use German/Japanese test cases.
+      Now fixed — French has all 40 passages same as the other languages.
+- [x] Regenerated `public/reader/surface-forms.json` (628→696 German,
+      670→767 Japanese) since the new fairy tale had zero lemma coverage
+      and the realigned existing passages needed re-checking too.
+- [x] Verified in real-browser Playwright: French Reader now shows 40
+      passage cards (was crashing/empty before — well, not crashing, just
+      genuinely empty since the file didn't exist), "Le Petit Chaperon
+      Rouge" is present and searchable; German's "Rotkäppchen" opens
+      correctly with all built-that-session features working against the
+      new content — read-aloud button present, 41 sentences with tap-to-
+      translate available, Vocab Quiz correctly counting 62 words.
+
 ## Content coverage
 - [x] Japanese N4/N5 "thin coverage" — turned out to be a data bug, not a
       real gap. 2,128 of 7,972 words had the wrong JLPT level (mostly N3
