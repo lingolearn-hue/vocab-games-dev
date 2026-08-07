@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext'
 import {
   loadGrammarPatterns, sortPatternsByPriority, filterPatternsByLevel,
   getLevelsFromPatterns, getCategoriesFromPatterns,
-  instantiateTemplate, buildPickCorrectOptions,
+  instantiateTemplate, buildPickCorrectOptions, buildOptions,
   checkTileOrder, getAlternatives,
   recordGrammarCorrect, recordGrammarWrong, getAllGrammarScores,
 } from '../engine/grammar'
@@ -32,17 +32,54 @@ const CATEGORY_LABELS = {
 // ── Exercise components ────────────────────────────────────────────────────────
 
 function FillBlank({ pattern, onResult }) {
-  const { text } = useMemo(
+  // Both text and the correct answer come from the same instantiateTemplate()
+  // call — has to be a single memo, not two separate ones each re-rolling
+  // the random pick, or text and options could end up describing different
+  // random choices.
+  const { text, correctAnswer } = useMemo(
     () => instantiateTemplate(pattern.template), [pattern.id]
   )
 
-  // Correct answer is distractors[0]; rest are wrong. Shuffle once on mount.
+  // Two distractor conventions coexist in the data: a plain literal array
+  // (distractors[0] = correct, rest = wrong — used when the template's
+  // blank has one fixed correct answer regardless of which random option
+  // got picked, e.g. modal-verb patterns with a fixed subject), and
+  // "auto:xxx" pool references that need resolving against the actual
+  // correctAnswer instantiateTemplate produced (used when the blank's
+  // right answer depends on which random option got picked, e.g. "which
+  // article goes with this randomly-chosen noun"). Mixing these up was a
+  // real bug: every auto:-based pattern rendered a single button showing
+  // the literal string "auto:xxx" instead of real distractor words, since
+  // it never touched correctAnswer or resolved the pool at all.
+  const usesAutoPool = pattern.distractors.some(d => typeof d === 'string' && d.startsWith('auto:'))
+
   const options = useMemo(() => {
-    const correct = pattern.distractors[0]
-    const wrong   = pattern.distractors.slice(1)
+    if (usesAutoPool) return buildOptions(pattern, correctAnswer)
+    // Two colon-bracket usages coexist in the data: genuinely-varying
+    // ("Hund:ein|Katze:eine|..." — the right answer changes depending on
+    // which option got picked) and self-mapping/flavor-only ("Student:
+    // Student|müde:müde|..." — every option secretly agrees, used just to
+    // vary the surrounding sentence, not the blank). Trust correctAnswer
+    // when it resolves to one of our known distractors (case-insensitive
+    // — some patterns capitalize the bracket option, e.g. "El"/"La", but
+    // list lowercase 'el'/'la' as the actual distractors); otherwise fall
+    // back to the fixed first distractor, which is correct for the
+    // self-mapping/no-bracket case. This was a real, live bug: several
+    // patterns (de-g-002, de-g-009, de-g-016, and more in other
+    // languages) have genuinely-varying brackets but were always showing
+    // distractors[0] as "correct" regardless of which noun/verb the
+    // bracket actually picked — verified live (e.g. "(Katze)" showing
+    // "ein" marked correct instead of "eine").
+    const matched = correctAnswer
+      ? pattern.distractors.find(d => d.toLowerCase() === correctAnswer.toLowerCase())
+      : null
+    const correct = matched ?? pattern.distractors[0]
+    const wrong = pattern.distractors.filter(d => d !== correct)
     return [{ text: correct, correct: true }, ...wrong.map(d => ({ text: d, correct: false }))]
       .sort(() => Math.random() - 0.5)
-  }, [pattern.id])
+  }, [pattern.id, correctAnswer])
+
+  const correctText = options.find(o => o.correct)?.text ?? pattern.distractors[0]
 
   const [chosen,   setChosen]   = useState(null)
   const [feedback, setFeedback] = useState(null)
@@ -67,7 +104,7 @@ function FillBlank({ pattern, onResult }) {
       {/* Feedback banner above sentence — no layout shift */}
       <div className={`gt-feedback-banner ${feedback || 'hidden'}`}>
         {feedback === 'correct' && <span className="gt-fb-correct">✓ Correct!</span>}
-        {feedback === 'wrong'   && <span className="gt-fb-wrong">✗ Correct answer: <strong>{pattern.distractors[0]}</strong></span>}
+        {feedback === 'wrong'   && <span className="gt-fb-wrong">✗ Correct answer: <strong>{correctText}</strong></span>}
       </div>
       <div className={`gt-sentence ${feedback || ''}`}>
         {displayText.split(/(\([^)]+\))/).map((part, i) =>

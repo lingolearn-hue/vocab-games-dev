@@ -257,9 +257,27 @@ export default function GradedReader() {
   const [readingIndex, setReadingIndex] = useState(-1)  // -1 = not playing
   const playingRef = useRef(false)
 
+  // Paragraph-aware sentence splitting — splitSentences() on the whole
+  // passage text was flattening every paragraph into one continuous run,
+  // silently dropping the \n\n paragraph breaks that exist in the source
+  // data (confirmed on the fairy tale content: 6 real paragraphs collapsed
+  // into a single wall of text). Split into paragraphs first, then
+  // sentences within each; `sentences` stays a flat array (read-aloud/
+  // scroll-to/translation-pairing all index into it by flat position),
+  // `paragraphGroups` groups those same sentence objects for rendering
+  // so paragraph spacing survives.
+  const paragraphGroups = useMemo(() => {
+    if (!currentPassage) return []
+    let idx = 0
+    return currentPassage.text
+      .split(/\n\s*\n/)
+      .map(para => splitSentences(para, language).map(text => ({ text, index: idx++ })))
+      .filter(group => group.length > 0)
+  }, [currentPassage, language])
+
   const sentences = useMemo(
-    () => currentPassage ? splitSentences(currentPassage.text, language) : [],
-    [currentPassage, language]
+    () => paragraphGroups.flat().map(s => s.text),
+    [paragraphGroups]
   )
   const sentenceRefs = useRef([])
 
@@ -273,10 +291,14 @@ export default function GradedReader() {
   // silently disabled for that passage rather than showing a wrong
   // translation next to the right sentence; the full-passage EN toggle
   // still works regardless since it doesn't depend on alignment.
-  const englishSentences = useMemo(
-    () => currentPassage?.translation ? splitSentences(currentPassage.translation, 'en') : [],
-    [currentPassage]
-  )
+  // Same paragraph-first splitting applied here too, so pairing stays
+  // aligned by paragraph order, not just overall count.
+  const englishSentences = useMemo(() => {
+    if (!currentPassage?.translation) return []
+    return currentPassage.translation
+      .split(/\n\s*\n/)
+      .flatMap(para => splitSentences(para, 'en'))
+  }, [currentPassage])
   const sentenceTranslationsAligned = language !== 'en' &&
     englishSentences.length > 0 && englishSentences.length === sentences.length
   const [expandedSentence, setExpandedSentence] = useState(null)
@@ -531,21 +553,25 @@ export default function GradedReader() {
         <div className="gr-cover-placeholder" aria-hidden="true">🖼️</div>
 
         <div className="gr-text">
-          {sentences.map((sentence, i) => (
-            <span
-              key={i}
-              ref={el => { sentenceRefs.current[i] = el }}
-              className={`gr-sentence ${readingIndex === i ? 'gr-sentence-active' : ''} ${sentenceTranslationsAligned ? 'gr-sentence-tappable' : ''}`}
-              onClick={sentenceTranslationsAligned ? () => toggleSentenceTranslation(i) : undefined}
-            >
-              <TextWithLookup text={sentence} language={language} lookup={augmentedLookup} scores={scores} showReading={showReading} />
-              {' '}
-              {expandedSentence === i && (
-                <span className="gr-sentence-translation" onClick={e => e.stopPropagation()}>
-                  {englishSentences[i]}
+          {paragraphGroups.map((group, pi) => (
+            <p key={pi} className="gr-paragraph">
+              {group.map(({ text: sentence, index: i }) => (
+                <span
+                  key={i}
+                  ref={el => { sentenceRefs.current[i] = el }}
+                  className={`gr-sentence ${readingIndex === i ? 'gr-sentence-active' : ''} ${sentenceTranslationsAligned ? 'gr-sentence-tappable' : ''}`}
+                  onClick={sentenceTranslationsAligned ? () => toggleSentenceTranslation(i) : undefined}
+                >
+                  <TextWithLookup text={sentence} language={language} lookup={augmentedLookup} scores={scores} showReading={showReading} />
+                  {' '}
+                  {expandedSentence === i && (
+                    <span className="gr-sentence-translation" onClick={e => e.stopPropagation()}>
+                      {englishSentences[i]}
+                    </span>
+                  )}
                 </span>
-              )}
-            </span>
+              ))}
+            </p>
           ))}
         </div>
 

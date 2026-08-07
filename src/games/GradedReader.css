@@ -326,6 +326,11 @@
   margin-bottom: 1.2rem;
 }
 
+.gr-paragraph {
+  margin: 0 0 1.1em;
+}
+.gr-paragraph:last-child { margin-bottom: 0; }
+
 .gr-text-cjk {
   font-size: 1.3rem;
   line-height: 2.2;

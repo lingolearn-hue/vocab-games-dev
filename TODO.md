@@ -279,8 +279,167 @@
       correctly with all built-that-session features working against the
       new content — read-aloud button present, 41 sentences with tap-to-
       translate available, Vocab Quiz correctly counting 62 words.
+- [x] Pulled a further batch (commits 03f7d2b, a31faa3, b3bdacd): 5 more
+      fairy tales — Bremen Town Musicians, Hansel and Gretel (A1), Snow
+      White, Cinderella, Rumpelstiltskin (A2) — 45 passages per language
+      now, up from 40. `REVIEW.md` renamed to `REVIEW-VOCAB.md` to
+      disambiguate from `REVIEW-TEXTS.md`. `AUTHORING-TEXTS.md` gained a
+      level-pairing strategy (A1+B1 and A2+B2 trios per tale set, capped
+      at B2 — no C1/C2 fairy tales, since "retelling a children's story"
+      stops being the right register by then) and a country-diversity
+      plan (Germany first, five more countries queued). Verified the
+      Hansel-and-Gretel plot-fix mentioned in the commit messages (gold
+      found before leaving, not after) actually landed correctly in the
+      text. Congruence check: 13 mismatches now (up from 7) — all minor
+      per-paragraph differences in the new stories; sentence-tap-
+      translate safely auto-disables for those specific story/language
+      combos rather than mismatching, per the guard already built.
+      Regenerated `surface-forms.json` again (696→800 German, 767→871
+      Japanese). Verified in real-browser Playwright: all 5 new tales
+      present/searchable, paragraph breaks render correctly, Vocab Quiz
+      and read-aloud both work against the new content.
+- [ ] Noticed, not fixed (their doc, not mine): `AUTHORING-TEXTS.md`'s
+      status section still says Snow White/Cinderella/Rumpelstiltskin are
+      "not yet written" — stale, since a later commit in the same batch
+      did write them. Worth a heads-up next time that thread picks back up.
+
+- [x] Fixed paragraph breaks not rendering — a real regression from the
+      read-aloud/sentence-tap-translate work: `splitSentences()` was being
+      called on the whole passage text at once, which silently discarded
+      the `\n\n` paragraph breaks in the source data (fully confirmed on
+      the new fairy tale: 6 real story-beat paragraphs were collapsing
+      into one continuous wall of text). Fixed by splitting into
+      paragraphs first, then sentences within each paragraph —
+      `paragraphGroups` for rendering (wrapped in `<p className="gr-
+      paragraph">`), while `sentences` stays a flat array so read-aloud/
+      scroll-to/translation-pairing (all index by flat position) didn't
+      need to change. Applied the same paragraph-first split to the
+      English translation side too, so sentence-tap-translate pairing
+      stays aligned by paragraph order, not just overall count. Verified
+      in real-browser Playwright: 6 paragraphs render correctly (matching
+      the source), all 41 sentences preserved, read-aloud auto-scroll
+      correctly crosses paragraph boundaries, sentence-tap-translate still
+      fully functional.
 
 ## Content coverage
+- [x] Japanese N4/N5 "thin coverage" — turned out to be a data bug, not a
+      real gap. 2,128 of 7,972 words had the wrong JLPT level (mostly N3
+      words mistagged N2). Rebuilt every level directly from the elzup
+      source CSVs. Corrected distribution: N5: 749, N4: 682, N3: 2,131,
+      N2: 1,741, N1: 2,669 (was N5: 532, N4: 7, N3: 401, N2: 3,409, N1: 2,951).
+- [x] Added `?` help buttons to Adventure, AdventureChapter, Settings, and
+      Stats — the four screens that had none. Also audited every existing
+      help button for accuracy against current features (several games have
+      gained controls since their help text was written) and fixed the
+      stale ones: Graded Reader's library-view help was completely outdated
+      (didn't mention search/tags/finished-tracking/Vocab Quiz/continue-
+      reading); Listening was missing the Speed slider; VocabBrowser didn't
+      mention its status/level/POS/topic filters or Trans/Scores toggles at
+      all; Flashcard was missing the 🔊 Auto toggle; PairMatch was missing
+      the "Same word type" toggle. RaceCar, GapFill, GrammarTrainer,
+      MatchingDrills, StrokeOrder, Typing, Dialogue, and GrammarDictionary
+      were all still accurate, left as-is. Verified all 4 new + 5 updated
+      help buttons open correctly in real-browser Playwright, not just
+      code review.
+
+## Grammar Trainer (German focus)
+- [x] **Found and fixed a real, live bug**: 11 of 36 German patterns (and 2
+      of Spanish's) used an `"auto:xxx"` distractor-pool convention with a
+      resolver (`getDistractors`/`buildOptions` in `engine/grammar.js`)
+      that was never actually called anywhere — `FillBlank` always read
+      `pattern.distractors[0]` directly, which for these patterns was the
+      literal string `"auto:xxx"`. Confirmed live: exercises rendered a
+      single button reading "auto:sein-present" instead of real German
+      words. Root cause affected 2 different things:
+      - 8 patterns (articles, cases, Perfekt, adjective endings) had a
+        correct, working `correctAnswer` in `instantiateTemplate()`'s
+        output that `FillBlank` just never used — fixed by wiring
+        `buildOptions()` in for any pattern using the auto: convention.
+      - 3 patterns (`sein`/`haben`/`müssen` present tense, plus 2 Spanish
+        `ser`/`estar` ones) had a deeper design problem: the template
+        randomized the *subject* pronoun, but the correct verb form
+        depends on which pronoun gets picked — something the engine has
+        no way to resolve without full per-pronoun conjugation tables,
+        which don't exist. Redesigned these 5 onto the already-proven
+        fixed-subject format (matching `können`/`müssen`'s working style)
+        instead of trying to build that missing data layer.
+      Verified all fixes in real-browser Playwright: cycled through every
+      conjugation pattern confirming real distinct word options (not
+      placeholder text), and confirmed clicking the actual correct answer
+      registers correctly (session score incremented, pattern advanced).
+- [x] Fleshed out German conjugation coverage — was 5 patterns (present
+      tense only: sein, haben, regular -en/ich, können, müssen), now 13.
+      Added: Präteritum (sein, haben), 4 more modal verbs (wollen,
+      dürfen, sollen, mögen — können/müssen already existed), a second
+      person for regular -en verbs (du-form, was ich-only), and separable
+      verbs (aufstehen-style) — a distinctly German construction that
+      wasn't represented at all. Perfekt was already reasonably covered
+      (de-g-015/016) so left alone rather than duplicated.
+- [ ] Other German categories are still thin and weren't touched this
+      pass (not asked for, scoped to conjugation): adjectives,
+      infinitivkonstruktionen, konnektoren, relativsätze, modalpartikeln,
+      subjunktiv all have exactly 1 pattern each. Candidate for a future
+      "flesh out the rest" pass if wanted.
+- [ ] Not attempted: a fully dynamic conjugation drill pulling from the
+      2,758-verb `public/conjugations/de.json` database (built earlier
+      this session, currently only feeding the Vocab Browser/Flashcard
+      word-detail conjugation display) — would give much broader verb
+      coverage than hand-authored patterns ever could, but needs a new
+      exercise-type architecture (dynamic question generation + synthetic
+      pattern IDs for scoring) rather than just adding more static JSON
+      patterns to the existing format. Worth considering if hand-authored
+      patterns start feeling repetitive.
+- [x] **Found a second, wider version of the same bug class** while
+      preparing to mass-generate article patterns — the first fix only
+      covered patterns explicitly marked `"auto:xxx"`. A second class
+      shared the same root flaw without that marker: patterns using a
+      literal distractor array *plus* a colon-convention bracket that
+      genuinely varies the correct answer per noun/verb (e.g.
+      `"Katze:eine"`) — `FillBlank`'s non-auto path still always trusted
+      `distractors[0]` regardless. Affected `de-g-002`, `de-g-009`,
+      `de-g-016`, plus 8 more in Spanish (`es-g-001/002/006/007/009/012/
+      020`) — one of which (`es-g-001`, definite articles) also had a
+      case-sensitivity wrinkle (`"El"` vs `"el"`). Confirmed live: a
+      sentence showing "(Katze)" had "eine" marked wrong and "ein" marked
+      correct — actively teaching wrong German. Rewired `FillBlank` with
+      a general, case-insensitive fix: trust `correctAnswer` from
+      `instantiateTemplate()` whenever it resolves to one of the pattern's
+      known distractors, otherwise fall back to the fixed first
+      distractor (correct for the self-mapping/no-bracket case). Verified
+      in real-browser Playwright: 11+ noun/verb combinations across the
+      affected German patterns, zero mismatches; confirmed no regression
+      against the earlier-fixed conjugation patterns either. Spanish's 4
+      data-design issues (`es-g-006/007/009/012` mix genuinely different
+      verbs within one pattern's distractor list, which needs a template
+      redesign, not just the engine fix) are flagged but not fixed — out
+      of this session's German-focused scope.
+- [x] Generated 100 new article patterns (`de-g-auto-*`), evenly split
+      across all 5 case/definiteness combinations already in use
+      (nominative/accusative/dative × definite/indefinite, 20 each).
+      Drawn from the vocab list's 13,081 clean-gender German nouns
+      (available now thanks to this session's earlier gender-data fixes),
+      weighted toward A1/A2 vocabulary. Distractors kept to just the 3
+      gender articles per your call — case-confusion distractors
+      (dative forms as wrong answers for accusative questions, etc.) are
+      a deliberate future enhancement, not done here.
+- [x] Generated 36 new word-order patterns scaling up all 8 existing
+      rules — 5 new variations each for the 6 tile-order rules (30 total:
+      V2, V2-with-place, modal-verb-structure, subordinate-clause-weil,
+      infinitive-clause-zu, inversion-after-adverb), 3 each for the 2
+      pick-correct rules (6 total: Nachfeld, erweiterte Adjektivattribute)
+      — weighted down deliberately on those last two rather than matching
+      "evenly" exactly, since they're B2/C1 grammar where auto-varying
+      vocabulary carries real correctness risk. Same syntactic
+      skeleton/tile-position/answer-logic as each original, different
+      vocabulary substituted in. Verified all 8 rules in real-browser
+      Playwright: all 6 tile-order rules confirmed via actually clicking
+      tiles in the generated correct order and checking the app accepts
+      it; the 2 pick-correct rules confirmed via both wrong-answer
+      error-matching (10/10) and correct-answer session-score increments
+      (2/3 sampled, clean).
+- [x] Total German grammar patterns: 36 → 180 across this whole pass.
+      Structural validation passed (no ID collisions, all required
+      fields present per exercise type).
 - [x] Japanese N4/N5 "thin coverage" — turned out to be a data bug, not a
       real gap. 2,128 of 7,972 words had the wrong JLPT level (mostly N3
       words mistagged N2). Rebuilt every level directly from the elzup

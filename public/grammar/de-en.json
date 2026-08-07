@@ -38,10 +38,13 @@
       "title": "Present tense — sein (to be)",
       "explanation": "sein: ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie/Sie sind.",
       "type": "fill-blank",
-      "template": "{[Ich|Du|Er|Sie|Es|Wir|Ihr|Sie]} ___ Student.",
+      "template": "Er ___ {[Student:Student|müde:müde|hier:hier|glücklich:glücklich]}.",
       "hint": "Conjugate 'sein' to match the subject.",
       "distractors": [
-        "auto:sein-present"
+        "ist",
+        "bin",
+        "bist",
+        "sind"
       ]
     },
     {
@@ -51,10 +54,13 @@
       "title": "Present tense — haben (to have)",
       "explanation": "haben: ich habe, du hast, er/sie/es hat, wir haben, ihr habt, sie/Sie haben.",
       "type": "fill-blank",
-      "template": "{[Ich|Du|Er|Sie|Wir|Ihr]} ___ einen Hund.",
+      "template": "Wir ___ {[einen Hund:einen Hund|Zeit:Zeit|ein Auto:ein Auto|Hunger:Hunger]}.",
       "hint": "Conjugate 'haben' to match the subject.",
       "distractors": [
-        "auto:haben-present"
+        "haben",
+        "habe",
+        "hast",
+        "hat"
       ]
     },
     {
@@ -224,10 +230,13 @@
       "title": "Modal verb — müssen (must)",
       "explanation": "müssen: ich muss, du musst, er muss, wir müssen, ihr müsst, sie müssen.",
       "type": "fill-blank",
-      "template": "{[Ich|Du|Er|Wir|Ihr|Sie]} ___ morgen arbeiten.",
+      "template": "Sie ___ {[morgen arbeiten:morgen arbeiten|früh aufstehen:früh aufstehen|das Buch lesen:das Buch lesen]}.",
       "hint": "Conjugate 'müssen' to match the subject.",
       "distractors": [
-        "auto:müssen-present"
+        "muss",
+        "musst",
+        "müssen",
+        "müsst"
       ]
     },
     {
@@ -753,6 +762,2801 @@
         },
         {
           "text": "Ein in mehreren Ländern erprobtes Modell wurde vorgestellt.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "de-g-037",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Präteritum — sein (to be, simple past)",
+      "explanation": "sein (Präteritum): ich war, du warst, er/sie/es war, wir waren, ihr wart, sie/Sie waren. Common even in speech, unlike most Präteritum forms.",
+      "type": "fill-blank",
+      "template": "Er ___ {[gestern müde:gestern müde|letzte Woche krank:letzte Woche krank|früher Lehrer:früher Lehrer]}.",
+      "hint": "Conjugate 'sein' in the Präteritum for 'er'.",
+      "distractors": [
+        "war",
+        "warst",
+        "waren",
+        "wart"
+      ]
+    },
+    {
+      "id": "de-g-038",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Präteritum — haben (to have, simple past)",
+      "explanation": "haben (Präteritum): ich hatte, du hattest, er/sie/es hatte, wir hatten, ihr hattet, sie/Sie hatten. Common even in speech, unlike most Präteritum forms.",
+      "type": "fill-blank",
+      "template": "Wir ___ {[keine Zeit:keine Zeit|großen Hunger:großen Hunger|viele Freunde:viele Freunde]}.",
+      "hint": "Conjugate 'haben' in the Präteritum for 'wir'.",
+      "distractors": [
+        "hatten",
+        "hatte",
+        "hattest",
+        "hattet"
+      ]
+    },
+    {
+      "id": "de-g-039",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Modal verb — wollen (to want)",
+      "explanation": "wollen: ich will, du willst, er/sie/es will, wir wollen, ihr wollt, sie/Sie wollen. Modal + infinitive at the end of the clause.",
+      "type": "fill-blank",
+      "template": "Ich ___ {[ein Eis essen:ein Eis essen|nach Hause gehen:nach Hause gehen|Deutsch lernen:Deutsch lernen]}.",
+      "hint": "Conjugate 'wollen' for 'ich'.",
+      "distractors": [
+        "will",
+        "willst",
+        "wollen",
+        "wollt"
+      ]
+    },
+    {
+      "id": "de-g-040",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Modal verb — dürfen (to be allowed to)",
+      "explanation": "dürfen: ich darf, du darfst, er/sie/es darf, wir dürfen, ihr dürft, sie/Sie dürfen. Modal + infinitive at the end of the clause.",
+      "type": "fill-blank",
+      "template": "Du ___ {[hier nicht rauchen:hier nicht rauchen|jetzt gehen:jetzt gehen|das Auto fahren:das Auto fahren]}.",
+      "hint": "Conjugate 'dürfen' for 'du'.",
+      "distractors": [
+        "darfst",
+        "darf",
+        "dürfen",
+        "dürft"
+      ]
+    },
+    {
+      "id": "de-g-041",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Modal verb — sollen (to be supposed to)",
+      "explanation": "sollen: ich soll, du sollst, er/sie/es soll, wir sollen, ihr sollt, sie/Sie sollen. Modal + infinitive at the end of the clause.",
+      "type": "fill-blank",
+      "template": "Ihr ___ {[pünktlich sein:pünktlich sein|die Hausaufgaben machen:die Hausaufgaben machen|leiser sprechen:leiser sprechen]}.",
+      "hint": "Conjugate 'sollen' for 'ihr'.",
+      "distractors": [
+        "sollt",
+        "soll",
+        "sollst",
+        "sollen"
+      ]
+    },
+    {
+      "id": "de-g-042",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Modal verb — mögen (to like)",
+      "explanation": "mögen: ich mag, du magst, er/sie/es mag, wir mögen, ihr mögt, sie/Sie mögen. Unlike the other modals, mögen is often used alone (with a noun), not just with an infinitive.",
+      "type": "fill-blank",
+      "template": "Wir ___ {[klassische Musik:klassische Musik|dieses Restaurant:dieses Restaurant|unsere Nachbarn:unsere Nachbarn]}.",
+      "hint": "Conjugate 'mögen' for 'wir'.",
+      "distractors": [
+        "mögen",
+        "mag",
+        "magst",
+        "mögt"
+      ]
+    },
+    {
+      "id": "de-g-043",
+      "level": "A1",
+      "category": "conjugation",
+      "title": "Present tense — regular -en verbs (du-form)",
+      "explanation": "Regular verbs, 'du' form: stem + -st. E.g. lernen → du lernst, arbeiten → du arbeitest (extra -e- for verbs whose stem ends in -t).",
+      "type": "fill-blank",
+      "template": "Du ___ {[sehr viel:sehr viel|jeden Tag:jeden Tag|gern Deutsch:gern Deutsch]}.",
+      "hint": "Fill in the correct 'du' form of 'lernen'.",
+      "distractors": [
+        "lernst",
+        "lerne",
+        "lernt",
+        "lernen"
+      ]
+    },
+    {
+      "id": "de-g-044",
+      "level": "A2",
+      "category": "conjugation",
+      "title": "Separable verbs — present tense",
+      "explanation": "Separable-prefix verbs (aufstehen, ankommen, einkaufen...) split in a main clause: the conjugated stem stays in second position, the prefix moves to the very end. aufstehen → Er steht früh auf.",
+      "type": "fill-blank",
+      "template": "Er ___ jeden Morgen früh auf.",
+      "hint": "Conjugate 'aufstehen' for 'er' — remember, the prefix 'auf' stays at the end.",
+      "distractors": [
+        "steht",
+        "stehe",
+        "stehst",
+        "stehen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-001",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Monsieur schläft.",
+      "hint": "Choose the correct article for 'Monsieur' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-002",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Superstar ist neu.",
+      "hint": "Choose the correct article for 'Superstar' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-003",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Fütterung ist neu.",
+      "hint": "Choose the correct article for 'Fütterung' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-004",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Stiefmutter ist hier.",
+      "hint": "Choose the correct article for 'Stiefmutter' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-005",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Ordnung schläft.",
+      "hint": "Choose the correct article for 'Ordnung' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-006",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Wärter ist hier.",
+      "hint": "Choose the correct article for 'Wärter' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-007",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Schulhaus schläft.",
+      "hint": "Choose the correct article for 'Schulhaus' (n).",
+      "distractors": [
+        "das",
+        "der",
+        "die"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-008",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "Wo ist ___ Stadtteil?",
+      "hint": "Choose the correct article for 'Stadtteil' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-009",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Migrant schläft.",
+      "hint": "Choose the correct article for 'Migrant' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-010",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Seilbahn schläft.",
+      "hint": "Choose the correct article for 'Seilbahn' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-011",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Küchentisch ist neu.",
+      "hint": "Choose the correct article for 'Küchentisch' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-012",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Rundreise ist sehr alt.",
+      "hint": "Choose the correct article for 'Rundreise' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-013",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Mittwochabend ist neu.",
+      "hint": "Choose the correct article for 'Mittwochabend' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-014",
+      "level": "A2",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "Wo ist ___ Verkauf?",
+      "hint": "Choose the correct article for 'Verkauf' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-015",
+      "level": "A1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Shirt ist hier.",
+      "hint": "Choose the correct article for 'Shirt' (n).",
+      "distractors": [
+        "das",
+        "der",
+        "die"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-016",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Hauptfach ist neu.",
+      "hint": "Choose the correct article for 'Hauptfach' (n).",
+      "distractors": [
+        "das",
+        "der",
+        "die"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-017",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Fabrik ist hier.",
+      "hint": "Choose the correct article for 'Fabrik' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-018",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Hang ist neu.",
+      "hint": "Choose the correct article for 'Hang' (m).",
+      "distractors": [
+        "der",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-019",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Grafik ist sehr alt.",
+      "hint": "Choose the correct article for 'Grafik' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-def-020",
+      "level": "B1",
+      "category": "articles",
+      "title": "Definite article — nominative",
+      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem), das (neut).",
+      "type": "fill-blank",
+      "template": "___ Lava ist sehr alt.",
+      "hint": "Choose the correct article for 'Lava' (f).",
+      "distractors": [
+        "die",
+        "der",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-001",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Wesen.",
+      "hint": "Choose the correct article for 'Wesen' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-002",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Steg.",
+      "hint": "Choose the correct article for 'Steg' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-003",
+      "level": "A2",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Autohaus dort.",
+      "hint": "Choose the correct article for 'Autohaus' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-004",
+      "level": "A2",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Leder.",
+      "hint": "Choose the correct article for 'Leder' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-005",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Ansprechpartner.",
+      "hint": "Choose the correct article for 'Ansprechpartner' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-006",
+      "level": "A2",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Snack dort.",
+      "hint": "Choose the correct article for 'Snack' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-007",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Hier ist ___ Byte.",
+      "hint": "Choose the correct article for 'Byte' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-008",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Hier ist ___ Lautsprecher.",
+      "hint": "Choose the correct article for 'Lautsprecher' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-009",
+      "level": "A2",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Hündin.",
+      "hint": "Choose the correct article for 'Hündin' (f).",
+      "distractors": [
+        "eine",
+        "ein",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-010",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Hier ist ___ Friedensvertrag.",
+      "hint": "Choose the correct article for 'Friedensvertrag' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-011",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Hier ist ___ Silbermedaille.",
+      "hint": "Choose the correct article for 'Silbermedaille' (f).",
+      "distractors": [
+        "eine",
+        "ein",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-012",
+      "level": "A1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Hier ist ___ Haar.",
+      "hint": "Choose the correct article for 'Haar' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-013",
+      "level": "A1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Markt dort.",
+      "hint": "Choose the correct article for 'Markt' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-014",
+      "level": "A2",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Hier ist ___ Erkältung.",
+      "hint": "Choose the correct article for 'Erkältung' (f).",
+      "distractors": [
+        "eine",
+        "ein",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-015",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Bastel.",
+      "hint": "Choose the correct article for 'Bastel' (f).",
+      "distractors": [
+        "eine",
+        "ein",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-016",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Stellplatz.",
+      "hint": "Choose the correct article for 'Stellplatz' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-017",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Ölgemälde dort.",
+      "hint": "Choose the correct article for 'Ölgemälde' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-018",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Wildtier.",
+      "hint": "Choose the correct article for 'Wildtier' (n).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-019",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Bube dort.",
+      "hint": "Choose the correct article for 'Bube' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-nom-indef-020",
+      "level": "B1",
+      "category": "articles",
+      "title": "Indefinite article — nominative",
+      "explanation": "Indefinite articles in nominative: ein (masc/neut), eine (fem).",
+      "type": "fill-blank",
+      "template": "Das ist ___ Weinkeller.",
+      "hint": "Choose the correct article for 'Weinkeller' (m).",
+      "distractors": [
+        "ein",
+        "eine",
+        "einen"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-001",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Armee.",
+      "hint": "Choose the correct article for 'Armee' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-002",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Henne.",
+      "hint": "Choose the correct article for 'Henne' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-003",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Er kauft ___ Mexikaner.",
+      "hint": "Choose the correct article for 'Mexikaner' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-004",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Wir brauchen ___ Bank.",
+      "hint": "Choose the correct article for 'Bank' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-005",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Wintergarten.",
+      "hint": "Choose the correct article for 'Wintergarten' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-006",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Stiefel.",
+      "hint": "Choose the correct article for 'Stiefel' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-007",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Holzkohle.",
+      "hint": "Choose the correct article for 'Holzkohle' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-008",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Wir brauchen ___ Gabe.",
+      "hint": "Choose the correct article for 'Gabe' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-009",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Er kauft ___ Lied.",
+      "hint": "Choose the correct article for 'Lied' (n).",
+      "distractors": [
+        "das",
+        "den",
+        "die"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-010",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Wir brauchen ___ Seite.",
+      "hint": "Choose the correct article for 'Seite' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-011",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Wir brauchen ___ Moschee.",
+      "hint": "Choose the correct article for 'Moschee' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-012",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Er kauft ___ Bäckerei.",
+      "hint": "Choose the correct article for 'Bäckerei' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-013",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Er kauft ___ Card.",
+      "hint": "Choose the correct article for 'Card' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-014",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Buchladen.",
+      "hint": "Choose the correct article for 'Buchladen' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-015",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Wir brauchen ___ Schäfer.",
+      "hint": "Choose the correct article for 'Schäfer' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-016",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Wir brauchen ___ April.",
+      "hint": "Choose the correct article for 'April' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-017",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Er kauft ___ Boxer.",
+      "hint": "Choose the correct article for 'Boxer' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-018",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Vision.",
+      "hint": "Choose the correct article for 'Vision' (f).",
+      "distractors": [
+        "die",
+        "den",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-019",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Ich sehe ___ Knoblauch.",
+      "hint": "Choose the correct article for 'Knoblauch' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-def-020",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — definite article",
+      "explanation": "Accusative definite article: den (masc), die (fem), das (neut) — only masculine changes from nominative.",
+      "type": "fill-blank",
+      "template": "Er kauft ___ Bäcker.",
+      "hint": "Choose the correct article for 'Bäcker' (m).",
+      "distractors": [
+        "den",
+        "die",
+        "das"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-001",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Gesäss.",
+      "hint": "Choose the correct article for 'Gesäss' (n).",
+      "distractors": [
+        "ein",
+        "einen",
+        "eine"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-002",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Strg.",
+      "hint": "Choose the correct article for 'Strg' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-003",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Mensa.",
+      "hint": "Choose the correct article for 'Mensa' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-004",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Wir sehen ___ Vorrunde.",
+      "hint": "Choose the correct article for 'Vorrunde' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-005",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Ferienhaus.",
+      "hint": "Choose the correct article for 'Ferienhaus' (n).",
+      "distractors": [
+        "ein",
+        "einen",
+        "eine"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-006",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Balkon.",
+      "hint": "Choose the correct article for 'Balkon' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-007",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Baumaterial.",
+      "hint": "Choose the correct article for 'Baumaterial' (n).",
+      "distractors": [
+        "ein",
+        "einen",
+        "eine"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-008",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Kindheitserinnerung.",
+      "hint": "Choose the correct article for 'Kindheitserinnerung' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-009",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Tagesthema.",
+      "hint": "Choose the correct article for 'Tagesthema' (n).",
+      "distractors": [
+        "ein",
+        "einen",
+        "eine"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-010",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Pass.",
+      "hint": "Choose the correct article for 'Pass' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-011",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Wir sehen ___ Berater.",
+      "hint": "Choose the correct article for 'Berater' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-012",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Fahrt.",
+      "hint": "Choose the correct article for 'Fahrt' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-013",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Volksschule.",
+      "hint": "Choose the correct article for 'Volksschule' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-014",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Wachmann.",
+      "hint": "Choose the correct article for 'Wachmann' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-015",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Landschaft.",
+      "hint": "Choose the correct article for 'Landschaft' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-016",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Axt.",
+      "hint": "Choose the correct article for 'Axt' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-017",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Wir sehen ___ Stuhl.",
+      "hint": "Choose the correct article for 'Stuhl' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-018",
+      "level": "B1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Vergangenheit.",
+      "hint": "Choose the correct article for 'Vergangenheit' (f).",
+      "distractors": [
+        "eine",
+        "einen",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-019",
+      "level": "A2",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Ich kaufe ___ Basketball.",
+      "hint": "Choose the correct article for 'Basketball' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-acc-indef-020",
+      "level": "A1",
+      "category": "articles",
+      "title": "Accusative case — indefinite article",
+      "explanation": "Accusative indefinite article: einen (masc), eine (fem), ein (neut) — masculine takes -en.",
+      "type": "fill-blank",
+      "template": "Sie braucht ___ Kilometer.",
+      "hint": "Choose the correct article for 'Kilometer' (m).",
+      "distractors": [
+        "einen",
+        "eine",
+        "ein"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-001",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Tutorial.",
+      "hint": "Choose the correct article for 'Tutorial' (n).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-002",
+      "level": "A1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Saft das Buch.",
+      "hint": "Choose the correct article for 'Saft' (m).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-003",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Prager.",
+      "hint": "Choose the correct article for 'Prager' (m).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-004",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Sie dankt ___ Stickerei.",
+      "hint": "Choose the correct article for 'Stickerei' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-005",
+      "level": "A1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Zimmer das Buch.",
+      "hint": "Choose the correct article for 'Zimmer' (n).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-006",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Sie dankt ___ Leuchtturm.",
+      "hint": "Choose the correct article for 'Leuchtturm' (m).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-007",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Innenhof.",
+      "hint": "Choose the correct article for 'Innenhof' (m).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-008",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Eleganz.",
+      "hint": "Choose the correct article for 'Eleganz' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-009",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Notdienst das Buch.",
+      "hint": "Choose the correct article for 'Notdienst' (m).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-010",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Preisklasse.",
+      "hint": "Choose the correct article for 'Preisklasse' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-011",
+      "level": "A2",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Mauer das Buch.",
+      "hint": "Choose the correct article for 'Mauer' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-012",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Kommunikation das Buch.",
+      "hint": "Choose the correct article for 'Kommunikation' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-013",
+      "level": "A2",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Sie dankt ___ Trockner.",
+      "hint": "Choose the correct article for 'Trockner' (m).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-014",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Sie dankt ___ Anzahlung.",
+      "hint": "Choose the correct article for 'Anzahlung' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-015",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Trainingseinheit das Buch.",
+      "hint": "Choose the correct article for 'Trainingseinheit' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-016",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Nachtschicht.",
+      "hint": "Choose the correct article for 'Nachtschicht' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-017",
+      "level": "A2",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Zahlung das Buch.",
+      "hint": "Choose the correct article for 'Zahlung' (f).",
+      "distractors": [
+        "der",
+        "dem",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-018",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Ich gebe ___ Metall das Buch.",
+      "hint": "Choose the correct article for 'Metall' (n).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-019",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Intro.",
+      "hint": "Choose the correct article for 'Intro' (n).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-dat-def-020",
+      "level": "B1",
+      "category": "articles",
+      "title": "Dative case — definite article",
+      "explanation": "Dative definite article: dem (masc/neut), der (fem) — masc/neut merge in dative, unlike nominative/accusative.",
+      "type": "fill-blank",
+      "template": "Er hilft ___ Moto.",
+      "hint": "Choose the correct article for 'Moto' (n).",
+      "distractors": [
+        "dem",
+        "der",
+        "den"
+      ]
+    },
+    {
+      "id": "de-g-auto-v2time-001",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second rule (V2)",
+      "explanation": "In German main clauses, the finite verb is always in second position. If something other than the subject comes first, subject and verb swap (inversion).",
+      "type": "tile-order",
+      "tiles": [
+        "Sie",
+        "oft",
+        "kocht",
+        "Nudeln"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the time adverb — verb stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2time-002",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second rule (V2)",
+      "explanation": "In German main clauses, the finite verb is always in second position. If something other than the subject comes first, subject and verb swap (inversion).",
+      "type": "tile-order",
+      "tiles": [
+        "Wir",
+        "heute",
+        "spielen",
+        "Fußball"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the time adverb — verb stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2time-003",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second rule (V2)",
+      "explanation": "In German main clauses, the finite verb is always in second position. If something other than the subject comes first, subject and verb swap (inversion).",
+      "type": "tile-order",
+      "tiles": [
+        "Du",
+        "manchmal",
+        "liest",
+        "Bücher"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the time adverb — verb stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2time-004",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second rule (V2)",
+      "explanation": "In German main clauses, the finite verb is always in second position. If something other than the subject comes first, subject and verb swap (inversion).",
+      "type": "tile-order",
+      "tiles": [
+        "Er",
+        "selten",
+        "trinkt",
+        "Kaffee"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the time adverb — verb stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2time-005",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second rule (V2)",
+      "explanation": "In German main clauses, the finite verb is always in second position. If something other than the subject comes first, subject and verb swap (inversion).",
+      "type": "tile-order",
+      "tiles": [
+        "Ich",
+        "abends",
+        "schreibe",
+        "E-Mails"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the time adverb — verb stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2place-001",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second — with place",
+      "explanation": "The verb stays in second position even when a place adverb leads the sentence.",
+      "type": "tile-order",
+      "tiles": [
+        "Sie",
+        "in München",
+        "arbeitet",
+        "heute"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": "Time before place is also common."
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the place — inversion applies."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2place-002",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second — with place",
+      "explanation": "The verb stays in second position even when a place adverb leads the sentence.",
+      "type": "tile-order",
+      "tiles": [
+        "Wir",
+        "im Park",
+        "spielen",
+        "morgen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": "Time before place is also common."
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the place — inversion applies."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2place-003",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second — with place",
+      "explanation": "The verb stays in second position even when a place adverb leads the sentence.",
+      "type": "tile-order",
+      "tiles": [
+        "Ich",
+        "zu Hause",
+        "bleibe",
+        "heute"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": "Time before place is also common."
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the place — inversion applies."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2place-004",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second — with place",
+      "explanation": "The verb stays in second position even when a place adverb leads the sentence.",
+      "type": "tile-order",
+      "tiles": [
+        "Er",
+        "in der Schule",
+        "lernt",
+        "jetzt"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": "Time before place is also common."
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the place — inversion applies."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-v2place-005",
+      "level": "A1",
+      "category": "word-order",
+      "title": "Verb-second — with place",
+      "explanation": "The verb stays in second position even when a place adverb leads the sentence.",
+      "type": "tile-order",
+      "tiles": [
+        "Du",
+        "am Strand",
+        "schwimmst",
+        "oft"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            3,
+            1
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "note": "Time before place is also common."
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3
+          ],
+          "note": "Fronting the place — inversion applies."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-modalstruct-001",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Modal verb sentence structure",
+      "explanation": "With modal verbs, the modal is in position 2 and the infinitive goes to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Sie",
+        "morgen",
+        "will",
+        "Kuchen",
+        "backen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "note": "Fronting the time adverb — the modal stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-modalstruct-002",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Modal verb sentence structure",
+      "explanation": "With modal verbs, the modal is in position 2 and the infinitive goes to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Wir",
+        "heute",
+        "können",
+        "Deutsch",
+        "üben"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "note": "Fronting the time adverb — the modal stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-modalstruct-003",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Modal verb sentence structure",
+      "explanation": "With modal verbs, the modal is in position 2 and the infinitive goes to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Du",
+        "jetzt",
+        "sollst",
+        "deine Hausaufgaben",
+        "machen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "note": "Fronting the time adverb — the modal stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-modalstruct-004",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Modal verb sentence structure",
+      "explanation": "With modal verbs, the modal is in position 2 and the infinitive goes to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Er",
+        "abends",
+        "möchte",
+        "ein Buch",
+        "lesen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "note": "Fronting the time adverb — the modal stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-modalstruct-005",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Modal verb sentence structure",
+      "explanation": "With modal verbs, the modal is in position 2 and the infinitive goes to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Ich",
+        "bald",
+        "muss",
+        "meine Eltern",
+        "besuchen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "note": null
+        },
+        {
+          "order": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "note": "Fronting the time adverb — the modal stays in position 2."
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-weil-001",
+      "level": "B1",
+      "category": "word-order",
+      "title": "Subordinate clause word order",
+      "explanation": "In subordinate clauses (after weil, dass, ob, wenn...), the verb moves to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Ich",
+        "mag",
+        "Musik",
+        "weil",
+        "sie",
+        "schön",
+        "ist"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-weil-002",
+      "level": "B1",
+      "category": "word-order",
+      "title": "Subordinate clause word order",
+      "explanation": "In subordinate clauses (after weil, dass, ob, wenn...), the verb moves to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Wir",
+        "bleiben",
+        "zu Hause",
+        "weil",
+        "es",
+        "kalt",
+        "ist"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-weil-003",
+      "level": "B1",
+      "category": "word-order",
+      "title": "Subordinate clause word order",
+      "explanation": "In subordinate clauses (after weil, dass, ob, wenn...), the verb moves to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Er",
+        "lernt",
+        "Spanisch",
+        "weil",
+        "es",
+        "nützlich",
+        "ist"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-weil-004",
+      "level": "B1",
+      "category": "word-order",
+      "title": "Subordinate clause word order",
+      "explanation": "In subordinate clauses (after weil, dass, ob, wenn...), the verb moves to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Sie",
+        "kauft",
+        "das Kleid",
+        "weil",
+        "es",
+        "günstig",
+        "ist"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-weil-005",
+      "level": "B1",
+      "category": "word-order",
+      "title": "Subordinate clause word order",
+      "explanation": "In subordinate clauses (after weil, dass, ob, wenn...), the verb moves to the end.",
+      "type": "tile-order",
+      "tiles": [
+        "Du",
+        "isst",
+        "Gemüse",
+        "weil",
+        "es",
+        "gesund",
+        "ist"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-zuclause-001",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Infinitive clause with zu",
+      "explanation": "Infinitive clauses use zu + infinitive at the end. With separable verbs: ge- inserts before the stem.",
+      "type": "tile-order",
+      "tiles": [
+        "Es",
+        "ist",
+        "gesund",
+        "Wasser",
+        "zu",
+        "trinken"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-zuclause-002",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Infinitive clause with zu",
+      "explanation": "Infinitive clauses use zu + infinitive at the end. With separable verbs: ge- inserts before the stem.",
+      "type": "tile-order",
+      "tiles": [
+        "Es",
+        "ist",
+        "schwer",
+        "Chinesisch",
+        "zu",
+        "lernen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-zuclause-003",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Infinitive clause with zu",
+      "explanation": "Infinitive clauses use zu + infinitive at the end. With separable verbs: ge- inserts before the stem.",
+      "type": "tile-order",
+      "tiles": [
+        "Es",
+        "ist",
+        "wichtig",
+        "die Wahrheit",
+        "zu",
+        "sagen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-zuclause-004",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Infinitive clause with zu",
+      "explanation": "Infinitive clauses use zu + infinitive at the end. With separable verbs: ge- inserts before the stem.",
+      "type": "tile-order",
+      "tiles": [
+        "Es",
+        "ist",
+        "schön",
+        "neue Freunde",
+        "zu",
+        "treffen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-zuclause-005",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Infinitive clause with zu",
+      "explanation": "Infinitive clauses use zu + infinitive at the end. With separable verbs: ge- inserts before the stem.",
+      "type": "tile-order",
+      "tiles": [
+        "Es",
+        "ist",
+        "interessant",
+        "andere Kulturen",
+        "zu",
+        "entdecken"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-inversion-001",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Inversion after adverb — Verbzweitstellung",
+      "explanation": "In German main clauses, the verb always comes second. If something other than the subject starts the sentence (adverb, object), subject and verb invert.",
+      "type": "tile-order",
+      "tiles": [
+        "Letztes Jahr",
+        "habe",
+        "ich",
+        "ein Auto",
+        "gekauft"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-inversion-002",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Inversion after adverb — Verbzweitstellung",
+      "explanation": "In German main clauses, the verb always comes second. If something other than the subject starts the sentence (adverb, object), subject and verb invert.",
+      "type": "tile-order",
+      "tiles": [
+        "Am Wochenende",
+        "hat",
+        "sie",
+        "ihre Oma",
+        "besucht"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-inversion-003",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Inversion after adverb — Verbzweitstellung",
+      "explanation": "In German main clauses, the verb always comes second. If something other than the subject starts the sentence (adverb, object), subject and verb invert.",
+      "type": "tile-order",
+      "tiles": [
+        "Vor Kurzem",
+        "haben",
+        "wir",
+        "ein Haus",
+        "gefunden"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-inversion-004",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Inversion after adverb — Verbzweitstellung",
+      "explanation": "In German main clauses, the verb always comes second. If something other than the subject starts the sentence (adverb, object), subject and verb invert.",
+      "type": "tile-order",
+      "tiles": [
+        "Neulich",
+        "hat",
+        "er",
+        "einen Fehler",
+        "gemacht"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-inversion-005",
+      "level": "A2",
+      "category": "word-order",
+      "title": "Inversion after adverb — Verbzweitstellung",
+      "explanation": "In German main clauses, the verb always comes second. If something other than the subject starts the sentence (adverb, object), subject and verb invert.",
+      "type": "tile-order",
+      "tiles": [
+        "Letzte Woche",
+        "habt",
+        "ihr",
+        "das Spiel",
+        "gewonnen"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-nachfeld-001",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Nachfeld — Ausklammerung",
+      "explanation": "In spoken German, elements can be placed after the sentence bracket (Nachfeld) for emphasis or to avoid overloading the middle field.",
+      "type": "pick-correct",
+      "sentences": [
+        {
+          "text": "Ich habe ihn gestern getroffen, meinen alten Freund.",
+          "correct": true
+        },
+        {
+          "text": "Ich habe gestern ihn getroffen, meinen alten Freund.",
+          "correct": false,
+          "error": "Das Pronomen 'ihn' steht vor Adverben. Korrekt: Ich habe ihn gestern getroffen."
+        },
+        {
+          "text": "Wir haben das Restaurant sehr genossen, das neue am Markt.",
+          "correct": true
+        },
+        {
+          "text": "Sie ist total begeistert, von diesem Konzert.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-nachfeld-002",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Nachfeld — Ausklammerung",
+      "explanation": "In spoken German, elements can be placed after the sentence bracket (Nachfeld) for emphasis or to avoid overloading the middle field.",
+      "type": "pick-correct",
+      "sentences": [
+        {
+          "text": "Er hat es endlich repariert, das alte Fahrrad.",
+          "correct": true
+        },
+        {
+          "text": "Er hat endlich es repariert, das alte Fahrrad.",
+          "correct": false,
+          "error": "Das Pronomen 'es' steht vor Adverben. Korrekt: Er hat es endlich repariert."
+        },
+        {
+          "text": "Ich habe die Geschichte gehört, die du mir erzählt hast.",
+          "correct": true
+        },
+        {
+          "text": "Wir sind sehr zufrieden, mit dem Ergebnis.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-nachfeld-003",
+      "level": "B2",
+      "category": "word-order",
+      "title": "Nachfeld — Ausklammerung",
+      "explanation": "In spoken German, elements can be placed after the sentence bracket (Nachfeld) for emphasis or to avoid overloading the middle field.",
+      "type": "pick-correct",
+      "sentences": [
+        {
+          "text": "Sie hat sie schnell beantwortet, die schwierige Frage.",
+          "correct": true
+        },
+        {
+          "text": "Sie hat schnell sie beantwortet, die schwierige Frage.",
+          "correct": false,
+          "error": "Das Pronomen 'sie' steht vor Adverben. Korrekt: Sie hat sie schnell beantwortet."
+        },
+        {
+          "text": "Ich habe das Lied gemocht, das im Radio lief.",
+          "correct": true
+        },
+        {
+          "text": "Er ist sehr stolz, auf seine Tochter.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-adjattr-001",
+      "level": "C1",
+      "category": "word-order",
+      "title": "Erweiterte Adjektivattribute",
+      "explanation": "German allows complex participial phrases before a noun: das von allen erwartete Ergebnis (the result expected by everyone). The whole phrase precedes the noun it modifies.",
+      "type": "pick-correct",
+      "sentences": [
+        {
+          "text": "Das von allen gelobte Projekt wurde fortgesetzt.",
+          "correct": true
+        },
+        {
+          "text": "Das gelobte von allen Projekt wurde fortgesetzt.",
+          "correct": false,
+          "error": "Das erweiterte Partizipialattribut steht geschlossen vor dem Nomen: das von allen gelobte Projekt."
+        },
+        {
+          "text": "Die im Sommer geplante Reise musste verschoben werden.",
+          "correct": true
+        },
+        {
+          "text": "Ein selten gesehener Vogel landete im Garten.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-adjattr-002",
+      "level": "C1",
+      "category": "word-order",
+      "title": "Erweiterte Adjektivattribute",
+      "explanation": "German allows complex participial phrases before a noun: das von allen erwartete Ergebnis (the result expected by everyone). The whole phrase precedes the noun it modifies.",
+      "type": "pick-correct",
+      "sentences": [
+        {
+          "text": "Der von der Regierung vorgeschlagene Plan stieß auf Kritik.",
+          "correct": true
+        },
+        {
+          "text": "Der vorgeschlagene von der Regierung Plan stieß auf Kritik.",
+          "correct": false,
+          "error": "Das erweiterte Partizipialattribut steht geschlossen vor dem Nomen: der von der Regierung vorgeschlagene Plan."
+        },
+        {
+          "text": "Die vor Jahren gegründete Firma feierte ihr Jubiläum.",
+          "correct": true
+        },
+        {
+          "text": "Ein kaum bekanntes Talent wurde entdeckt.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "de-g-auto-adjattr-003",
+      "level": "C1",
+      "category": "word-order",
+      "title": "Erweiterte Adjektivattribute",
+      "explanation": "German allows complex participial phrases before a noun: das von allen erwartete Ergebnis (the result expected by everyone). The whole phrase precedes the noun it modifies.",
+      "type": "pick-correct",
+      "sentences": [
+        {
+          "text": "Das lange erwartete Ergebnis wurde endlich bekanntgegeben.",
+          "correct": true
+        },
+        {
+          "text": "Das erwartete lange Ergebnis wurde endlich bekanntgegeben.",
+          "correct": false,
+          "error": "Das erweiterte Partizipialattribut steht geschlossen vor dem Nomen: das lange erwartete Ergebnis."
+        },
+        {
+          "text": "Die von Experten entwickelte Methode setzte sich durch.",
+          "correct": true
+        },
+        {
+          "text": "Ein oft zitiertes Beispiel stammt aus dieser Studie.",
           "correct": true
         }
       ]
