@@ -3,6 +3,8 @@ import { useApp } from '../context/AppContext'
 import LevelChooser from '../components/LevelChooser'
 import ChoiceChips from '../components/ChoiceChips'
 import HelpButton from '../components/HelpButton'
+import QuizOverlay from '../components/QuizOverlay'
+import { hasQuiz } from '../engine/grammarQuiz'
 import './GrammarDictionary.css'
 
 async function loadGrammar(language) {
@@ -21,8 +23,9 @@ const LEVEL_ORDER = {
   en: ['A1','A2','B1','B2','C1'],
 }
 
-function PatternCard({ pattern, initialOpen }) {
+function PatternCard({ pattern, initialOpen, vocabEntries }) {
   const [open, setOpen] = useState(initialOpen ?? false)
+  const [quizOpen, setQuizOpen] = useState(false)
 
   return (
     <div className={`gd-card ${open ? 'open' : ''}`}>
@@ -37,6 +40,12 @@ function PatternCard({ pattern, initialOpen }) {
       {open && (
         <div className="gd-card-body">
           <p className="gd-explanation">{pattern.explanation}</p>
+
+          {hasQuiz(pattern.quizType) && (
+            <button className="gd-quiz-btn" onClick={() => setQuizOpen(true)}>
+              🎯 Practise this
+            </button>
+          )}
 
           {pattern.type === 'fill-blank' && (
             <div className="gd-example">
@@ -73,12 +82,21 @@ function PatternCard({ pattern, initialOpen }) {
           )}
         </div>
       )}
+
+      {quizOpen && (
+        <QuizOverlay
+          quizType={pattern.quizType}
+          title={pattern.title}
+          vocabEntries={vocabEntries}
+          onClose={() => setQuizOpen(false)}
+        />
+      )}
     </div>
   )
 }
 
 export default function GrammarDictionary({ patterns: chapterPatterns, onBack }) {
-  const { activeLanguage, goBack } = useApp()
+  const { activeLanguage, goBack, vulgarFilteredEntries } = useApp()
   const handleBack = onBack ?? goBack
   const [allPatterns, setAllPatterns] = useState([])
   const [loading, setLoading] = useState(false)
@@ -195,7 +213,7 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
           filtered.map(p => (
             <div key={p.id} className={`gd-item ${p.isChapter ? 'chapter-pattern' : ''}`}>
               {p.isChapter && <span className="gd-chapter-star" title="Current chapter">★</span>}
-              <PatternCard pattern={p} />
+              <PatternCard pattern={p} vocabEntries={vulgarFilteredEntries} />
             </div>
           ))
         )}

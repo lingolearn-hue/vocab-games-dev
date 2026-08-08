@@ -343,6 +343,39 @@
       code review.
 
 ## Grammar Trainer (German focus)
+- [x] **Reverted** the mass-generated static content from this session's
+      first pass (100 article patterns, 36 word-order patterns, 8
+      conjugation patterns — 144 total, back to 36) — the actual ask was
+      a dynamic per-topic quiz, not more static JSON rows. Kept the two
+      real bug fixes to `FillBlank`'s distractor resolution and the 3
+      redesigned templates (`de-g-003`/`004`/`013`) since those repaired
+      patterns that were actively showing broken placeholder text, not
+      "additions" in the sense being reverted.
+- [x] Built a **dynamic grammar mini-quiz** system instead —
+      `engine/grammarQuiz.js` (a registry of question generators, keyed by
+      `quizType`) + `components/QuizOverlay.jsx` (a shared, reusable 5-
+      round multiple-choice overlay with its own summary screen). Distinct
+      from the static pattern system: no stored content, no data file to
+      bloat or corrupt, effectively infinite variety since each question
+      draws a fresh random noun from the vocab list every time. Designed
+      generically per your call — `QUIZ_GENERATORS` is a plain registry,
+      so adding a new deterministic grammar point (plural forms,
+      adjective-ending agreement...) later is just adding one more entry,
+      no restructuring needed. Only fully vocab-deterministic points are
+      good fits for this — word order/subjunktiv-type points still belong
+      in the static, hand-authored system.
+- [x] Wired a "🎯 Practise this" / "🎯 Quick practice" trigger into both
+      screens per your call ("both"): `GrammarDictionary` (inside the
+      expanded pattern card) and `GrammarTrainer` (next to the
+      explanation, while doing the static exercises). A pattern only
+      shows the trigger if it has a `quizType` field — 5 German article
+      patterns tagged for now (`de-g-001/002/008/009/018`, covering
+      nominative/accusative/dative × definite/indefinite).
+      Verified in real-browser Playwright on both entry points: overlay
+      opens with a real German noun and 3 real article options, played a
+      full 5-round session and confirmed the summary score (1/5) exactly
+      matched manual counting, and confirmed patterns without a
+      `quizType` correctly show no trigger at all (no false positives).
 - [x] **Found and fixed a real, live bug**: 11 of 36 German patterns (and 2
       of Spanish's) used an `"auto:xxx"` distractor-pool convention with a
       resolver (`getDistractors`/`buildOptions` in `engine/grammar.js`)

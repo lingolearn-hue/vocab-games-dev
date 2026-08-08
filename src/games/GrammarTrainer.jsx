@@ -9,6 +9,8 @@ import {
 } from '../engine/grammar'
 import LevelChooser from '../components/LevelChooser'
 import HelpButton from '../components/HelpButton'
+import QuizOverlay from '../components/QuizOverlay'
+import { hasQuiz } from '../engine/grammarQuiz'
 import './GrammarTrainer.css'
 
 const TYPE_META = {
@@ -349,7 +351,7 @@ function TypeSelector({ patterns, onSelect, scores }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function GrammarTrainer() {
-  const { goBack, activeLanguage } = useApp()
+  const { goBack, activeLanguage, vulgarFilteredEntries } = useApp()
 
   const [allPatterns,       setAllPatterns]       = useState([])
   const [activeLevels,      setActiveLevels]       = useState(null)
@@ -360,6 +362,7 @@ export default function GrammarTrainer() {
   const [scores,            setScores]             = useState({})
   const [sessionCorrect,    setSessionCorrect]     = useState(0)
   const [sessionTotal,      setSessionTotal]       = useState(0)
+  const [quizOpen,          setQuizOpen]           = useState(false)
 
   useEffect(() => {
     if (!activeLanguage) return
@@ -493,6 +496,11 @@ export default function GrammarTrainer() {
               </div>
               <h2 className="gt-pattern-title">{currentPattern.title}</h2>
               <p className="gt-explanation">{currentPattern.explanation}</p>
+              {hasQuiz(currentPattern.quizType) && (
+                <button className="gt-quiz-btn" onClick={() => setQuizOpen(true)}>
+                  🎯 Quick practice
+                </button>
+              )}
             </div>
 
             {(() => {
@@ -522,6 +530,15 @@ export default function GrammarTrainer() {
           </>
         )}
       </div>
+
+      {quizOpen && currentPattern && (
+        <QuizOverlay
+          quizType={currentPattern.quizType}
+          title={currentPattern.title}
+          vocabEntries={vulgarFilteredEntries}
+          onClose={() => setQuizOpen(false)}
+        />
+      )}
     </div>
   )
 }
