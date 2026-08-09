@@ -1,49 +1,60 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { generateQuestion } from '../engine/grammarQuiz'
 import './QuizOverlay.css'
 
-const ROUNDS = 5
+const AUTO_ADVANCE_MS = 700
 
 /**
- * Lightweight practice overlay for a single grammar point — a short run of
- * ROUNDS auto-generated multiple-choice questions, then a summary. Distinct
- * from GrammarTrainer's full exercise flow: no category/type navigation, no
- * persisted score history, just quick in-place practice for whichever
- * grammar point you tapped. Closing early is always fine — this is meant to
- * be a low-friction supplement, not a session you have to finish.
+ * Lightweight practice overlay for a single grammar point — an open-ended
+ * run of auto-generated multiple-choice questions. Distinct from Grammar
+ * Trainer's full exercise flow: no category/type navigation, no persisted
+ * score history, just quick in-place practice for whichever grammar point
+ * you tapped. There's no round limit — it keeps going for as long as the
+ * user wants; they stop it themselves (✕ or "Stop") whenever they're done,
+ * and see a running tally either way. A wrong pick turns that option red
+ * and stays on the same question — other options remain pickable — so the
+ * user keeps retrying until they get it right. A correct answer auto-
+ * advances to the next question after a brief "correct" flash.
  */
-export default function QuizOverlay({ quizType, title, vocabEntries, onClose }) {
-  const [round, setRound] = useState(0)
-  const [question, setQuestion] = useState(() => generateQuestion(quizType, vocabEntries))
-  const [selected, setSelected] = useState(null)
-  const [feedback, setFeedback] = useState(null)
+export default function QuizOverlay({ quizType, title, level, vocabEntries, onClose }) {
+  const [round, setRound] = useState(1)
+  const [question, setQuestion] = useState(() => generateQuestion(quizType, vocabEntries, level))
+  const [wrongOptions, setWrongOptions] = useState([])
+  const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong'
   const [correctCount, setCorrectCount] = useState(0)
-  const done = round >= ROUNDS
+  const [stopped, setStopped] = useState(false)
+  const answered = round - 1 // rounds fully completed so far
+  const advanceTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(advanceTimer.current), [])
 
   function choose(option) {
-    if (feedback) return
-    setSelected(option)
+    if (feedback === 'correct' || wrongOptions.includes(option)) return
     const isCorrect = option === question.correctAnswer
-    setFeedback(isCorrect ? 'correct' : 'wrong')
-    if (isCorrect) setCorrectCount(c => c + 1)
-  }
-
-  function next() {
-    const nextRound = round + 1
-    setRound(nextRound)
-    setSelected(null)
-    setFeedback(null)
-    if (nextRound < ROUNDS) {
-      setQuestion(generateQuestion(quizType, vocabEntries))
+    if (isCorrect) {
+      setFeedback('correct')
+      setCorrectCount(c => c + 1)
+      advanceTimer.current = setTimeout(next, AUTO_ADVANCE_MS)
+    } else {
+      setFeedback('wrong')
+      setWrongOptions(w => [...w, option])
     }
   }
 
-  function playAgain() {
-    setRound(0)
-    setCorrectCount(0)
-    setSelected(null)
+  function next() {
+    setRound(r => r + 1)
+    setWrongOptions([])
     setFeedback(null)
-    setQuestion(generateQuestion(quizType, vocabEntries))
+    setQuestion(generateQuestion(quizType, vocabEntries, level))
+  }
+
+  function playAgain() {
+    setRound(1)
+    setCorrectCount(0)
+    setWrongOptions([])
+    setFeedback(null)
+    setStopped(false)
+    setQuestion(generateQuestion(quizType, vocabEntries, level))
   }
 
   if (!question) {
@@ -68,38 +79,37 @@ export default function QuizOverlay({ quizType, title, vocabEntries, onClose }) 
           <button className="qo-close" onClick={onClose}>✕</button>
         </div>
 
-        {!done ? (
+        {!stopped ? (
           <>
-            <div className="qo-progress">{round + 1} / {ROUNDS}</div>
+            <div className="qo-progress">Round {round} · {correctCount} correct</div>
             <div className="qo-prompt">{question.prompt}</div>
             <div className="qo-options">
               {question.options.map(opt => {
-                const isSelected = selected === opt
-                const isCorrectOpt = feedback && opt === question.correctAnswer
-                const cls = feedback
-                  ? (isCorrectOpt ? 'correct' : isSelected ? 'wrong' : '')
-                  : ''
+                const isWrongPick = wrongOptions.includes(opt)
+                const isCorrectPick = feedback === 'correct' && opt === question.correctAnswer
+                const cls = isCorrectPick ? 'correct' : isWrongPick ? 'wrong' : ''
                 return (
                   <button
                     key={opt}
                     className={`qo-option ${cls}`}
                     onClick={() => choose(opt)}
-                    disabled={!!feedback}
+                    disabled={feedback === 'correct' || isWrongPick}
                   >
                     {opt}
                   </button>
                 )
               })}
             </div>
-            {feedback && (
-              <button className="qo-next-btn" onClick={next}>
-                {round + 1 < ROUNDS ? 'Next →' : 'See results →'}
-              </button>
+            {feedback === 'wrong' && (
+              <div className="qo-round-actions">
+                <span className="qo-feedback-msg qo-feedback-wrong">Not quite — try again</span>
+                <button className="qo-stop-btn" onClick={() => { clearTimeout(advanceTimer.current); setStopped(true) }}>Stop</button>
+              </div>
             )}
           </>
         ) : (
           <div className="qo-summary">
-            <div className="qo-summary-score">{correctCount} / {ROUNDS}</div>
+            <div className="qo-summary-score">{correctCount} / {answered}</div>
             <p className="qo-summary-label">correct</p>
             <div className="qo-summary-actions">
               <button className="qo-again-btn" onClick={playAgain}>↺ Play again</button>

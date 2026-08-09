@@ -84,7 +84,11 @@
 .qo-option.correct { border-color: #22a06b; background: #e9f8f1; color: #22a06b; }
 .qo-option.wrong    { border-color: #e5534b; background: #fdecea; color: #e5534b; }
 
+.qo-round-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.qo-feedback-msg { font-size: 0.88rem; font-weight: 600; }
+.qo-feedback-wrong { color: #e5534b; }
 .qo-next-btn {
+  flex: 1;
   padding: 0.75rem;
   border: none;
   border-radius: 12px;
@@ -96,6 +100,19 @@
   -webkit-appearance: none;
 }
 .qo-next-btn:hover { background: #3a6ae0; }
+.qo-stop-btn {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  color: #555;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  white-space: nowrap;
+}
+.qo-stop-btn:hover { border-color: #e5534b; color: #e5534b; }
 
 .qo-empty {
   text-align: center;
@@ -138,3 +155,5 @@
 [data-theme="dark"] .qo-empty         { color: var(--dt2); }
 [data-theme="dark"] .qo-summary-label { color: var(--dt2); }
 [data-theme="dark"] .qo-again-btn     { background: #1e1e1e; border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .qo-stop-btn      { background: #1e1e1e; border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .qo-feedback-wrong { color: #ff8078; }

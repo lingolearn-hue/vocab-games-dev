@@ -1,18 +1,54 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66am** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66at** — this working copy's
   actual current state; dev is where this session's work has been pushed
-  throughout (Graded Reader overhaul, lemmatizer fix, article engines,
-  Vocab Browser word-detail overlay, etc. — see the rest of this file).
-- `vocab-games` (production, `main` branch): **v0.66** — three commits
-  behind dev (v0.66aa/al/am not yet pushed there). Next production push
-  should carry all of this session's work forward.
+  throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
+  lemmatizer fix, article engines, Vocab Browser word-detail overlay, etc.
+  — see the rest of this file).
+- `vocab-games` (production, `main` branch): **v0.66** — several commits
+  behind dev (not yet synced forward). Next production push should carry
+  all of this session's work forward.
 - Both repos' `dev`/`master` branches (stale, pre-dating a lot of this work)
   were deleted — see "Groundskeeping" below. Production now only has `main`
   and `gh-pages`. `vocab-games-dev` also had a stale, unrelated `source`
   branch (last touched at v0.63ac) — also deleted; `main` was always the
   real working branch there.
+
+## Grammar Dictionary practice overhaul (v0.66at)
+- [x] Fixed two real article-quiz bugs: nominative indefinite offered an
+      invalid `einen` distractor, dative definite offered an invalid `den`
+      distractor. Nominative indefinite now correctly offers only
+      `ein`/`eine` (masc/neut share `ein`).
+- [x] Removed the category filter chip row from Grammar Dictionary (was
+      illegible) — `category` stays in the data, just unused in this UI.
+- [x] Level filter changed from multi-select to single-select. Added a
+      `single` prop to `ChoiceChips`/`LevelChooser` (default off, so other
+      screens using multi-select are unaffected).
+- [x] Quiz vocab pool is now level-scoped: an A1 pattern draws from A1
+      vocab first, only falling back to the full pool if the scoped pool
+      has fewer than 4 eligible entries. `generateQuestion()` and
+      `QuizOverlay` now take a `level` param.
+- [x] `de-g-001` explanation rewritten to introduce German's three-gender
+      system before the specific article forms — the intended model for
+      "explanation should be sufficient to understand the topic on its
+      own" going forward. Added a new `examples` field (clean sentence
+      pairs) rendered in place of the raw bracket `template` string when
+      present; other article patterns still fall back to the raw template.
+- [x] Practice sessions are now endless — no round cap. Runs until the
+      user stops it (✕ or "Stop"), with a running `Round N · X correct`
+      tally and a `correct / roundsPlayed` summary on stop.
+- [x] Correct answers auto-advance to the next question after a brief
+      flash — no button tap needed.
+- [x] Wrong picks turn that option red and stay on the same question —
+      other options remain pickable, so the user retries until correct
+      rather than being shown a static "wrong" dead end.
+- [x] `grammar-dictionary-logic.md` drafted, covering data schema, the two
+      parallel exercise systems (Grammar Trainer vs. Grammar Dictionary's
+      dynamic quiz), quiz generation/level-scoping, and design principles
+      (explanation completeness, endless practice). Shared with V as a
+      draft for discussion — see file for open items (only German articles
+      have generators so far; `examples` only added to one pattern).
 
 ## Vocab Browser word-detail overlay
 - [x] Tapping a word row now opens a full detail overlay — translations,

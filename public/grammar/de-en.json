@@ -8,10 +8,14 @@
       "level": "A1",
       "category": "articles",
       "title": "Definite article — nominative",
-      "explanation": "The nominative case is used for the subject of a sentence. Definite articles: der (masc), die (fem/pl), das (neut).",
+      "explanation": "German nouns come in three grammatical genders — masculine, feminine, and neuter — and the article you use depends on which gender a noun has. In the nominative case (used for the subject of a sentence), the definite article is der (masc), die (fem), or das (neut); die also covers the plural, regardless of gender.",
       "type": "fill-blank",
       "template": "___ {[der Hund|die Katze|das Buch|die Frau|der Mann|das Kind|der Apfel|die Stadt]} ist hier.",
       "hint": "Choose the correct definite article for the noun in brackets.",
+      "examples": [
+        "Der Hund ist hier. (masculine — \"the dog is here\")",
+        "Die Katze ist hier. (feminine — \"the cat is here\")"
+      ],
       "distractors": [
         "auto:nominative-article"
       ],

@@ -24,16 +24,21 @@ function pickRandom(arr) {
 
 const DE_ARTICLE_CONFIGS = {
   'de-articles-nom-def':   { map: { m: 'der',   f: 'die',  n: 'das' }, options: ['der', 'die', 'das'] },
-  'de-articles-nom-indef': { map: { m: 'ein',   f: 'eine', n: 'ein' }, options: ['ein', 'eine', 'einen'] },
+  'de-articles-nom-indef': { map: { m: 'ein',   f: 'eine', n: 'ein' }, options: ['ein', 'eine'] },
   'de-articles-acc-def':   { map: { m: 'den',   f: 'die',  n: 'das' }, options: ['den', 'die', 'das'] },
   'de-articles-acc-indef': { map: { m: 'einen', f: 'eine', n: 'ein' }, options: ['einen', 'eine', 'ein'] },
-  'de-articles-dat-def':   { map: { m: 'dem',   f: 'der',  n: 'dem' }, options: ['dem', 'der', 'den'] },
+  'de-articles-dat-def':   { map: { m: 'dem',   f: 'der',  n: 'dem' }, options: ['dem', 'der'] },
 }
 
-function generateGermanArticleQuestion(quizType, vocabEntries) {
+function generateGermanArticleQuestion(quizType, vocabEntries, level) {
   const config = DE_ARTICLE_CONFIGS[quizType]
   if (!config) return null
-  const pool = vocabEntries.filter(e => e.pos === 'noun' && ['m', 'f', 'n'].includes(e.gender))
+  const nouns = vocabEntries.filter(e => e.pos === 'noun' && ['m', 'f', 'n'].includes(e.gender))
+  // Scope to the pattern's own level so e.g. A1 grammar only draws A1
+  // words; fall back to the full noun pool if a level has too few (or no)
+  // gendered nouns of its own, rather than showing "not enough vocab".
+  const scoped = level ? nouns.filter(e => e.level === level) : nouns
+  const pool = scoped.length >= 4 ? scoped : nouns
   if (pool.length === 0) return null
   const entry = pickRandom(pool)
   const correctAnswer = config.map[entry.gender]
@@ -47,18 +52,18 @@ function generateGermanArticleQuestion(quizType, vocabEntries) {
 // ── Registry ─────────────────────────────────────────────────────────────
 
 export const QUIZ_GENERATORS = {
-  'de-articles-nom-def':   (entries) => generateGermanArticleQuestion('de-articles-nom-def', entries),
-  'de-articles-nom-indef': (entries) => generateGermanArticleQuestion('de-articles-nom-indef', entries),
-  'de-articles-acc-def':   (entries) => generateGermanArticleQuestion('de-articles-acc-def', entries),
-  'de-articles-acc-indef': (entries) => generateGermanArticleQuestion('de-articles-acc-indef', entries),
-  'de-articles-dat-def':   (entries) => generateGermanArticleQuestion('de-articles-dat-def', entries),
+  'de-articles-nom-def':   (entries, level) => generateGermanArticleQuestion('de-articles-nom-def', entries, level),
+  'de-articles-nom-indef': (entries, level) => generateGermanArticleQuestion('de-articles-nom-indef', entries, level),
+  'de-articles-acc-def':   (entries, level) => generateGermanArticleQuestion('de-articles-acc-def', entries, level),
+  'de-articles-acc-indef': (entries, level) => generateGermanArticleQuestion('de-articles-acc-indef', entries, level),
+  'de-articles-dat-def':   (entries, level) => generateGermanArticleQuestion('de-articles-dat-def', entries, level),
 }
 
 export function hasQuiz(quizType) {
   return !!quizType && !!QUIZ_GENERATORS[quizType]
 }
 
-export function generateQuestion(quizType, vocabEntries) {
+export function generateQuestion(quizType, vocabEntries, level) {
   const gen = QUIZ_GENERATORS[quizType]
-  return gen ? gen(vocabEntries) : null
+  return gen ? gen(vocabEntries, level) : null
 }

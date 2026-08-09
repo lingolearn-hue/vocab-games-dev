@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import LevelChooser from '../components/LevelChooser'
-import ChoiceChips from '../components/ChoiceChips'
 import HelpButton from '../components/HelpButton'
 import QuizOverlay from '../components/QuizOverlay'
 import { hasQuiz } from '../engine/grammarQuiz'
@@ -49,8 +48,14 @@ function PatternCard({ pattern, initialOpen, vocabEntries }) {
 
           {pattern.type === 'fill-blank' && (
             <div className="gd-example">
-              <div className="gd-example-label">Example</div>
-              <div className="gd-template">{pattern.template}</div>
+              <div className="gd-example-label">Example{pattern.examples?.length > 1 ? 's' : ''}</div>
+              {pattern.examples?.length ? (
+                pattern.examples.map((ex, i) => (
+                  <div key={i} className="gd-template">{ex}</div>
+                ))
+              ) : (
+                <div className="gd-template">{pattern.template}</div>
+              )}
               <div className="gd-hint">{pattern.hint}</div>
             </div>
           )}
@@ -87,6 +92,7 @@ function PatternCard({ pattern, initialOpen, vocabEntries }) {
         <QuizOverlay
           quizType={pattern.quizType}
           title={pattern.title}
+          level={pattern.level}
           vocabEntries={vocabEntries}
           onClose={() => setQuizOpen(false)}
         />
@@ -101,8 +107,7 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
   const [allPatterns, setAllPatterns] = useState([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
-  const [activeLevels, setActiveLevels] = useState(null)  // multi-select, null = all
-  const [activeCategories, setActiveCategories] = useState(null)  // multi-select, null = all
+  const [activeLevels, setActiveLevels] = useState(null)  // single-select, null = all
   const [showChapterOnly, setShowChapterOnly] = useState(!!chapterPatterns?.length)
 
   // Load global grammar file
@@ -133,22 +138,17 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
     let p = mergedPatterns
     if (showChapterOnly && chapterPatterns?.length) p = p.filter(x => x.isChapter)
     if (activeLevels) p = p.filter(x => activeLevels.includes(x.level))
-    if (activeCategories) p = p.filter(x => activeCategories.includes(x.category))
     if (search.trim()) {
       const q = search.toLowerCase()
       p = p.filter(x => x.title.toLowerCase().includes(q) || x.explanation.toLowerCase().includes(q))
     }
     return p
-  }, [mergedPatterns, showChapterOnly, activeLevels, activeCategories, search, chapterPatterns])
+  }, [mergedPatterns, showChapterOnly, activeLevels, search, chapterPatterns])
 
   const levels = useMemo(() => {
     const s = new Set(mergedPatterns.map(p => p.level))
     return levelOrder.filter(l => s.has(l))
   }, [mergedPatterns, levelOrder])
-
-  const categories = useMemo(() => {
-    return [...new Set(mergedPatterns.map(p => p.category).filter(Boolean))].sort()
-  }, [mergedPatterns])
 
   return (
     <div className="gd-screen">
@@ -186,21 +186,8 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
         )}
         <div className="gd-filter-row">
           <span className="gd-filter-label">Level</span>
-          <LevelChooser levels={levels} value={activeLevels} onChange={setActiveLevels} className="gd-level-filter" />
+          <LevelChooser levels={levels} value={activeLevels} onChange={setActiveLevels} className="gd-level-filter" single />
         </div>
-        {categories.length > 0 && (
-          <div className="gd-filter-row gd-filter-row--cats">
-            <span className="gd-filter-label">Category</span>
-            <ChoiceChips
-              options={categories}
-              value={activeCategories}
-              onChange={setActiveCategories}
-              getLabel={c => c.replace(/-/g, ' ')}
-              chipClassName="gd-chip gd-chip--sm"
-              className="gd-category-filter"
-            />
-          </div>
-        )}
       </div>
 
       {/* Results */}
