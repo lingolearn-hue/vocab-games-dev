@@ -18,6 +18,17 @@ const TAG_LABELS = {
   'advanced':    'Advanced',
 }
 
+// Library filter chips — kept to a short, fixed set rather than every tag
+// in the data (which included a long, unpredictable tail of topic: tags
+// and made the filter row overflow/scroll awkwardly). More granular
+// filtering (the two-row type+topic approach used on the vocab front page)
+// is a possible later addition, not this pass.
+const READER_TAG_FILTERS = [
+  { tag: 'fiction', label: 'Fiction' },
+  { tag: 'non-fiction', label: 'Non-fiction' },
+  { tag: 'genre:fairytale', label: 'Fairy tale' },
+]
+
 // Read-aloud pacing: a short breather between sentences so playback doesn't
 // run sentences together with zero gap, which reads too rushed to actually
 // follow along with the text on screen.
@@ -55,6 +66,24 @@ function tagLabel(tag) {
 const CUSTOM_PASSAGE_KEY = 'vocabCustomPassage'
 const FINISHED_KEY = 'vocabFinishedPassages'
 const LAST_PASSAGE_KEY = 'vocabLastPassage'
+const READER_PREFS_KEY = 'vocabReaderPrefs' // per-language: { level, tags, hideFinished }
+
+function loadReaderPrefs(language) {
+  try {
+    const all = JSON.parse(localStorage.getItem(READER_PREFS_KEY) || '{}')
+    return all[language] || null
+  } catch {
+    return null
+  }
+}
+
+function saveReaderPrefs(language, prefs) {
+  try {
+    const all = JSON.parse(localStorage.getItem(READER_PREFS_KEY) || '{}')
+    all[language] = prefs
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify(all))
+  } catch { /* storage unavailable — prefs just won't persist */ }
+}
 
 function loadLastPassage() {
   try {
@@ -95,7 +124,6 @@ export default function GradedReader() {
   const [mode,            setMode]            = useState('library')
   const [customPassage,   setCustomPassage]   = useState(null)
   const [showTranslation, setShowTranslation] = useState(false)
-  const [activeTags,      setActiveTags]      = useState(new Set())
   const [search,          setSearch]          = useState('')
   // Passage ids (already namespaced by language, e.g. "de-p1") the user has
   // marked as finished — persisted across sessions. Only library passages
@@ -193,20 +221,51 @@ export default function GradedReader() {
 
   const availableTags = useMemo(() => {
     const allTags = new Set(passages.flatMap(p => p.tags ?? []))
-    // Exclude level-like tags (beginner/intermediate/advanced) — now handled by level chips
-    const levelLike = new Set(['beginner','intermediate','advanced'])
-    const typeTags  = ['fiction','non-fiction','biography','essay'].filter(t => allTags.has(t))
-    const topicTags = [...allTags].filter(t => !levelLike.has(t) && !['fiction','non-fiction','biography','essay'].includes(t)).sort()
-    return [...typeTags, ...topicTags]
+    return READER_TAG_FILTERS.filter(f => allTags.has(f.tag))
   }, [passages])
 
-  // Active levels (multi-select, same null=all pattern as the rest of the app) + active tags (multi)
-  const [activeLevels, setActiveLevels] = useState(null)
+  // Active level (single-select, persistent per language — a learner
+  // realistically stays at one level for a long stretch, so defaulting to
+  // "all levels" every time they open the reader just adds noise) + active
+  // tags (persistent) + hide-finished toggle (persistent).
+  const [activeLevel, setActiveLevelRaw] = useState(null)
+  const [activeTags,  setActiveTags]     = useState(new Set())
+  const [hideFinished, setHideFinished]  = useState(false)
+  const prefsLoadedForLanguage = useRef(null)
+
+  // Load persisted prefs once per language (availableLevels needs passages
+  // to be loaded first to pick a sensible default if nothing was saved yet).
+  useEffect(() => {
+    if (!language || prefsLoadedForLanguage.current === language || availableLevels.length === 0) return
+    prefsLoadedForLanguage.current = language
+    const saved = loadReaderPrefs(language)
+    setActiveLevelRaw(saved?.level && availableLevels.includes(saved.level) ? saved.level : availableLevels[0])
+    setActiveTags(new Set(saved?.tags ?? []))
+    setHideFinished(!!saved?.hideFinished)
+  }, [language, availableLevels])
+
+  function persistPrefs(patch) {
+    saveReaderPrefs(language, {
+      level: patch.level ?? activeLevel,
+      tags: [...(patch.tags ?? activeTags)],
+      hideFinished: patch.hideFinished ?? hideFinished,
+    })
+  }
+
+  // Single-select: never allow clearing back to "no level selected" — the
+  // level chooser always keeps exactly one level active.
+  function setActiveLevel(levels) {
+    const level = levels?.[0] ?? activeLevel
+    if (!level) return
+    setActiveLevelRaw(level)
+    persistPrefs({ level })
+  }
 
   const filteredPassages = useMemo(() => {
     const q = search.trim().toLowerCase()
     return passages.filter(p => {
-      if (activeLevels && !activeLevels.includes(p.level)) return false
+      if (activeLevel && p.level !== activeLevel) return false
+      if (hideFinished && finishedPassages.has(p.id)) return false
       if (activeTags.size > 0) {
         const ptags = new Set(p.tags ?? [])
         if (![...activeTags].every(t => ptags.has(t))) return false
@@ -223,12 +282,21 @@ export default function GradedReader() {
       }
       return true
     })
-  }, [passages, activeLevels, activeTags, search])
+  }, [passages, activeLevel, activeTags, hideFinished, finishedPassages, search])
 
   function toggleTag(tag) {
     setActiveTags(prev => {
       const next = new Set(prev)
       next.has(tag) ? next.delete(tag) : next.add(tag)
+      persistPrefs({ tags: next })
+      return next
+    })
+  }
+
+  function toggleHideFinished() {
+    setHideFinished(prev => {
+      const next = !prev
+      persistPrefs({ hideFinished: next })
       return next
     })
   }
@@ -323,6 +391,46 @@ export default function GradedReader() {
     [paragraphGroups]
   )
   const sentenceRefs = useRef([])
+  const paragraphRefs = useRef([])
+  // Whether the user is currently scrolled near the bottom of whatever's
+  // been revealed so far. Drives the continue/reveal button's dual
+  // behavior: reveal-and-scroll when they're already at the bottom asking
+  // for more, vs. just scroll-back-down (no new reveal) when they've
+  // scrolled up to reread something and tap it — otherwise tapping it
+  // while rereading paragraph 2 would silently reveal paragraph 5 off-
+  // screen instead of taking them back to where they actually left off.
+  const [nearBottom, setNearBottom] = useState(true)
+  const pendingScrollRef = useRef(false)
+
+  useEffect(() => {
+    const el = readingBodyRef.current
+    if (!el || !currentPassage) return
+    const THRESHOLD = 80
+    function checkNearBottom() {
+      setNearBottom(el.scrollHeight - el.scrollTop - el.clientHeight < THRESHOLD)
+    }
+    checkNearBottom()
+    el.addEventListener('scroll', checkNearBottom, { passive: true })
+    return () => el.removeEventListener('scroll', checkNearBottom)
+  }, [currentPassage])
+
+  // After revealing a new paragraph via the continue button, scroll to it
+  // once it's actually rendered (can't scrollIntoView something that
+  // doesn't exist in the DOM yet on the same tick as the state update).
+  useEffect(() => {
+    if (!pendingScrollRef.current) return
+    pendingScrollRef.current = false
+    paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [revealedCount])
+
+  function handleContinueOrBack() {
+    if (revealedCount < paragraphGroups.length && nearBottom) {
+      pendingScrollRef.current = true
+      setRevealedCount(c => c + 1)
+    } else {
+      paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   // Sentence-level tap-to-translate — naive index-pairing between the
   // source and English sentence splits (no per-sentence data exists; the
@@ -410,9 +518,18 @@ export default function GradedReader() {
             <button className={`gr-tab ${mode === 'library' ? 'active' : ''}`} onClick={() => setMode('library')}>Library</button>
             <button className={`gr-tab ${mode === 'paste'   ? 'active' : ''}`} onClick={() => setMode('paste')}>Paste</button>
           </div>
+          {mode === 'library' && (
+            <button
+              className={`gr-hide-finished-btn ${hideFinished ? 'active' : ''}`}
+              onClick={toggleHideFinished}
+              title={hideFinished ? 'Show finished passages' : 'Hide finished passages'}
+            >
+              {hideFinished ? '🙈' : '👁'}
+            </button>
+          )}
           <HelpButton
             title="Graded Reader"
-            description="Browse passages by level, search titles/text/topics, or paste your own text to read. Tap 📇 on a passage to quiz yourself on just its vocab, and tap ✓ Mark as Finished when you're done — your progress and last-read spot are saved automatically."
+            description="Browse passages by level, search titles/text/topics, or paste your own text to read. Tap 📇 on a passage to quiz yourself on just its vocab, and tap ✓ Mark as Finished when you're done — your progress and last-read spot are saved automatically. Tap 👁 to hide passages you've already finished."
           />
         </div>
 
@@ -426,32 +543,36 @@ export default function GradedReader() {
               </div>
             ) : (
               <>
-                {/* ── "Continue reading" — resume the last-opened passage,
-                     if it's still in this language's library ── */}
-                {(() => {
-                  if (!lastPassage) return null
-                  const resume = passages.find(p => p.id === lastPassage.id)
-                  if (!resume) return null
-                  return (
-                    <button className="gr-continue-banner" onClick={() => openPassage(resume, true)}>
-                      <span className="gr-continue-icon">📖</span>
-                      <span className="gr-continue-text">
-                        <span className="gr-continue-label">Continue reading</span>
-                        <span className="gr-continue-title">{resume.title}</span>
+                {/* ── Top banners: finished-progress (left) + "Continue
+                     reading" resume banner (right), same pill shape,
+                     side by side rather than stacked full-width blocks ── */}
+                <div className="gr-top-banners">
+                  {passages.length > 0 && (
+                    <div className="gr-progress-summary">
+                      <span className="gr-progress-summary-icon">✓</span>
+                      <span className="gr-progress-summary-text">
+                        {passages.filter(p => finishedPassages.has(p.id)).length}/{passages.length}
                       </span>
-                      <span className="gr-continue-arrow">→</span>
-                    </button>
-                  )
-                })()}
+                    </div>
+                  )}
+                  {(() => {
+                    if (!lastPassage) return null
+                    const resume = passages.find(p => p.id === lastPassage.id)
+                    if (!resume) return null
+                    return (
+                      <button className="gr-continue-banner" onClick={() => openPassage(resume, true)}>
+                        <span className="gr-continue-icon">📖</span>
+                        <span className="gr-continue-text">
+                          <span className="gr-continue-label">Continue reading</span>
+                          <span className="gr-continue-title">{resume.title}</span>
+                        </span>
+                        <span className="gr-continue-arrow">→</span>
+                      </button>
+                    )
+                  })()}
+                </div>
 
-                {/* ── Reading progress summary ── */}
-                {passages.length > 0 && (
-                  <div className="gr-progress-summary">
-                    ✓ {passages.filter(p => finishedPassages.has(p.id)).length} of {passages.length} finished
-                  </div>
-                )}
-
-                {/* ── Filters — level chips, search, and a single flat tag row, all
+                {/* ── Filters — level chips, search, and a short fixed tag row, all
                      sharing the same horizontal padding so they read as one
                      aligned block instead of separately-indented rows ── */}
                 {(() => {
@@ -459,7 +580,7 @@ export default function GradedReader() {
                   return (
                     <div className="gr-filters">
                       {availableLevels.length > 0 && (
-                        <LevelChooser levels={availableLevels} value={activeLevels} onChange={setActiveLevels} className="gr-filter-levels" />
+                        <LevelChooser levels={availableLevels} value={activeLevel ? [activeLevel] : null} onChange={setActiveLevel} className="gr-filter-levels" single />
                       )}
                       <div className="gr-search-row">
                         <input
@@ -473,17 +594,21 @@ export default function GradedReader() {
                           <button className="gr-search-clear" onClick={() => setSearch('')} aria-label="Clear search">✕</button>
                         )}
                       </div>
-                      {availableTags.length > 0 && (
-                        <div className="gr-tag-scroll">
-                          {availableTags.map(tag => (
-                            <button key={tag} className={`gr-tag-chip ${activeTags.has(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
-                              {tagLabel(tag)}
-                            </button>
-                          ))}
+                      {(availableTags.length > 0 || activeTags.size > 0 || search) && (
+                        <div className="gr-tag-row">
+                          {(activeTags.size > 0 || search) && (
+                            <button className="gr-tag-clear" onClick={() => { setActiveTags(new Set()); persistPrefs({ tags: new Set() }); setSearch('') }} aria-label="Clear filters">✕</button>
+                          )}
+                          {availableTags.length > 0 && (
+                            <div className="gr-tag-scroll">
+                              {availableTags.map(({ tag, label }) => (
+                                <button key={tag} className={`gr-tag-chip ${activeTags.has(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {(activeTags.size > 0 || activeLevels || search) && (
-                        <button className="gr-tag-clear" onClick={() => { setActiveTags(new Set()); setActiveLevels(null); setSearch('') }}>✕ Clear filters</button>
                       )}
                     </div>
                   )
@@ -641,7 +766,7 @@ export default function GradedReader() {
 
         <div className="gr-text">
           {paragraphGroups.slice(0, revealedCount).map((group, pi) => (
-            <p key={pi} className="gr-paragraph">
+            <p key={pi} className="gr-paragraph" ref={el => { paragraphRefs.current[pi] = el }}>
               {group.map(({ text: sentence, index: i }) => (
                 <span
                   key={i}
@@ -662,9 +787,9 @@ export default function GradedReader() {
           ))}
         </div>
 
-        {revealedCount < paragraphGroups.length && (
-          <button className="gr-continue-reveal-btn" onClick={() => setRevealedCount(c => c + 1)}>
-            Continue reading ↓
+        {(revealedCount < paragraphGroups.length || !nearBottom) && (
+          <button className="gr-continue-reveal-btn" onClick={handleContinueOrBack}>
+            {revealedCount < paragraphGroups.length && nearBottom ? 'Continue reading ↓' : '↓ Back to last paragraph'}
           </button>
         )}
 

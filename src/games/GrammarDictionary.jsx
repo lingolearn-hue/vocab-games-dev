@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import LevelChooser from '../components/LevelChooser'
 import HelpButton from '../components/HelpButton'
@@ -22,21 +22,39 @@ const LEVEL_ORDER = {
   en: ['A1','A2','B1','B2','C1'],
 }
 
-function PatternCard({ pattern, initialOpen, vocabEntries }) {
-  const [open, setOpen] = useState(initialOpen ?? false)
+const GD_LEVEL_KEY = 'vocabGrammarDictLevel' // per-language: selected level
+
+function loadGdLevel(language) {
+  try {
+    const all = JSON.parse(localStorage.getItem(GD_LEVEL_KEY) || '{}')
+    return all[language] || null
+  } catch {
+    return null
+  }
+}
+
+function saveGdLevel(language, level) {
+  try {
+    const all = JSON.parse(localStorage.getItem(GD_LEVEL_KEY) || '{}')
+    all[language] = level
+    localStorage.setItem(GD_LEVEL_KEY, JSON.stringify(all))
+  } catch { /* storage unavailable — selection just won't persist */ }
+}
+
+function PatternCard({ pattern, isOpen, onToggle, vocabEntries }) {
   const [activeQuizType, setActiveQuizType] = useState(null)
 
   return (
-    <div className={`gd-card ${open ? 'open' : ''}`}>
-      <button className="gd-card-header" onClick={() => setOpen(o => !o)}>
+    <div className={`gd-card ${isOpen ? 'open' : ''}`}>
+      <button className="gd-card-header" onClick={onToggle}>
         <div className="gd-card-left">
           <span className="gd-level-badge">{pattern.level}</span>
           <span className="gd-title">{pattern.title}</span>
         </div>
-        <span className="gd-arrow">{open ? '▾' : '›'}</span>
+        <span className="gd-arrow">{isOpen ? '▾' : '›'}</span>
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="gd-card-body">
           <p className="gd-explanation">{pattern.explanation}</p>
 
@@ -134,8 +152,17 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
   const [allPatterns, setAllPatterns] = useState([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
-  const [activeLevels, setActiveLevels] = useState(null)  // single-select, null = all
+  // Level filter — single-select, persistent per language. Defaults to A1
+  // (or the lowest available level for languages without an A1) rather
+  // than "all levels", since a learner realistically stays at one level
+  // for a long stretch and starting unfiltered just adds noise.
+  const [activeLevels, setActiveLevelsRaw] = useState(null)
+  const levelPrefLoadedFor = useRef(null)
   const [showChapterOnly, setShowChapterOnly] = useState(!!chapterPatterns?.length)
+  // Accordion: only one pattern's content open at a time — opening another
+  // collapses whichever was open, rather than stacking several expanded
+  // cards' worth of explanation/examples/quiz buttons on screen at once.
+  const [openId, setOpenId] = useState(null)
 
   // Load global grammar file
   useEffect(() => {
@@ -176,6 +203,26 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
     const s = new Set(mergedPatterns.map(p => p.level))
     return levelOrder.filter(l => s.has(l))
   }, [mergedPatterns, levelOrder])
+
+  // Load the persisted level once per language, once we actually know
+  // which levels this language has (so we can fall back sensibly if a
+  // saved level no longer exists, or default to A1 the first time).
+  useEffect(() => {
+    if (!activeLanguage || levelPrefLoadedFor.current === activeLanguage || levels.length === 0) return
+    levelPrefLoadedFor.current = activeLanguage
+    const saved = loadGdLevel(activeLanguage)
+    const fallback = levels.includes('A1') ? 'A1' : levels[0]
+    setActiveLevelsRaw([levels.includes(saved) ? saved : fallback])
+  }, [activeLanguage, levels])
+
+  // Single-select: never allow clearing back to "no level selected" (i.e.
+  // "all levels") — always keep exactly one level active.
+  function setActiveLevels(next) {
+    const level = next?.[0]
+    if (!level) return
+    setActiveLevelsRaw([level])
+    saveGdLevel(activeLanguage, level)
+  }
 
   return (
     <div className="gd-screen">
@@ -227,7 +274,12 @@ export default function GrammarDictionary({ patterns: chapterPatterns, onBack })
           filtered.map(p => (
             <div key={p.id} className={`gd-item ${p.isChapter ? 'chapter-pattern' : ''}`}>
               {p.isChapter && <span className="gd-chapter-star" title="Current chapter">★</span>}
-              <PatternCard pattern={p} vocabEntries={vulgarFilteredEntries} />
+              <PatternCard
+                pattern={p}
+                isOpen={openId === p.id}
+                onToggle={() => setOpenId(id => (id === p.id ? null : p.id))}
+                vocabEntries={vulgarFilteredEntries}
+              />
             </div>
           ))
         )}

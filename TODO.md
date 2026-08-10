@@ -1,7 +1,7 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66au** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66av** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, etc.
@@ -18,6 +18,70 @@
   (`{version, date, repo}`). The footer in `Setup.jsx` now fetches it at
   runtime instead of a hardcoded string; `README.md`'s `Version: X.X —
   YYYY-MM-DD` line is kept in sync with it manually for now.
+- **Pending, not yet applied**: a merge of the `zh-g-023`/`zh-g-026`
+  duplicate ("既然…就") was found sitting uncommitted in the working tree
+  with no record of being intentionally authored — reverted out of this
+  push rather than shipped unreviewed. Saved at `/tmp/zh-en-pending.diff`
+  in the working container for review; apply with `git apply` if it turns
+  out to be wanted, otherwise redo the merge decision from scratch.
+
+## Graded Reader: filters, layout, and reading-flow polish (v0.66av)
+- [x] Level filter: single-select (was multi), persistent per-language,
+      defaults to the lowest available level rather than "all."
+- [x] "Hide finished" toggle (👁/🙈) in the header, persistent per-language.
+- [x] Tag filter row cut down to a fixed 3: Fiction / Non-fiction / Fairy
+      tale (was: every tag in the data, including a long unpredictable
+      topic: tail) — persistent per-language. "Clear filters" moved to a
+      compact button to the left of the tag row instead of a separate
+      block below it.
+- [x] Continue-reading button (reveal-as-you-go) now actually scrolls to
+      the newly-revealed paragraph. If the user scrolls back up to reread
+      something, it relabels to "↓ Back to last paragraph" and just
+      scrolls them back rather than confusingly revealing new content
+      off-screen.
+- [x] Layout pass: progress-summary pill moved beside the Continue-reading
+      banner (same pill shape, both ~10% shorter); level chips ~10%
+      shorter (scoped to the reader only, not a global change); vertical
+      spacing trimmed generally — addresses "50% of the screen lost
+      before the text even starts."
+
+## Grammar Dictionary: B1 coverage + UX fixes (v0.66av)
+- [x] Accordion behavior: only one pattern's content open at a time —
+      opening another collapses whichever was open (was: several cards
+      could be expanded simultaneously, cluttering the screen).
+- [x] Fixed a real ambiguity bug: "sie" (she/they) and "Sie" (formal) all
+      render as identical text once composed into a sentence and
+      capitalized at the start — worse, sie_sg/sie_pl take *different*
+      conjugated forms. Generators building a full sentence around one of
+      these three now exclude the other reading's correct form from the
+      distractor pool, so only one plausible answer is ever on screen.
+- [x] Accusative/dative article quizzes now use real carrier sentences
+      ("Ich sehe ___ Hund.", "Ich helfe ___ Frau.") instead of a bare
+      word — case only means something in context of what requires it.
+      Nominative stays a bare word deliberately (citation form).
+- [x] Level filter defaults to A1 on first open (or the lowest available
+      level, e.g. HSK1) and persists per-language, matching the same
+      pattern already built for the Graded Reader.
+- [x] Fixed a real UX bug in `TileOrderExercise` (shared by Grammar
+      Trainer's static patterns and both dynamic tile-order quiz
+      families): the tile bank removed placed tiles from the list,
+      causing the remaining tiles to reflow/jump on every tap. Bank now
+      stays at fixed positions — placed tiles grey out and become
+      unclickable instead of disappearing.
+- [x] New B1 content: Perfekt (participle formation + sein-vs-haben
+      auxiliary choice, reusing the same 7 curated regular stems as the
+      conjugation quiz), subordinate clause word order (verb-final,
+      dual-mode MC + tile-order), causal conjunctions weil-vs-denn.
+      `de-g-007` ("V2 with place") pointed at the existing V2 generator —
+      same rule, different lead word, no new logic needed.
+- [x] `grammar-dictionary-logic.md` updated throughout.
+- **Discussed, not yet built**: B2/C1 German content (~11 patterns) — a
+  leveled proposal was given (verb-final tile-order, Perfekt/passive
+  sentence-blank, and a generalized closed-set-in-sentence shape cover
+  most of it); other languages (ES/JA/ZH/EN) have zero dynamic quiz
+  coverage and would need a similar-sized project of their own.
+
+
 
 ## Graded Reader UI fixes (v0.66au)
 - [x] Fixed the "Vocab Quiz" button landing on top of the text for short

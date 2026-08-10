@@ -222,6 +222,8 @@
       "title": "Verb-second — with place",
       "explanation": "The verb stays in second position even when a place adverb leads the sentence.",
       "type": "tile-order",
+      "quizTypeMc": "de-verb-second-mc",
+      "quizTypeTiles": "de-verb-second-tiles",
       "tiles": [
         "Er",
         "in Berlin",
@@ -472,6 +474,7 @@
       "title": "Perfekt — regular verbs",
       "explanation": "The Perfekt is the standard spoken past tense in German, built from a conjugated auxiliary (haben or sein) plus a past participle at the end of the sentence. Regular (\"weak\") verbs form their participle as ge- + stem + -t — for example machen (\"to do\") becomes gemacht.",
       "type": "fill-blank",
+      "quizType": "de-perfekt-participle",
       "template": "Ich habe gestern ___ {[das Buch gelesen:gelesen|Deutsch gelernt:gelernt|Pizza gegessen:gegessen|Musik gehört:gehört]}.",
       "examples": [
         "Ich habe gestern Deutsch gelernt. (\"I learned German yesterday\")",
@@ -489,6 +492,7 @@
       "title": "Perfekt — sein vs haben",
       "explanation": "Choosing haben vs. sein for the Perfekt depends on the main verb: verbs of motion (fahren, gehen) or change of state use sein, while most other verbs — including actions like essen (to eat) and arbeiten (to work) — use haben.",
       "type": "fill-blank",
+      "quizType": "de-perfekt-aux",
       "template": "Er ___ nach Berlin {[gefahren:ist|gegangen:ist|gegessen:hat|gearbeitet:hat]}.",
       "examples": [
         "Er ist nach Berlin gefahren. (motion — \"he traveled to Berlin\")",
@@ -509,6 +513,8 @@
       "title": "Subordinate clause word order",
       "explanation": "In subordinate clauses (after weil, dass, ob, wenn...), the verb moves to the end.",
       "type": "tile-order",
+      "quizTypeMc": "de-subordinate-mc",
+      "quizTypeTiles": "de-subordinate-tiles",
       "tiles": [
         "Ich",
         "lerne",
@@ -575,6 +581,7 @@
       "title": "Coordinating vs subordinating conjunctions",
       "explanation": "Coordinating conjunctions (und, aber, oder, denn) don't change word order. Subordinating (weil, dass, wenn, obwohl) send the verb to end.",
       "type": "pick-correct",
+      "quizType": "de-causal-conj",
       "sentences": [
         {
           "text": "Ich lerne Deutsch, weil es interessant ist.",
@@ -595,16 +602,16 @@
     {
       "id": "de-g-021",
       "level": "B2",
-      "category": "tense",
+      "category": "konjunktiv",
       "title": "Konjunktiv II — würden + infinitive",
-      "explanation": "Konjunktiv II is used for hypothetical, unreal, or polite situations — the German equivalent of English \"would\". The most common way to form it is würde (conjugated) + the main verb's infinitive at the end of the sentence.",
+      "explanation": "Konjunktiv II expresses hypothetical, unreal, or polite situations — the German equivalent of English \"would\". The regular pattern is würde (conjugated) + the main verb's infinitive at the end of the sentence; a handful of very common verbs use their own \"strong\" Konjunktiv II forms instead (hätte, wäre, käme, gäbe), especially in the \"wenn\" (if) clause of a conditional sentence.",
       "type": "fill-blank",
       "template": "Wenn ich Zeit hätte, ___ ich mehr {[lesen:würde|reisen:würde|lernen:würde|schlafen:würde]}.",
       "examples": [
-        "Ich würde mehr reisen. (\"I would travel more\")",
-        "Er würde gern helfen. (\"he would gladly help\")"
+        "Wenn ich mehr Zeit hätte, würde ich mehr reisen. (\"if I had more time, I would travel more\")",
+        "Wenn er reicher wäre, würde er ein Haus kaufen. (\"if he were richer, he'd buy a house\")"
       ],
-      "hint": "Konjunktiv II: würde + infinitive at end.",
+      "hint": "würde + infinitive is the regular pattern; hätte/wäre are the strong forms of haben/sein used in the \"wenn\" clause.",
       "distractors": [
         "würde",
         "werde",
@@ -639,26 +646,6 @@
           ],
           "note": null
         }
-      ]
-    },
-    {
-      "id": "de-g-023",
-      "level": "B2",
-      "category": "konjunktiv",
-      "title": "Konjunktiv II — Irrealis (würde + Infinitiv)",
-      "explanation": "Konjunktiv II drückt Irreales, Hypothetisches oder höfliche Bitten aus. Muster: würde + Infinitiv, oder starke Formen (käme, gäbe, wäre).",
-      "type": "fill-blank",
-      "template": "Wenn ich mehr Zeit _____, würde ich mehr reisen.",
-      "examples": [
-        "Wenn ich mehr Zeit hätte, würde ich mehr reisen. (\"if I had more time, I would travel more\")",
-        "Wenn er reicher wäre, würde er ein Haus kaufen. (\"if he were richer, he'd buy a house\")"
-      ],
-      "hint": "Konjunktiv II von 'haben': hätte.",
-      "distractors": [
-        "hätte",
-        "habe",
-        "hatte",
-        "haben würde"
       ]
     },
     {
@@ -899,6 +886,7 @@
       "title": "Kausale Konjunktionen — weil vs denn",
       "explanation": "weil: subordinate clause, verb-last. denn: coordinating conjunction, main clause order (verb second). Both mean 'because' but have different word order consequences.",
       "type": "pick-correct",
+      "quizType": "de-causal-conj",
       "sentences": [
         {
           "text": "Ich bleibe zuhause, weil ich krank bin.",

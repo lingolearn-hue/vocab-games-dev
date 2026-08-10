@@ -46,6 +46,13 @@
   color: #111;
 }
 .toe-tile--bank:hover:not(:disabled) { background: #e0e8ff; color: #4f7ef8; }
+.toe-tile--used {
+  background: none;
+  color: #bbb;
+  opacity: 0.5;
+  cursor: default;
+}
+.toe-tile--used:hover { background: none; color: #bbb; }
 
 .toe-tile--placed {
   background: #4f7ef8;
@@ -142,5 +149,6 @@
 [data-theme="dark"] .toe-answer-zone.correct { background: #182d24; }
 [data-theme="dark"] .toe-answer-zone.wrong   { background: #2d1a19; }
 [data-theme="dark"] .toe-tile--bank { background: #2a2a2a; color: #ccc; }
+[data-theme="dark"] .toe-tile--used { background: none; color: #555; }
 [data-theme="dark"] .toe-reset-btn { background: #2a2a2a; color: #ccc; }
 [data-theme="dark"] .toe-wrong-feedback { background: #2d1a19; color: var(--dt2); }

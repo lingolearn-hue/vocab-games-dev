@@ -36,6 +36,17 @@ const DE_ARTICLE_CONFIGS = {
   'de-articles-dat-def':   { m: 'Dem (m)', f: 'Der', n: 'Dem (n)' },
 }
 
+// Accusative/dative quizzes get a real carrier sentence (blank + the noun,
+// built with a verb that actually requires that case) rather than a bare
+// word — the case only means anything in context of what's *requiring* it.
+// Nominative stays a bare word: it's the dictionary/citation form, so
+// showing it standalone is the normal, meaningful way to test it.
+const DE_ARTICLE_CARRIERS = {
+  'de-articles-acc-def':   noun => `Ich sehe ___ ${noun}.`,
+  'de-articles-acc-indef': noun => `Ich habe ___ ${noun}.`,
+  'de-articles-dat-def':   noun => `Ich helfe ___ ${noun}.`,
+}
+
 function generateGermanArticleQuestion(quizType, vocabEntries, level) {
   const config = DE_ARTICLE_CONFIGS[quizType]
   if (!config) return null
@@ -57,8 +68,9 @@ function generateGermanArticleQuestion(quizType, vocabEntries, level) {
     id: g,
     label: config[g],
   }))
+  const carrier = DE_ARTICLE_CARRIERS[quizType]
   return {
-    prompt: entry.entry,
+    prompt: carrier ? carrier(entry.entry) : entry.entry,
     correctAnswer: entry.gender,
     options,
   }
@@ -257,6 +269,21 @@ const DE_MODAL_FORMS = {
 // is only useful for the bare-prompt sein/haben/regular quizzes above).
 const PRONOUN_TEXT = { ich: 'ich', du: 'du', er: 'er', sie_sg: 'sie', es: 'es', wir: 'wir', ihr: 'ihr', sie_pl: 'sie', Sie: 'Sie' }
 
+// sie_sg ("she"), sie_pl ("they"), and Sie (formal "you") all render as the
+// identical surface text once composed into a sentence — worse, since the
+// subject is always sentence-initial here, sie_sg/sie_pl also get
+// capitalized to "Sie", making all three textually indistinguishable from
+// each other. That's fine for word-order quizzes (the correct word order
+// doesn't depend on which of the three is meant), but it's a real problem
+// wherever the *conjugated form itself* is the answer, since sie_sg takes
+// the singular ('er'-group) form while sie_pl/Sie take the plural
+// ('sie'-group) form — two different, both textually "valid-looking"
+// answers for what reads as the same prompt. Rather than picking one
+// meaning and hoping the learner guesses right, block the other reading's
+// form from ever appearing as a decoy, so only one plausible answer is
+// ever on screen.
+const SIE_AMBIGUOUS_OTHER_GROUP = { sie_sg: 'sie', sie_pl: 'er', Sie: 'er' }
+
 function generateGermanModalQuestion(modal) {
   const forms = DE_MODAL_FORMS[modal]
   if (!forms) return null
@@ -265,7 +292,8 @@ function generateGermanModalQuestion(modal) {
   const stem = pickRandom(Object.keys(V2_VERB_OBJECTS))
   const object = pickRandom(V2_VERB_OBJECTS[stem])
   const sentence = `${capitalize(PRONOUN_TEXT[pronoun.id])} ___ ${object} ${stem}en.`
-  const otherForms = [...new Set(Object.values(forms))].filter(f => f !== correctForm)
+  const blockedForm = SIE_AMBIGUOUS_OTHER_GROUP[pronoun.id] ? forms[SIE_AMBIGUOUS_OTHER_GROUP[pronoun.id]] : null
+  const otherForms = [...new Set(Object.values(forms))].filter(f => f !== correctForm && f !== blockedForm)
   const wrong = otherForms.sort(() => Math.random() - 0.5).slice(0, 2)
   const options = [correctForm, ...wrong]
     .sort(() => Math.random() - 0.5)
@@ -382,6 +410,146 @@ function generateGermanModalMcQuestion() {
   }
 }
 
+// ── Perfekt (present perfect) ────────────────────────────────────────────
+//
+// Reuses the same 7 curated, fully-regular stems as the regular-verb
+// conjugation quiz — their participles are trivially regular too
+// (ge- + stem + -t), so no new verb data is needed, just a different
+// computed form. Two related but distinct grammar points share this
+// verb/object pool: which participle (de-g-015) and which auxiliary
+// (de-g-016) — kept as separate generators since they blank out a
+// different word in the sentence.
+
+function participleOf(stem) {
+  return `ge${stem}t`
+}
+
+function generateGermanPerfektParticipleQuestion() {
+  const subject = pickRandom(V2_SUBJECTS)
+  const habenForm = DE_VERB_FORMS.haben[subject.group]
+  const stem = pickRandom(Object.keys(V2_VERB_OBJECTS))
+  const object = pickRandom(V2_VERB_OBJECTS[stem])
+  const correct = participleOf(stem)
+  // Distractors are real mistakes learners make forming a participle: no
+  // ge- prefix at all, or the -en ending strong/irregular verbs use
+  // instead of -t.
+  const wrong = [`${stem}t`, `ge${stem}en`]
+  const options = [correct, ...wrong]
+    .sort(() => Math.random() - 0.5)
+    .map(f => ({ id: f, label: f }))
+  return {
+    prompt: `${capitalize(subject.pronoun)} ${habenForm} gestern ${object} ___.`,
+    correctAnswer: correct,
+    options,
+  }
+}
+
+// A small curated set of sein-verbs (motion/change-of-state) — these are
+// all strong/irregular verbs, so unlike the haben-side their participles
+// can't be derived by rule and are just hand-supplied here.
+const DE_SEIN_VERBS = [
+  { participle: 'gefahren', tail: 'nach Berlin' },
+  { participle: 'gegangen', tail: 'nach Hause' },
+  { participle: 'gekommen', tail: 'zu spät' },
+]
+
+function generateGermanPerfektAuxQuestion() {
+  const subject = pickRandom(V2_SUBJECTS)
+  const habenForm = DE_VERB_FORMS.haben[subject.group]
+  const seinForm = DE_VERB_FORMS.sein[subject.group]
+  const useSein = Math.random() < 0.5
+  let tail, participle, correct, wrong
+  if (useSein) {
+    const v = pickRandom(DE_SEIN_VERBS)
+    tail = v.tail; participle = v.participle
+    correct = seinForm; wrong = habenForm
+  } else {
+    const stem = pickRandom(Object.keys(V2_VERB_OBJECTS))
+    tail = pickRandom(V2_VERB_OBJECTS[stem]); participle = participleOf(stem)
+    correct = habenForm; wrong = seinForm
+  }
+  const options = [correct, wrong]
+    .sort(() => Math.random() - 0.5)
+    .map(f => ({ id: f, label: f }))
+  return {
+    prompt: `${capitalize(subject.pronoun)} ___ ${tail} ${participle}.`,
+    correctAnswer: correct,
+    options,
+  }
+}
+
+// ── Subordinate clause word order (verb-final) ───────────────────────────
+//
+// Same dual-mode shape as V2/modal word order, but the fixed element is
+// different: after a subordinating conjunction (weil), the finite verb
+// moves all the way to the *end* of the clause rather than staying in
+// position 2. A small curated set of sein + adjective clauses keeps this
+// self-contained (no vocab dependency) and avoids irregular-verb pitfalls.
+
+const DE_SUB_MAIN_CLAUSES = ['Ich bleibe zu Hause,', 'Er geht nicht raus,', 'Wir feiern nicht,']
+const DE_SUB_ADJECTIVES = ['krank', 'müde', 'glücklich', 'hungrig', 'traurig']
+
+function buildSubordinateCore() {
+  const main = pickRandom(DE_SUB_MAIN_CLAUSES)
+  const subject = pickRandom(V2_SUBJECTS)
+  const seinForm = DE_VERB_FORMS.sein[subject.group]
+  const adjective = pickRandom(DE_SUB_ADJECTIVES)
+  // base = everything except the verb, in its natural (already-correct)
+  // order; the verb belongs at the very end for this construction.
+  const base = [main, 'weil', subject.pronoun, adjective]
+  const words = [...base, seinForm]
+  return { words, seinForm, base }
+}
+
+function generateGermanSubordinateTilesQuestion() {
+  const { words } = buildSubordinateCore()
+  let shuffledIdx
+  do {
+    shuffledIdx = words.map((_, i) => i).sort(() => Math.random() - 0.5)
+  } while (shuffledIdx.every((v, i) => v === i))
+  // First word (the main clause) already carries its own capital letter
+  // and trailing comma — nothing else needs re-casing since nothing else
+  // in this construction can end up sentence-initial.
+  const tiles = shuffledIdx.map(i => words[i])
+  const order = words.map((_, p) => shuffledIdx.indexOf(p))
+  return { tiles, answers: [{ order, note: null }] }
+}
+
+function generateGermanSubordinateMcQuestion() {
+  const { words, seinForm, base } = buildSubordinateCore()
+  const correctSentence = words.join(' ') + '.'
+  // Wrong variants: verb right after "weil" (before the subject), or verb
+  // in the normal V2 position right after the subject — the single most
+  // common real mistake (using main-clause word order in a weil-clause).
+  const wrongSlots = [2, 3]
+  const wrongSentences = wrongSlots.map(slot => {
+    const rest = [...base]
+    rest.splice(slot, 0, seinForm)
+    return rest.join(' ') + '.'
+  })
+  const options = [correctSentence, ...wrongSentences]
+    .sort(() => Math.random() - 0.5)
+    .map(s => ({ id: s, label: s }))
+  return {
+    prompt: 'Which word order is correct?',
+    correctAnswer: correctSentence,
+    options,
+  }
+}
+
+// ── weil vs. denn (causal conjunctions) ──────────────────────────────────
+//
+// The clean, minimal instantiation of "coordinating vs. subordinating
+// conjunctions" (de-g-020 is the broader version of the same underlying
+// point, and reuses this exact generator rather than a separate one).
+// Reuses the generic sentence-blank mechanism from the preposition
+// quizzes — same shape, different closed word set.
+
+const DE_CAUSAL_CONJ_SENTENCES = {
+  weil: 'Ich bleibe zu Hause, ___ ich krank bin.',
+  denn: 'Ich bleibe zu Hause, ___ ich bin krank.',
+}
+
 // ── Registry ─────────────────────────────────────────────────────────────
 
 export const QUIZ_GENERATORS = {
@@ -401,6 +569,11 @@ export const QUIZ_GENERATORS = {
   'de-prep-dative':        () => generateGermanPrepositionQuestion(DE_DAT_PREP_SENTENCES),
   'de-modal-order-mc':     () => generateGermanModalMcQuestion(),
   'de-modal-order-tiles':  () => generateGermanModalTilesQuestion(),
+  'de-perfekt-participle': () => generateGermanPerfektParticipleQuestion(),
+  'de-perfekt-aux':        () => generateGermanPerfektAuxQuestion(),
+  'de-subordinate-mc':     () => generateGermanSubordinateMcQuestion(),
+  'de-subordinate-tiles':  () => generateGermanSubordinateTilesQuestion(),
+  'de-causal-conj':        () => generateGermanPrepositionQuestion(DE_CAUSAL_CONJ_SENTENCES),
 }
 
 export function hasQuiz(quizType) {

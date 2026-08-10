@@ -68,6 +68,19 @@
 .gr-tab:first-child { border-left: none; }
 .gr-tab.active { background: #4f7ef8; color: #fff; font-weight: 600; }
 
+.gr-hide-finished-btn {
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 7px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.gr-hide-finished-btn.active { border-color: #4f7ef8; background: #eef2ff; }
+
 .gr-trans-toggle {
   background: none;
   border: 1.5px solid #e0e0e0;
@@ -121,14 +134,14 @@
 .gr-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem 1.2rem 2rem;
+  padding: 0.7rem 1.2rem 2rem;
 }
 
 /* Passage list */
 .gr-passage-list {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
+  gap: 1.15rem;
 }
 
 /* Series grouping — a named group of level-variants of the same story
@@ -139,7 +152,7 @@
 .gr-series {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .gr-series-header {
@@ -414,14 +427,24 @@
   line-height: 1.6;
 }
 
-/* "Continue reading" banner */
+/* Top banners row: finished-progress pill (left) + "Continue reading"
+   resume banner (right) — same pill shape/height so they read as one
+   paired unit instead of two differently-styled stacked blocks. Both
+   ~10% shorter than the original single-block versions. */
+.gr-top-banners {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin: 0.5rem 1rem 0;
+}
+
 .gr-continue-banner {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  width: calc(100% - 2rem);
-  margin: 0.8rem 1rem 0;
-  padding: 0.7rem 0.9rem;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.63rem 0.8rem;
   border: none;
   border-radius: 12px;
   background: #eef2ff;
@@ -429,19 +452,27 @@
   text-align: left;
   -webkit-appearance: none;
 }
-.gr-continue-icon { font-size: 1.3rem; flex-shrink: 0; }
+.gr-continue-icon { font-size: 1.15rem; flex-shrink: 0; }
 .gr-continue-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
-.gr-continue-label { font-size: 0.68rem; font-weight: 700; color: #4f7ef8; text-transform: uppercase; letter-spacing: 0.03em; }
-.gr-continue-title { font-size: 0.9rem; font-weight: 700; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gr-continue-arrow { font-size: 1.1rem; color: #4f7ef8; flex-shrink: 0; }
+.gr-continue-label { font-size: 0.66rem; font-weight: 700; color: #4f7ef8; text-transform: uppercase; letter-spacing: 0.03em; }
+.gr-continue-title { font-size: 0.85rem; font-weight: 700; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gr-continue-arrow { font-size: 1rem; color: #4f7ef8; flex-shrink: 0; }
 
-/* Reading progress summary */
+/* Reading progress summary — same pill shape/height as the continue
+   banner, sized to its content rather than flexing to fill space. */
 .gr-progress-summary {
-  padding: 0.6rem 1rem 0;
-  font-size: 0.78rem;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.63rem 0.75rem;
+  border-radius: 12px;
+  background: #eefaf3;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: #22a06b;
 }
+.gr-progress-summary-icon { font-size: 0.85rem; }
 
 
 /* Dark mode */
@@ -455,14 +486,28 @@
 .gr-filters {
   border-bottom: 1px solid #f0f0f0;
   background: #fafafa;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.3rem;
 }
 
 .gr-filter-levels {
-  padding: 0.7rem 1rem 0.5rem;
+  padding: 0.5rem 1rem 0.35rem;
 }
 .gr-filter-levels .chip-row-inner {
   gap: calc(0.4rem * var(--chip-row-scale, 1));
+}
+/* ~10% shorter than the app-wide default level chip — scoped to the
+   reader's filter row only, not a global level-chip change. */
+.gr-filter-levels .level-chip {
+  padding-top: calc(0.27rem * var(--chip-row-scale, 1));
+  padding-bottom: calc(0.27rem * var(--chip-row-scale, 1));
+  font-size: calc(0.68rem * var(--chip-row-scale, 1));
+}
+
+.gr-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1rem 0.25rem;
 }
 
 .gr-tag-scroll {
@@ -471,12 +516,13 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 0 1rem 0.3rem;
+  flex: 1;
+  min-width: 0;
 }
 .gr-tag-scroll::-webkit-scrollbar { display: none; }
 
 .gr-tag-chip {
-  padding: 0.3rem 0.7rem;
+  padding: 0.28rem 0.65rem;
   border-radius: 20px;
   border: 1.5px solid #e0e0e0;
   background: none;
@@ -493,18 +539,19 @@
 .gr-tag-chip.active { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
 
 .gr-tag-clear {
-  display: block;
-  width: calc(100% - 2rem);
-  margin: 0.3rem 1rem 0;
-  padding: 0.35rem;
-  border-radius: 20px;
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
   border: 1.5px solid #e5534b;
   background: none;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: #e5534b;
   cursor: pointer;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   -webkit-appearance: none;
 }
 .gr-tag-clear:hover { background: #e5534b22; }
@@ -537,6 +584,8 @@
 
 [data-theme="dark"] .gr-screen              { background: #111; }
 [data-theme="dark"] .gr-header              { border-color: #222; }
+[data-theme="dark"] .gr-hide-finished-btn        { border-color: #333; }
+[data-theme="dark"] .gr-hide-finished-btn.active { border-color: #4f7ef8; background: #1a2340; }
 [data-theme="dark"] .gr-back                { color: var(--dt2); }
 [data-theme="dark"] .gr-back:hover          { color: #f0f0f0; }
 [data-theme="dark"] .gr-title               { color: #f0f0f0; }
@@ -562,7 +611,7 @@
 [data-theme="dark"] .gr-sentence-translation { background: #1a2340; color: var(--dt2); }
 [data-theme="dark"] .gr-continue-banner     { background: #1a2340; }
 [data-theme="dark"] .gr-continue-title      { color: #f0f0f0; }
-[data-theme="dark"] .gr-progress-summary    { color: #3ecf8e; }
+[data-theme="dark"] .gr-progress-summary    { background: #10281c; color: #3ecf8e; }
 [data-theme="dark"] .gr-finish-btn          { background: #1a1a1a; border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gr-finish-btn:hover    { border-color: #22a06b; color: #22a06b; }
 [data-theme="dark"] .gr-finish-btn.is-finished { background: #10281c; border-color: #22a06b; color: #3ecf8e; }

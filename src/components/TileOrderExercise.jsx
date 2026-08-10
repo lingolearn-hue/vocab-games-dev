@@ -21,22 +21,18 @@ import './TileOrderExercise.css'
  */
 export default function TileOrderExercise({ tiles, answers, onCheck, onNext, prompt }) {
   const [placed,    setPlaced]    = useState([])
-  const [remaining, setRemaining] = useState(() => tiles.map((_, i) => i))
   const [feedback,  setFeedback]  = useState(null)
   const [alternatives, setAlternatives] = useState([])
   const [wrongMsg,  setWrongMsg]  = useState('')
 
   function placeTile(idx) {
-    if (feedback) return
+    if (feedback || placed.includes(idx)) return
     setPlaced(p => [...p, idx])
-    setRemaining(r => r.filter(i => i !== idx))
   }
 
   function removeTile(pos) {
     if (feedback) return
-    const idx = placed[pos]
     setPlaced(p => p.filter((_, i) => i !== pos))
-    setRemaining(r => [...r, idx].sort((a, b) => a - b))
   }
 
   function submit() {
@@ -54,7 +50,6 @@ export default function TileOrderExercise({ tiles, answers, onCheck, onNext, pro
 
   function reset() {
     setPlaced([])
-    setRemaining(tiles.map((_, i) => i))
     setFeedback(null)
     setAlternatives([])
     setWrongMsg('')
@@ -78,15 +73,18 @@ export default function TileOrderExercise({ tiles, answers, onCheck, onNext, pro
           ))
         }
       </div>
+      {/* Bank stays at fixed positions the whole time — tiles are greyed
+          out and blocked once placed rather than removed from the list,
+          so the remaining tiles don't reflow/jump around on every tap. */}
       <div className="toe-tile-bank">
-        {remaining.map(idx => (
+        {tiles.map((word, idx) => (
           <button
             key={idx}
-            className="toe-tile toe-tile--bank"
+            className={`toe-tile toe-tile--bank ${placed.includes(idx) ? 'toe-tile--used' : ''}`}
             onClick={() => placeTile(idx)}
-            disabled={!!feedback}
+            disabled={!!feedback || placed.includes(idx)}
           >
-            {tiles[idx]}
+            {word}
           </button>
         ))}
       </div>
