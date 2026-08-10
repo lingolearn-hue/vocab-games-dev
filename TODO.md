@@ -1,7 +1,7 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66av** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66aw** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, etc.
@@ -24,6 +24,15 @@
   push rather than shipped unreviewed. Saved at `/tmp/zh-en-pending.diff`
   in the working container for review; apply with `git apply` if it turns
   out to be wanted, otherwise redo the merge decision from scratch.
+
+## Graded Reader: small polish (v0.66aw)
+- [x] Passage cards in the library list shortened (padding/gap trimmed).
+- [x] Read-aloud now speaks the story title first, before the sentence-
+      by-sentence narration.
+- [x] Story-type filter chips (Fiction/Non-fiction/Fairy tale) changed
+      from multi- to single-select — tapping the active one clears it
+      (unlike the level chooser, "no type filter" is a meaningful state
+      here). Persisted prefs shape changed from `tags: []` to `tag: null`.
 
 ## Graded Reader: filters, layout, and reading-flow polish (v0.66av)
 - [x] Level filter: single-select (was multi), persistent per-language,

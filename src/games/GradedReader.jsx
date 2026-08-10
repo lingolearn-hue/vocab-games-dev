@@ -227,9 +227,12 @@ export default function GradedReader() {
   // Active level (single-select, persistent per language — a learner
   // realistically stays at one level for a long stretch, so defaulting to
   // "all levels" every time they open the reader just adds noise) + active
-  // tags (persistent) + hide-finished toggle (persistent).
+  // story-type tag (single-select, persistent — "and" logic across
+  // fiction/non-fiction/fairy-tale doesn't really make sense, and tapping
+  // the active chip again clears it, unlike the level chooser) + hide-
+  // finished toggle (persistent).
   const [activeLevel, setActiveLevelRaw] = useState(null)
-  const [activeTags,  setActiveTags]     = useState(new Set())
+  const [activeTag,   setActiveTagRaw]   = useState(null)
   const [hideFinished, setHideFinished]  = useState(false)
   const prefsLoadedForLanguage = useRef(null)
 
@@ -240,14 +243,14 @@ export default function GradedReader() {
     prefsLoadedForLanguage.current = language
     const saved = loadReaderPrefs(language)
     setActiveLevelRaw(saved?.level && availableLevels.includes(saved.level) ? saved.level : availableLevels[0])
-    setActiveTags(new Set(saved?.tags ?? []))
+    setActiveTagRaw(saved?.tag ?? null)
     setHideFinished(!!saved?.hideFinished)
   }, [language, availableLevels])
 
   function persistPrefs(patch) {
     saveReaderPrefs(language, {
       level: patch.level ?? activeLevel,
-      tags: [...(patch.tags ?? activeTags)],
+      tag: patch.tag !== undefined ? patch.tag : activeTag,
       hideFinished: patch.hideFinished ?? hideFinished,
     })
   }
@@ -266,10 +269,7 @@ export default function GradedReader() {
     return passages.filter(p => {
       if (activeLevel && p.level !== activeLevel) return false
       if (hideFinished && finishedPassages.has(p.id)) return false
-      if (activeTags.size > 0) {
-        const ptags = new Set(p.tags ?? [])
-        if (![...activeTags].every(t => ptags.has(t))) return false
-      }
+      if (activeTag && !(p.tags ?? []).includes(activeTag)) return false
       if (q) {
         const textMatch = p.title?.toLowerCase().includes(q) ||
                            p.text?.toLowerCase().includes(q) ||
@@ -282,15 +282,12 @@ export default function GradedReader() {
       }
       return true
     })
-  }, [passages, activeLevel, activeTags, hideFinished, finishedPassages, search])
+  }, [passages, activeLevel, activeTag, hideFinished, finishedPassages, search])
 
   function toggleTag(tag) {
-    setActiveTags(prev => {
-      const next = new Set(prev)
-      next.has(tag) ? next.delete(tag) : next.add(tag)
-      persistPrefs({ tags: next })
-      return next
-    })
+    const next = activeTag === tag ? null : tag
+    setActiveTagRaw(next)
+    persistPrefs({ tag: next })
   }
 
   function toggleHideFinished() {
@@ -474,6 +471,10 @@ export default function GradedReader() {
     setRevealedCount(paragraphGroups.length) // read-aloud can land on any sentence, so reveal everything first
     wakeLockRef.current = await requestWakeLock()
     const rate = settings.listeningSpeechRate ?? 0.9
+    if (currentPassage?.title) {
+      await speakAndWait(currentPassage.title, language, { rate })
+      if (playingRef.current) await sleep(SENTENCE_PAUSE_MS)
+    }
     for (let i = 0; i < sentences.length; i++) {
       if (!playingRef.current) break
       setReadingIndex(i)
@@ -594,15 +595,15 @@ export default function GradedReader() {
                           <button className="gr-search-clear" onClick={() => setSearch('')} aria-label="Clear search">✕</button>
                         )}
                       </div>
-                      {(availableTags.length > 0 || activeTags.size > 0 || search) && (
+                      {(availableTags.length > 0 || activeTag || search) && (
                         <div className="gr-tag-row">
-                          {(activeTags.size > 0 || search) && (
-                            <button className="gr-tag-clear" onClick={() => { setActiveTags(new Set()); persistPrefs({ tags: new Set() }); setSearch('') }} aria-label="Clear filters">✕</button>
+                          {(activeTag || search) && (
+                            <button className="gr-tag-clear" onClick={() => { setActiveTagRaw(null); persistPrefs({ tag: null }); setSearch('') }} aria-label="Clear filters">✕</button>
                           )}
                           {availableTags.length > 0 && (
                             <div className="gr-tag-scroll">
                               {availableTags.map(({ tag, label }) => (
-                                <button key={tag} className={`gr-tag-chip ${activeTags.has(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
+                                <button key={tag} className={`gr-tag-chip ${activeTag === tag ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
                                   {label}
                                 </button>
                               ))}
