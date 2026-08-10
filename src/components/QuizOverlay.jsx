@@ -1,20 +1,28 @@
 import { useState, useEffect, useRef } from 'react'
 import { generateQuestion } from '../engine/grammarQuiz'
+import TileOrderExercise from './TileOrderExercise'
 import './QuizOverlay.css'
 
 const AUTO_ADVANCE_MS = 700
 
 /**
  * Lightweight practice overlay for a single grammar point — an open-ended
- * run of auto-generated multiple-choice questions. Distinct from Grammar
- * Trainer's full exercise flow: no category/type navigation, no persisted
- * score history, just quick in-place practice for whichever grammar point
- * you tapped. There's no round limit — it keeps going for as long as the
- * user wants; they stop it themselves (✕ or "Stop") whenever they're done,
- * and see a running tally either way. A wrong pick turns that option red
- * and stays on the same question — other options remain pickable — so the
- * user keeps retrying until they get it right. A correct answer auto-
- * advances to the next question after a brief "correct" flash.
+ * run of auto-generated questions. Distinct from Grammar Trainer's full
+ * exercise flow: no category/type navigation, no persisted score history,
+ * just quick in-place practice for whichever grammar point you tapped.
+ * There's no round limit — it keeps going for as long as the user wants;
+ * they stop it themselves (✕ or "Stop") whenever they're done, and see a
+ * running tally either way.
+ *
+ * Generators return one of two question shapes, and this overlay renders
+ * whichever one it gets:
+ *   - multiple-choice: { prompt, correctAnswer, options: [{id,label}] } —
+ *     a wrong pick turns that option red and stays on the same question
+ *     (other options remain pickable) so the user retries until correct;
+ *     a correct answer auto-advances after a brief flash.
+ *   - tile-order: { tiles, answers } — handed off to TileOrderExercise
+ *     (the same tap-to-place component Grammar Trainer uses), which has
+ *     its own check/feedback/Next flow.
  */
 export default function QuizOverlay({ quizType, title, level, vocabEntries, onClose }) {
   const [round, setRound] = useState(1)
@@ -25,19 +33,21 @@ export default function QuizOverlay({ quizType, title, level, vocabEntries, onCl
   const [stopped, setStopped] = useState(false)
   const answered = round - 1 // rounds fully completed so far
   const advanceTimer = useRef(null)
+  const isTileQuestion = !!question?.tiles
 
   useEffect(() => () => clearTimeout(advanceTimer.current), [])
 
-  function choose(option) {
-    if (feedback === 'correct' || wrongOptions.includes(option)) return
-    const isCorrect = option === question.correctAnswer
+  function choose(option, e) {
+    if (feedback === 'correct' || wrongOptions.includes(option.id)) return
+    e?.currentTarget?.blur()
+    const isCorrect = option.id === question.correctAnswer
     if (isCorrect) {
       setFeedback('correct')
       setCorrectCount(c => c + 1)
       advanceTimer.current = setTimeout(next, AUTO_ADVANCE_MS)
     } else {
       setFeedback('wrong')
-      setWrongOptions(w => [...w, option])
+      setWrongOptions(w => [...w, option.id])
     }
   }
 
@@ -55,6 +65,11 @@ export default function QuizOverlay({ quizType, title, level, vocabEntries, onCl
     setFeedback(null)
     setStopped(false)
     setQuestion(generateQuestion(quizType, vocabEntries, level))
+  }
+
+  function stop() {
+    clearTimeout(advanceTimer.current)
+    setStopped(true)
   }
 
   if (!question) {
@@ -80,33 +95,50 @@ export default function QuizOverlay({ quizType, title, level, vocabEntries, onCl
         </div>
 
         {!stopped ? (
-          <>
-            <div className="qo-progress">Round {round} · {correctCount} correct</div>
-            <div className="qo-prompt">{question.prompt}</div>
-            <div className="qo-options">
-              {question.options.map(opt => {
-                const isWrongPick = wrongOptions.includes(opt)
-                const isCorrectPick = feedback === 'correct' && opt === question.correctAnswer
-                const cls = isCorrectPick ? 'correct' : isWrongPick ? 'wrong' : ''
-                return (
-                  <button
-                    key={opt}
-                    className={`qo-option ${cls}`}
-                    onClick={() => choose(opt)}
-                    disabled={feedback === 'correct' || isWrongPick}
-                  >
-                    {opt}
-                  </button>
-                )
-              })}
-            </div>
-            {feedback === 'wrong' && (
+          isTileQuestion ? (
+            <>
+              <div className="qo-progress">Round {round} · {correctCount} correct</div>
+              <TileOrderExercise
+                key={round}
+                tiles={question.tiles}
+                answers={question.answers}
+                onCheck={isCorrect => { if (isCorrect) setCorrectCount(c => c + 1) }}
+                onNext={next}
+              />
               <div className="qo-round-actions">
-                <span className="qo-feedback-msg qo-feedback-wrong">Not quite — try again</span>
-                <button className="qo-stop-btn" onClick={() => { clearTimeout(advanceTimer.current); setStopped(true) }}>Stop</button>
+                <span />
+                <button className="qo-stop-btn" onClick={stop}>Stop</button>
               </div>
-            )}
-          </>
+            </>
+          ) : (
+            <>
+              <div className="qo-progress">Round {round} · {correctCount} correct</div>
+              <div className="qo-prompt">{question.prompt}</div>
+              <div className="qo-options">
+                {question.options.map(opt => {
+                  const isWrongPick = wrongOptions.includes(opt.id)
+                  const isCorrectPick = feedback === 'correct' && opt.id === question.correctAnswer
+                  const cls = isCorrectPick ? 'correct' : isWrongPick ? 'wrong' : ''
+                  return (
+                    <button
+                      key={opt.id}
+                      className={`qo-option ${cls}`}
+                      onClick={e => choose(opt, e)}
+                      disabled={feedback === 'correct' || isWrongPick}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+              {feedback === 'wrong' && (
+                <div className="qo-round-actions">
+                  <span className="qo-feedback-msg qo-feedback-wrong">Not quite — try again</span>
+                  <button className="qo-stop-btn" onClick={stop}>Stop</button>
+                </div>
+              )}
+            </>
+          )
         ) : (
           <div className="qo-summary">
             <div className="qo-summary-score">{correctCount} / {answered}</div>

@@ -128,6 +128,33 @@
 .gr-passage-list {
   display: flex;
   flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* Series grouping — a named group of level-variants of the same story
+   (e.g. "Mein Freund" at A1/A2/B1...). Was completely unstyled before,
+   rendering as bare unspaced divs with no visual separation from a plain
+   list — the header + gap here is what actually makes it read as a
+   distinct group instead of just more list items. */
+.gr-series {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.gr-series-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.1rem;
+}
+.gr-series-icon { font-size: 0.9rem; }
+.gr-series-name { font-size: 0.85rem; font-weight: 700; color: #333; }
+.gr-series-count { font-size: 0.72rem; color: #999; }
+
+.gr-series-cards {
+  display: flex;
+  flex-direction: column;
   gap: 0.6rem;
 }
 
@@ -264,7 +291,7 @@
 
 /* Reading body */
 .gr-reading-body {
-  padding: 1.2rem 1.2rem 5rem;
+  padding: 1.2rem 1.2rem 2rem;
   position: relative;
 }
 
@@ -286,37 +313,48 @@
   flex-shrink: 0;
 }
 
-/* Floating "Vocab Quiz" button — bottom-right of the reading screen,
-   launches a flashcard session (via sessionEntries) scoped to just this
-   passage's vocab. Positioned relative to .gr-screen so it stays anchored
-   to the centered column rather than the raw viewport edge. */
-.gr-vocab-fab {
-  position: absolute;
-  right: 1.2rem;
-  bottom: 1.2rem;
+/* Reveal-as-you-go progress bar */
+.gr-progress {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.65rem 1rem;
-  border: none;
-  border-radius: 24px;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+.gr-progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #ececec;
+  overflow: hidden;
+}
+.gr-progress-fill {
+  height: 100%;
   background: #4f7ef8;
-  color: #fff;
-  font-size: 0.85rem;
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+.gr-progress-label {
+  font-size: 0.72rem;
   font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gr-continue-reveal-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 1.2rem;
+  padding: 0.75rem;
+  border: 1.5px dashed #c8d4fb;
+  border-radius: 12px;
+  background: #f4f7ff;
+  color: #4f7ef8;
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(79,126,248,0.4);
   -webkit-appearance: none;
-  appearance: none;
-  z-index: 5;
 }
-.gr-vocab-fab:hover { background: #3a6ae0; }
-.gr-vocab-fab-count {
-  background: rgba(255,255,255,0.25);
-  border-radius: 10px;
-  padding: 0.05rem 0.4rem;
-  font-size: 0.75rem;
-}
+.gr-continue-reveal-btn:hover { background: #eef2ff; border-color: #4f7ef8; }
 
 /* Text */
 .gr-text {
@@ -506,10 +544,15 @@
 [data-theme="dark"] .gr-tag-chip            { border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gr-tag-chip.active     { background: #4f7ef8; border-color: #4f7ef8; color: #fff; }
 [data-theme="dark"] .gr-passage-card        { background: #1a1a1a; border-color: #222; }
+[data-theme="dark"] .gr-series-name         { color: #e0e0e0; }
+[data-theme="dark"] .gr-series-count        { color: var(--dt2); }
 [data-theme="dark"] .gr-passage-card:hover  { background: #222; }
 [data-theme="dark"] .gr-passage-title       { color: #f0f0f0; }
 [data-theme="dark"] .gr-passage-tag         { background: #2a2a2a; color: var(--dt2); }
 [data-theme="dark"] .gr-text                { color: #f0f0f0; }
+[data-theme="dark"] .gr-progress-bar        { background: #2a2a2a; }
+[data-theme="dark"] .gr-progress-label      { color: var(--dt2); }
+[data-theme="dark"] .gr-continue-reveal-btn { background: #1a2340; border-color: #333; }
 [data-theme="dark"] .gr-translation         { background: #1a1a1a; border-color: #333; color: var(--dt2); }
 [data-theme="dark"] .gr-search              { background: #1a1a1a; border-color: #333; color: #f0f0f0; }
 [data-theme="dark"] .gr-cover-placeholder   { background: #1e1e1e; border-color: #333; }

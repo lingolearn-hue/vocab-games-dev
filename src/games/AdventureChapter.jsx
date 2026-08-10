@@ -45,7 +45,7 @@ function VocabPhase({ chapter, entries, language }) {
       <div className="advc-game-row">
         <span className="advc-game-label">Train with:</span>
         <div className="advc-game-btns">
-          <button className="advc-game-btn" onClick={() => launchGame('flashcard')} disabled={entries.length < 1}>🃏 Flashcard</button>
+          <button className="advc-game-btn" onClick={() => launchGame('flashcard')} disabled={entries.length < 1}>📇 Flashcard</button>
           <button className="advc-game-btn" onClick={() => launchGame('pairmatch')} disabled={entries.length < 2}>🔗 Match</button>
           <button className="advc-game-btn" onClick={() => launchGame('racecar')}   disabled={entries.length < 3}>🏎 Race Car</button>
         </div>

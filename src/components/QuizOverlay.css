@@ -78,7 +78,11 @@
   -webkit-appearance: none;
   transition: border-color 0.12s, background 0.12s, transform 0.1s;
 }
-.qo-option:hover:not(:disabled) { border-color: #4f7ef8; background: #f0f4ff; }
+@media (hover: hover) {
+  .qo-option:hover:not(:disabled) { border-color: #4f7ef8; background: #f0f4ff; }
+}
+.qo-option:focus { outline: none; }
+.qo-option:focus-visible { outline: 2px solid #4f7ef8; outline-offset: 1px; }
 .qo-option:active:not(:disabled) { transform: scale(0.96); }
 .qo-option:disabled { cursor: default; }
 .qo-option.correct { border-color: #22a06b; background: #e9f8f1; color: #22a06b; }

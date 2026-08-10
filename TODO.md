@@ -1,7 +1,7 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66at** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66au** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, etc.
@@ -14,6 +14,99 @@
   and `gh-pages`. `vocab-games-dev` also had a stale, unrelated `source`
   branch (last touched at v0.63ac) — also deleted; `main` was always the
   real working branch there.
+- Version tracking moved to a single source of truth: `public/version.json`
+  (`{version, date, repo}`). The footer in `Setup.jsx` now fetches it at
+  runtime instead of a hardcoded string; `README.md`'s `Version: X.X —
+  YYYY-MM-DD` line is kept in sync with it manually for now.
+
+## Graded Reader UI fixes (v0.66au)
+- [x] Fixed the "Vocab Quiz" button landing on top of the text for short
+      passages — was `position: absolute` against the content column
+      (whose height is just "however long the passage is"), so short
+      passages didn't have room for `bottom: 1.2rem` to clear the text.
+      Moved it (and added a new "🔗 Matching game" button alongside it,
+      reusing the same `sessionEntries` scoping PairMatch already
+      supports) into the header row as compact icon buttons instead of a
+      floating FAB.
+- [x] Reveal-as-you-go: passages open showing only the first paragraph,
+      with a "Continue reading ↓" button to reveal one more at a time —
+      addresses passages reading as an intimidating wall of text on open.
+      Still one continuous scroll (deliberately not building real
+      pagination — see reasoning below); a thin progress bar + "Paragraph
+      N of M" sits above the text for multi-paragraph passages. Read-aloud
+      reveals everything immediately (it can land on any sentence);
+      "Continue reading" (resume-last-passage) restores reveal progress
+      alongside scroll position.
+- [x] Fixed a real duplicate-content bug: single-entry "series" (most
+      fairy tales currently — one passage per tale) were rendering a
+      "📚 Title · 1 level" header directly above a card repeating the same
+      title. Now folded into the plain standalone list; genuine multi-
+      level series (Mein Freund, Meine Katze, Der Markt, Windsurfen) keep
+      the grouped header.
+- [x] Found and fixed: `.gr-series`/`.gr-series-header`/`.gr-series-cards`
+      had zero CSS rules anywhere — rendering as unstyled default divs
+      with no visual grouping at all. Added proper spacing/typography.
+- [x] Read-aloud pacing: added a 500ms pause between sentences (previously
+      back-to-back with zero gap). Added Screen Wake Lock during playback
+      so the screen doesn't dim/lock during hands-free listening
+      (best-effort — silently no-ops on unsupported browsers).
+- [x] Unified the Flashcard icon on 📇 everywhere (main menu, Adventure
+      chapter game picker) — was 🃏 (joker/playing card), which didn't
+      mean anything; 📇 (card index) was already established for the same
+      concept inside Graded Reader's vocab-quiz button.
+- **Discussed, deliberately not built**: real page-based pagination
+  (scroll-vs-pages) and a horizontal level-carousel for series. Scroll
+  stays the reading model — pagination would need dynamic page-height
+  measurement and would make every position-aware feature (read-aloud
+  auto-scroll, tap-to-translate, last-read-spot) page-aware for little
+  real benefit on a phone. The series carousel idea was dropped as
+  over-engineering: a learner filtered to their own level only ever sees
+  one card per series anyway, so cross-level browsing barely comes up.
+
+## Grammar Dictionary: A1–A2 German practice coverage (v0.66au)
+- [x] können/müssen: full-sentence prompts ("Ich ___ Klavier spielen."),
+      reusing the curated verb/object pairs from the V2 generator for the
+      infinitive half of the sentence. Added conjugation tables matching
+      the sein/haben treatment.
+- [x] Accusative/dative prepositions: one hand-curated, correctly-cased
+      example sentence per preposition rather than one shared template
+      crossed against all of them — distractors drawn from the same
+      case-family so the exercise tests knowing which preposition fits,
+      not just noticing the noun phrase's case.
+- [x] Modal word order (dual-mode MC + tile-order on "Modal verb sentence
+      structure"): same shape as V2 word order, with the infinitive fixed
+      at the very end after the modal.
+- [x] "Inversion after adverb" pointed at the existing V2 generators
+      instead of duplicating logic — it tests the identical rule. Flagged
+      as a content-level duplicate alongside the other duplicate-pattern
+      flags (see grammar-dictionary-logic.md).
+- [x] `de-g-014`'s explanation expanded (was one terse sentence); `de-g-010`
+      through `de-g-013` already solid from the earlier German audit.
+- [x] `grammar-dictionary-logic.md` updated throughout with the new
+      question shapes, all new generators, the TileOrderExercise
+      extraction, and a refreshed gaps list.
+
+## Grammar Dictionary: verb conjugation + V2 word order (v0.66at)
+- [x] sein/haben/regular-verb conjugation quizzes: 9-pronoun prompts (with
+      sie/Sie forms disambiguated in the label), 3 options drawn from the
+      verb's own real forms. 10 hand-picked fully-regular stems for the
+      regular-verb quiz (no vowel change, no -e- spelling insertion).
+      Added conjugation tables to the explanation area for all three.
+- [x] Verb-second (V2) word order, dual-mode: "🎯 Multiple choice" and
+      "🔀 Arrange the words" buttons, both derived from the same curated
+      compositional sentence builder (5 subjects × 7 curated verb/object
+      pairs × 3 adverbs) so MC distractors and the tile-order answer can
+      never drift out of sync.
+- [x] Extracted the tap-to-place tile-order interaction out of Grammar
+      Trainer into a shared `components/TileOrderExercise.jsx`, so both
+      the static pattern pool and the new dynamic quiz use the same
+      component (scoring/advancement left to the caller via callbacks).
+- [x] Article quiz options now always ordered m/f/n (never shuffled);
+      genders sharing a surface form (nominative/dative indefinite "ein"/
+      "dem") get disambiguated labels ("Ein (m)" / "Ein (n)").
+- [x] Practice sessions: correct answers auto-advance after a brief flash;
+      wrong picks turn that option red and stay on the same question for
+      retry (other options remain pickable) instead of a dead-end.
 
 ## Grammar Dictionary practice overhaul (v0.66at)
 - [x] Fixed two real article-quiz bugs: nominative indefinite offered an

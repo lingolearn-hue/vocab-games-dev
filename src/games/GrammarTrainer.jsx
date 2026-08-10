@@ -4,12 +4,12 @@ import {
   loadGrammarPatterns, sortPatternsByPriority, filterPatternsByLevel,
   getLevelsFromPatterns, getCategoriesFromPatterns,
   instantiateTemplate, buildPickCorrectOptions, buildOptions,
-  checkTileOrder, getAlternatives,
   recordGrammarCorrect, recordGrammarWrong, getAllGrammarScores,
 } from '../engine/grammar'
 import LevelChooser from '../components/LevelChooser'
 import HelpButton from '../components/HelpButton'
 import QuizOverlay from '../components/QuizOverlay'
+import TileOrderExercise from '../components/TileOrderExercise'
 import { hasQuiz } from '../engine/grammarQuiz'
 import './GrammarTrainer.css'
 
@@ -201,111 +201,19 @@ function PickCorrect({ pattern, onResult }) {
 }
 
 function TileOrder({ pattern, onResult }) {
-  const [placed,    setPlaced]    = useState([])
-  const [remaining, setRemaining] = useState(() => pattern.tiles.map((_, i) => i))
-  const [feedback,  setFeedback]  = useState(null)
-  const [alternatives, setAlternatives] = useState([])
-  const [wrongMsg,  setWrongMsg]  = useState('')
-
-  function placeTile(idx) {
-    if (feedback) return
-    setPlaced(p => [...p, idx])
-    setRemaining(r => r.filter(i => i !== idx))
-  }
-
-  function removeTile(pos) {
-    if (feedback) return
-    const idx = placed[pos]
-    setPlaced(p => p.filter((_, i) => i !== pos))
-    setRemaining(r => [...r, idx].sort((a, b) => a - b))
-  }
-
-  function submit() {
-    if (placed.length !== pattern.tiles.length) return
-    const { correct, matchedAnswer } = checkTileOrder(pattern.tiles, placed, pattern.answers)
-    if (correct) {
-      setAlternatives(getAlternatives(pattern.tiles, pattern.answers, matchedAnswer))
-      setFeedback('correct')
-      recordGrammarCorrect(pattern.id)
-    } else {
-      setWrongMsg(pattern.answers[0].order.map(i => pattern.tiles[i]).join(' '))
-      setFeedback('wrong')
-      recordGrammarWrong(pattern.id)
-    }
-  }
-
-  function reset() {
-    setPlaced([])
-    setRemaining(pattern.tiles.map((_, i) => i))
-    setFeedback(null)
-    setAlternatives([])
-    setWrongMsg('')
+  function handleCheck(isCorrect) {
+    if (isCorrect) recordGrammarCorrect(pattern.id)
+    else recordGrammarWrong(pattern.id)
   }
 
   return (
     <div className="gt-exercise">
-      <p className="gt-tile-prompt">Arrange the tiles into the correct sentence order.</p>
-      <div className={`gt-answer-zone ${feedback || ''}`}>
-        {placed.length === 0
-          ? <span className="gt-answer-placeholder">Tap tiles below to build the sentence…</span>
-          : placed.map((idx, pos) => (
-            <button
-              key={pos}
-              className="gt-tile gt-tile--placed"
-              onClick={() => removeTile(pos)}
-              disabled={!!feedback}
-            >
-              {pattern.tiles[idx]}
-            </button>
-          ))
-        }
-      </div>
-      <div className="gt-tile-bank">
-        {remaining.map(idx => (
-          <button
-            key={idx}
-            className="gt-tile gt-tile--bank"
-            onClick={() => placeTile(idx)}
-            disabled={!!feedback}
-          >
-            {pattern.tiles[idx]}
-          </button>
-        ))}
-      </div>
-      {!feedback && (
-        <div className="gt-tile-controls">
-          <button className="gt-reset-btn" onClick={reset}>↺ Reset</button>
-          <button
-            className="gt-submit-btn"
-            onClick={submit}
-            disabled={placed.length !== pattern.tiles.length}
-          >
-            Check
-          </button>
-        </div>
-      )}
-      {feedback === 'correct' && (
-        <div className="gt-correct-feedback">
-          <span>✓ Correct!</span>
-          {alternatives.map((alt, i) => (
-            <div key={i} className="gt-alternative">
-              Also correct: <strong>{alt.sentence}</strong>
-              {alt.note && <span className="gt-alt-note"> — {alt.note}</span>}
-            </div>
-          ))}
-        </div>
-      )}
-      {feedback === 'wrong' && (
-        <div className="gt-wrong-feedback">
-          <span className="gt-wrong-label">✗ Not quite.</span>
-          One correct order: <strong>{wrongMsg}</strong>
-        </div>
-      )}
-      {feedback && (
-        <button className="gt-next-btn" onClick={() => onResult(feedback === 'correct')}>
-          Next →
-        </button>
-      )}
+      <TileOrderExercise
+        tiles={pattern.tiles}
+        answers={pattern.answers}
+        onCheck={handleCheck}
+        onNext={onResult}
+      />
     </div>
   )
 }

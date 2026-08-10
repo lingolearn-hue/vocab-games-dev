@@ -24,7 +24,7 @@ const LEVEL_ORDER = {
 
 function PatternCard({ pattern, initialOpen, vocabEntries }) {
   const [open, setOpen] = useState(initialOpen ?? false)
-  const [quizOpen, setQuizOpen] = useState(false)
+  const [activeQuizType, setActiveQuizType] = useState(null)
 
   return (
     <div className={`gd-card ${open ? 'open' : ''}`}>
@@ -40,10 +40,38 @@ function PatternCard({ pattern, initialOpen, vocabEntries }) {
         <div className="gd-card-body">
           <p className="gd-explanation">{pattern.explanation}</p>
 
+          {pattern.conjugationTable && (
+            <table className="gd-conj-table">
+              <tbody>
+                {pattern.conjugationTable.map((row, i) => (
+                  <tr key={i}>
+                    <td className="gd-conj-pronoun">{row.pronoun}</td>
+                    <td className="gd-conj-form">{row.form}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
           {hasQuiz(pattern.quizType) && (
-            <button className="gd-quiz-btn" onClick={() => setQuizOpen(true)}>
+            <button className="gd-quiz-btn" onClick={() => setActiveQuizType(pattern.quizType)}>
               🎯 Practise this
             </button>
+          )}
+
+          {(hasQuiz(pattern.quizTypeMc) || hasQuiz(pattern.quizTypeTiles)) && (
+            <div className="gd-quiz-btn-row">
+              {hasQuiz(pattern.quizTypeMc) && (
+                <button className="gd-quiz-btn" onClick={() => setActiveQuizType(pattern.quizTypeMc)}>
+                  🎯 Multiple choice
+                </button>
+              )}
+              {hasQuiz(pattern.quizTypeTiles) && (
+                <button className="gd-quiz-btn" onClick={() => setActiveQuizType(pattern.quizTypeTiles)}>
+                  🔀 Arrange the words
+                </button>
+              )}
+            </div>
           )}
 
           {pattern.type === 'fill-blank' && (
@@ -56,7 +84,6 @@ function PatternCard({ pattern, initialOpen, vocabEntries }) {
               ) : (
                 <div className="gd-template">{pattern.template}</div>
               )}
-              <div className="gd-hint">{pattern.hint}</div>
             </div>
           )}
 
@@ -88,13 +115,13 @@ function PatternCard({ pattern, initialOpen, vocabEntries }) {
         </div>
       )}
 
-      {quizOpen && (
+      {activeQuizType && (
         <QuizOverlay
-          quizType={pattern.quizType}
+          quizType={activeQuizType}
           title={pattern.title}
           level={pattern.level}
           vocabEntries={vocabEntries}
-          onClose={() => setQuizOpen(false)}
+          onClose={() => setActiveQuizType(null)}
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { filterByLevel } from '../engine/settings'
 import LevelChips from './LevelChips'
@@ -11,7 +11,7 @@ const LANGUAGE_FLAGS = { zh: '🇨🇳', es: '🇪🇸', de: '🇩🇪', ja: '�
 const LANGUAGE_NAMES = { zh: 'Chinese', es: 'Spanish', de: 'German', ja: 'Japanese', fr: 'French' }
 
 const DRILL_GAMES = [
-  { id: 'flashcard', label: '🃏 Flashcard',  desc: 'Swipe to learn' },
+  { id: 'flashcard', label: '📇 Flashcard',  desc: 'Swipe to learn' },
   { id: 'racecar',   label: '🏎 Race Car',   desc: 'Steer into the answer' },
   { id: 'pairmatch', label: '🔗 Pair Match', desc: 'Connect word pairs' },
   { id: 'typing',    label: '⌨️ Typing',     desc: 'Type from memory' },
@@ -88,6 +88,14 @@ export default function Setup() {
   const [reverseMenuOpen,   setReverseMenuOpen]   = useState(false)
   const [openGroup,      setOpenGroup]      = useState('drills')
   const [tutorialOpen,   setTutorialOpen]   = useState(false)
+  const [appVersion, setAppVersion] = useState(null)
+
+  useEffect(() => {
+    fetch(`${import.meta.env.BASE_URL}version.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(v => v && setAppVersion(v.version))
+      .catch(() => {})
+  }, [])
 
   // Filtered by the same global level selection LevelChips drives, so the
   // stats-bar count matches what's actually shown/playable, not the full list.
@@ -266,7 +274,7 @@ export default function Setup() {
         <p className="hint">{activeLanguage ? 'Loading vocabulary…' : 'Tap the flag above to choose a language.'}</p>
       )}
 
-      <div className="setup-version">v0.66at</div>
+      <div className="setup-version">{appVersion ? `v${appVersion}` : ''}</div>
 
       {tutorialOpen && <Tutorial onDone={() => setTutorialOpen(false)} />}
     </div>

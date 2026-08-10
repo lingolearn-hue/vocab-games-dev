@@ -18,6 +18,33 @@ const TAG_LABELS = {
   'advanced':    'Advanced',
 }
 
+// Read-aloud pacing: a short breather between sentences so playback doesn't
+// run sentences together with zero gap, which reads too rushed to actually
+// follow along with the text on screen.
+const SENTENCE_PAUSE_MS = 500
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Screen Wake Lock — keeps the screen from dimming/locking while a passage
+// is being read aloud, since there's no touch input during hands-free
+// playback to reset the OS's own idle timer. Best-effort: silently no-ops
+// on unsupported browsers or if permission is denied, since losing the
+// wake lock just means the screen can dim again, not a broken feature.
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) return await navigator.wakeLock.request('screen')
+  } catch {
+    // unsupported, denied, or page not visible — fine, just no wake lock
+  }
+  return null
+}
+
+function releaseWakeLock(lock) {
+  try { lock?.release?.() } catch { /* already released */ }
+}
+
 function tagLabel(tag) {
   if (TAG_LABELS[tag]) return TAG_LABELS[tag]
   if (tag.startsWith('topic:'))  return tag.slice(6).replace(/-/g, ' ')
@@ -80,6 +107,12 @@ export default function GradedReader() {
   // (no stable id worth persisting across sessions).
   const [lastPassage, setLastPassage] = useState(loadLastPassage)
   const readingBodyRef = useRef(null)
+  // Reveal-as-you-go: passages open showing just the first paragraph, with
+  // a "Continue reading ↓" tap to reveal the next one — keeps a long
+  // passage from landing as one intimidating wall of text on open. Reading
+  // aloud (which can land on any sentence) reveals everything immediately
+  // rather than trying to stay in sync with manual reveals.
+  const [revealedCount, setRevealedCount] = useState(1)
   const textAreaRef = useRef(null)
 
   useEffect(() => {
@@ -204,14 +237,16 @@ export default function GradedReader() {
     setActivePassage(p)
     setCustomPassage(null)
     setShowTranslation(false)
-    const saved = { id: p.id, scrollTop: restoreScroll ? (loadLastPassage()?.scrollTop ?? 0) : 0 }
+    const priorForThisPassage = restoreScroll ? loadLastPassage() : null
+    setRevealedCount(priorForThisPassage?.id === p.id ? (priorForThisPassage.revealedCount || 1) : 1)
+    const saved = { id: p.id, scrollTop: priorForThisPassage?.scrollTop ?? 0, revealedCount: priorForThisPassage?.revealedCount ?? 1 }
     setLastPassage(saved)
     localStorage.setItem(LAST_PASSAGE_KEY, JSON.stringify(saved))
   }
 
-  // Save scroll position for "continue reading" as the user scrolls the
-  // passage, and restore it (if resuming the same passage) once the DOM
-  // for the new passage has actually rendered.
+  // Save scroll position + reveal progress for "continue reading" as the
+  // user scrolls/reveals, and restore both (if resuming the same passage)
+  // once the DOM for the new passage has actually rendered.
   useEffect(() => {
     const el = readingBodyRef.current
     if (!el || !activePassage) return
@@ -219,18 +254,19 @@ export default function GradedReader() {
       el.scrollTop = lastPassage.scrollTop
     }
     function onScroll() {
-      const next = { id: activePassage.id, scrollTop: el.scrollTop }
+      const next = { id: activePassage.id, scrollTop: el.scrollTop, revealedCount }
       localStorage.setItem(LAST_PASSAGE_KEY, JSON.stringify(next))
     }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
-  }, [activePassage])
+  }, [activePassage, revealedCount])
 
   function openCustom() {
     if (!pastedText.trim()) return
     setCustomPassage({ id: 'custom', title: pastedTitle || 'Custom text', text: pastedText, translation: null })
     setActivePassage(null)
     setShowTranslation(false)
+    setRevealedCount(1)
   }
 
   const currentPassage = activePassage ?? customPassage
@@ -250,12 +286,19 @@ export default function GradedReader() {
     setScreen('flashcard')
   }
 
+  function startVocabMatch() {
+    if (passageEntries.length < 2) return
+    setSessionEntries(passageEntries)
+    setScreen('pairmatch')
+  }
+
   // ── Read-aloud ─────────────────────────────────────────────────────────
   // Speaks the passage sentence-by-sentence (not as one long utterance) so
   // the UI can highlight reading progress and so play/pause has a clean
   // boundary to stop at rather than cutting off mid-sentence.
   const [readingIndex, setReadingIndex] = useState(-1)  // -1 = not playing
   const playingRef = useRef(false)
+  const wakeLockRef = useRef(null)
 
   // Paragraph-aware sentence splitting — splitSentences() on the whole
   // passage text was flattening every paragraph into one continuous run,
@@ -320,26 +363,40 @@ export default function GradedReader() {
   async function playPassage() {
     if (playingRef.current || sentences.length === 0) return
     playingRef.current = true
+    setRevealedCount(paragraphGroups.length) // read-aloud can land on any sentence, so reveal everything first
+    wakeLockRef.current = await requestWakeLock()
     const rate = settings.listeningSpeechRate ?? 0.9
     for (let i = 0; i < sentences.length; i++) {
       if (!playingRef.current) break
       setReadingIndex(i)
       await speakAndWait(sentences[i], language, { rate })
+      // A brief pause between sentences — spoken back-to-back with zero gap
+      // reads too rushed to actually follow along with the text.
+      if (playingRef.current && i < sentences.length - 1) await sleep(SENTENCE_PAUSE_MS)
     }
     playingRef.current = false
     setReadingIndex(-1)
+    releaseWakeLock(wakeLockRef.current)
+    wakeLockRef.current = null
   }
 
   function stopPassage() {
     playingRef.current = false
     stopSpeech()
     setReadingIndex(-1)
+    releaseWakeLock(wakeLockRef.current)
+    wakeLockRef.current = null
   }
 
   // Stop any in-progress read-aloud when switching passages or leaving the screen
   useEffect(() => {
     setExpandedSentence(null)
-    return () => { playingRef.current = false; stopSpeech() }
+    return () => {
+      playingRef.current = false
+      stopSpeech()
+      releaseWakeLock(wakeLockRef.current)
+      wakeLockRef.current = null
+    }
   }, [currentPassage])
 
   // ── List view ──────────────────────────────────────────────────────────────
@@ -447,6 +504,17 @@ export default function GradedReader() {
                           standalones.push(p)
                         }
                       })
+                      // A "series" of one isn't a series — it's just a passage
+                      // whose title happens to match its own series tag (e.g.
+                      // fairy tales with a single level so far). Rendering it
+                      // as a grouped section repeats that name right above
+                      // itself for no reason, so fold true one-offs into the
+                      // standalone list instead.
+                      const realSeries = {}
+                      Object.entries(seriesMap).forEach(([name, list]) => {
+                        if (list.length > 1) realSeries[name] = list
+                        else standalones.push(...list)
+                      })
 
                       const renderCard = (p) => {
                         const passageSpans = tokenise(p.text, augmentedLookup, language)
@@ -478,7 +546,7 @@ export default function GradedReader() {
 
                       return (
                         <>
-                          {Object.entries(seriesMap).map(([seriesName, seriesPassages]) => (
+                          {Object.entries(realSeries).map(([seriesName, seriesPassages]) => (
                             <div key={seriesName} className="gr-series">
                               <div className="gr-series-header">
                                 <span className="gr-series-icon">📚</span>
@@ -492,7 +560,7 @@ export default function GradedReader() {
                           ))}
                           {standalones.length > 0 && (
                             <div className="gr-series">
-                              {Object.keys(seriesMap).length > 0 && (
+                              {Object.keys(realSeries).length > 0 && (
                                 <div className="gr-series-header">
                                   <span className="gr-series-icon">📄</span>
                                   <span className="gr-series-name">Standalone</span>
@@ -543,17 +611,36 @@ export default function GradedReader() {
         {currentPassage.translation && (
           <button className={`gr-trans-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation(t => !t)}>EN</button>
         )}
+        {passageEntries.length > 0 && (
+          <button className="gr-play-btn" onClick={startVocabQuiz} title="Practice this passage's vocab as flashcards">
+            📇
+          </button>
+        )}
+        {passageEntries.length >= 2 && (
+          <button className="gr-play-btn" onClick={startVocabMatch} title="Practice this passage's vocab as a matching game">
+            🔗
+          </button>
+        )}
         <HelpButton
           title="Graded Reader"
-          description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, and tap 🔊 to have the passage read aloud sentence by sentence."
+          description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, tap 🔊 to have the passage read aloud sentence by sentence, and use 📇/🔗 to practice this passage's vocab as flashcards or a matching game."
         />
       </div>
 
       <div className="gr-body gr-reading-body" ref={readingBodyRef}>
         <div className="gr-cover-placeholder" aria-hidden="true">🖼️</div>
 
+        {paragraphGroups.length > 1 && (
+          <div className="gr-progress">
+            <div className="gr-progress-bar">
+              <div className="gr-progress-fill" style={{ width: `${(Math.min(revealedCount, paragraphGroups.length) / paragraphGroups.length) * 100}%` }} />
+            </div>
+            <span className="gr-progress-label">Paragraph {Math.min(revealedCount, paragraphGroups.length)} of {paragraphGroups.length}</span>
+          </div>
+        )}
+
         <div className="gr-text">
-          {paragraphGroups.map((group, pi) => (
+          {paragraphGroups.slice(0, revealedCount).map((group, pi) => (
             <p key={pi} className="gr-paragraph">
               {group.map(({ text: sentence, index: i }) => (
                 <span
@@ -575,6 +662,12 @@ export default function GradedReader() {
           ))}
         </div>
 
+        {revealedCount < paragraphGroups.length && (
+          <button className="gr-continue-reveal-btn" onClick={() => setRevealedCount(c => c + 1)}>
+            Continue reading ↓
+          </button>
+        )}
+
         {showTranslation && currentPassage.translation && (
           <div className="gr-translation"><p>{currentPassage.translation}</p></div>
         )}
@@ -592,12 +685,6 @@ export default function GradedReader() {
             onClick={() => toggleFinished(activePassage.id)}
           >
             {finishedPassages.has(activePassage.id) ? '✓ Finished' : 'Mark as Finished'}
-          </button>
-        )}
-
-        {passageEntries.length > 0 && (
-          <button className="gr-vocab-fab" onClick={startVocabQuiz} title="Practice this passage's vocab as flashcards">
-            📇 Vocab Quiz <span className="gr-vocab-fab-count">{passageEntries.length}</span>
           </button>
         )}
       </div>
