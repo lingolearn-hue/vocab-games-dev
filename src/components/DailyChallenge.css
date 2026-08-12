@@ -18,12 +18,14 @@
   border-radius: 20px;
   max-width: 640px;
   width: 100%;
+  /* Fixed footprint so switching tabs/buttons never reflows the overlay. */
+  height: 640px;
   max-height: 94dvh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   padding: 1.5rem 1.5rem 1.2rem;
+  overflow: hidden;
 }
 [data-theme="dark"] .dc-panel { background: #1c1c1e; }
 
@@ -42,39 +44,66 @@
 .dc-close:hover { color: #333; }
 [data-theme="dark"] .dc-close:hover { color: #eee; }
 
-.dc-title { margin: 0 0 0.2rem; font-size: 1.3rem; }
-.dc-subtitle { margin: 0 0 1rem; font-size: 0.85rem; color: var(--dt2); }
+.dc-title { margin: 0 0 0.2rem; font-size: 1.3rem; flex-shrink: 0; }
+.dc-subtitle {
+  margin: 0 0 0.7rem;
+  font-size: 0.85rem;
+  color: var(--dt2);
+  flex-shrink: 0;
+}
 
-.dc-body { display: flex; gap: 1rem; min-height: 0; }
+/* Visible text labels for the icon-only rail, shown as a legend under the
+   header/tagline. Keeps the rail compact while still surfacing full labels
+   (readability + accessibility) and highlighting the active tab. */
+.dc-tab-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  margin: 0 0 0.9rem;
+  flex-shrink: 0;
+}
+.dc-tab-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--dt2);
+}
+.dc-tab-legend-item.active {
+  color: inherit;
+  font-weight: 700;
+}
+.dc-tab-legend-icon { font-size: 0.85rem; }
 
+.dc-body { display: flex; gap: 1rem; flex: 1; min-height: 0; }
+
+/* Icon-only rail, pinned fully to the left edge. */
 .dc-rail {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   flex-shrink: 0;
-  width: 84px;
+  width: 48px;
 }
 .dc-rail-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  justify-content: center;
   background: none;
   border: 1px solid var(--border, #ddd);
   border-radius: 12px;
-  padding: 0.5rem 0.3rem;
+  padding: 0.6rem 0;
   cursor: pointer;
-  font-size: 0.65rem;
-  line-height: 1.1;
   color: inherit;
-  text-align: center;
+  width: 48px;
+  height: 48px;
 }
 .dc-rail-btn.active { background: var(--accent-soft, #eef4ff); border-color: var(--accent, #4a7cff); }
-.dc-rail-icon { font-size: 1.2rem; }
+.dc-rail-icon { font-size: 1.25rem; line-height: 1; }
 [data-theme="dark"] .dc-rail-btn { border-color: #444; }
 [data-theme="dark"] .dc-rail-btn.active { background: #2a3348; border-color: #6a9bff; }
 
-.dc-content { flex: 1; min-width: 0; }
+.dc-content { flex: 1; min-width: 0; overflow-y: auto; }
 
 /* Today's task */
 .dc-today { display: flex; flex-direction: column; gap: 0.8rem; }
@@ -89,6 +118,11 @@
   padding: 0.8rem 1rem;
 }
 [data-theme="dark"] .dc-today-flavor { background: #2a2a2e; }
+
+/* Reserved-height slots so accepting/favoriting/examples appearing or
+   disappearing never shifts the layout below them. */
+.dc-examples-slot { min-height: 3.4rem; }
+.dc-done-count-slot { min-height: 1.1rem; }
 
 .dc-today-actions, .dc-today-main-actions {
   display: flex;
@@ -119,8 +153,14 @@
   line-height: 1;
 }
 .dc-star.on { color: #f0b400; }
+.dc-star-inline { font-size: 1.1rem; flex-shrink: 0; }
+.dc-star-grid {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.3rem;
+  font-size: 0.9rem;
+}
 
-.dc-accepted-badge { font-size: 0.75rem; color: var(--dt2); }
 .dc-done-count { font-size: 0.75rem; color: var(--dt2); }
 
 .dc-examples {
@@ -138,7 +178,7 @@
 .dc-example-line-small { font-size: 0.72rem; }
 [data-theme="dark"] .dc-examples { border-left-color: #3a4258; }
 
-/* Flavor-change "AI generation" orb animation */
+/* "AI generation" orb animation — yellow for task change, blue for flavor change */
 .dc-orb-active { justify-content: center; }
 .dc-orb {
   position: relative;
@@ -152,8 +192,13 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, #8ab4ff 0%, #4a7cff 45%, rgba(74,124,255,0) 75%);
   animation: dc-orb-pulse 0.55s ease-in-out;
+}
+.dc-orb-flavor .dc-orb-glow {
+  background: radial-gradient(circle, #8ab4ff 0%, #4a7cff 45%, rgba(74,124,255,0) 75%);
+}
+.dc-orb-task .dc-orb-glow {
+  background: radial-gradient(circle, #ffe28a 0%, #f0b400 45%, rgba(240,180,0,0) 75%);
 }
 @keyframes dc-orb-pulse {
   0%   { transform: scale(0.4); opacity: 0.3; }
@@ -178,11 +223,18 @@
 .dc-list-row-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
 .dc-empty { font-size: 0.85rem; color: var(--dt2); }
 
-/* Grid browser */
-.dc-grid-wrap { overflow-x: auto; }
+/* Grid browser — every column header and every cell share fixed,
+   identical dimensions; columns with fewer flavors simply run shorter
+   (ragged at the bottom) rather than stretching to match. */
+.dc-grid-wrap { overflow-x: auto; height: 100%; }
 .dc-grid { display: flex; gap: 0.6rem; min-width: max-content; }
 .dc-grid-col { display: flex; flex-direction: column; gap: 0.4rem; width: 150px; }
 .dc-grid-col-header {
+  height: 2.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   font-size: 0.7rem;
   font-weight: 600;
   text-align: center;
@@ -194,27 +246,43 @@
 
 .dc-grid-cell {
   position: relative;
-  text-align: left;
   background: var(--panel-alt, #f6f7fa);
   border: 2px solid transparent;
   border-radius: 8px;
-  padding: 0.4rem 0.5rem;
-  font-size: 0.7rem;
-  cursor: pointer;
-  min-height: 3.2rem;
+  height: 4.4rem;
+  overflow: hidden;
 }
 [data-theme="dark"] .dc-grid-cell { background: #2a2a2e; }
 .dc-grid-cell-fav { border-color: #f0b400; }
+.dc-grid-cell-main {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.4rem 1.4rem 0.4rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: inherit;
+}
+.dc-grid-cell-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .dc-grid-cell-count {
   position: absolute;
   bottom: 0.25rem;
   right: 0.4rem;
   font-size: 0.65rem;
   color: var(--dt2);
+  background: inherit;
 }
 
 @media (max-width: 520px) {
+  .dc-panel { height: 680px; }
   .dc-body { flex-direction: column; }
-  .dc-rail { flex-direction: row; width: 100%; overflow-x: auto; }
-  .dc-rail-btn { flex-direction: row; gap: 0.3rem; flex-shrink: 0; }
+  .dc-rail { flex-direction: row; width: 100%; overflow-x: auto; height: 48px; }
 }

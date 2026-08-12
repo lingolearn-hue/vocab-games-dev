@@ -8,6 +8,12 @@
  * CHALLENGE_TYPE), each of which has several "flavor" variants. "Today's
  * task" = today's weekday's core idea + a chosen/rotating flavor.
  *
+ * Flavors carry a stable string `id`, not an array index. This matters:
+ * favorites/counts/open-challenges are persisted keyed on typeId+flavorId,
+ * so reordering, inserting, or removing flavors in FLAVORS never silently
+ * repoints a user's saved data at the wrong sentence. dailyChallengeExamples.js
+ * mirrors these same ids.
+ *
  * State persisted to localStorage under STORAGE_KEY, keyed per language so
  * favorites/history/counts don't bleed across languages.
  */
@@ -36,56 +42,62 @@ export const CHALLENGE_TYPES = [
 ]
 
 // Flavors per core idea. Ragged on purpose — not every core idea needs the
-// same number of variants. Text is in English; it's an instruction for what
-// to do, not target-language content, so it isn't translated per language.
+// same number of variants. `id` is stable and must match the corresponding
+// entry in dailyChallengeExamples.js. `text` is in English; it's an
+// instruction for what to do, not target-language content, so it isn't
+// translated per language.
 export const FLAVORS = {
   naming: [
-    'Name everything you see that\'s on your desk or table.',
-    'Name every vehicle you see today.',
-    'Name the food and drink you have today, as you have it.',
-    'Name everything you see in one room of your home.',
+    { id: 'naming-desk',    text: 'Name everything you see that\'s on your desk or table.' },
+    { id: 'naming-vehicle', text: 'Name every vehicle you see today.' },
+    { id: 'naming-food',    text: 'Name the food and drink you have today, as you have it.' },
+    { id: 'naming-room',    text: 'Name everything you see in one room of your home.' },
   ],
   constraint: [
-    'Today, only name red things.',
-    'Today, only name kitchen things.',
-    'Today, only name things made of metal.',
-    'Today, only name things you can hold in one hand.',
-    'Today, only name clothing you or others are wearing.',
+    { id: 'constraint-red',     text: 'Today, only name red things.' },
+    { id: 'constraint-kitchen', text: 'Today, only name kitchen things.' },
+    { id: 'constraint-metal',   text: 'Today, only name things made of metal.' },
+    { id: 'constraint-onehand', text: 'Today, only name things you can hold in one hand.' },
+    { id: 'constraint-clothing',text: 'Today, only name clothing you or others are wearing.' },
   ],
   narrating: [
-    'Narrate your morning routine as you do it.',
-    'Narrate making a drink or a meal as you do it.',
-    'Narrate a short walk or commute as you take it.',
-    'Narrate tidying up or a chore as you do it.',
+    { id: 'narrating-morning', text: 'Narrate your morning routine as you do it.' },
+    { id: 'narrating-meal',    text: 'Narrate making a drink or a meal as you do it.' },
+    { id: 'narrating-commute', text: 'Narrate a short walk or commute as you take it.' },
+    { id: 'narrating-chore',   text: 'Narrate tidying up or a chore as you do it.' },
   ],
   recap: [
-    'At your first break, give a 30-second "previously on my workday" recap.',
-    'At lunch, recap the morning as if introducing an episode.',
-    'At the end of the day, do a "next time on…" teaser for tomorrow.',
+    { id: 'recap-break',    text: 'At your first break, give a 30-second "previously on my workday" recap.' },
+    { id: 'recap-lunch',    text: 'At lunch, recap the morning as if introducing an episode.' },
+    { id: 'recap-tomorrow', text: 'At the end of the day, do a "next time on…" teaser for tomorrow.' },
   ],
   signs: [
-    'Translate every street sign you pass today.',
-    'Translate every elevator or lift notice you see today.',
-    'Translate every safety sign or notice you see today.',
-    'Translate every shop or restaurant sign you pass today.',
-    'Translate every menu item you come across today.',
+    { id: 'signs-street',     text: 'Translate every street sign you pass today.' },
+    { id: 'signs-elevator',   text: 'Translate every elevator or lift notice you see today.' },
+    { id: 'signs-safety',     text: 'Translate every safety sign or notice you see today.' },
+    { id: 'signs-shop',       text: 'Translate every shop or restaurant sign you pass today.' },
+    { id: 'signs-menu',       text: 'Translate every menu item you come across today.' },
   ],
   postit: [
-    'Label ten household objects with sticky notes.',
-    'Label everything in one room (kitchen, bathroom, etc).',
-    'Label the contents of your fridge or pantry.',
-    'Label items on your desk or workspace.',
+    { id: 'postit-household', text: 'Label ten household objects with sticky notes.' },
+    { id: 'postit-room',      text: 'Label everything in one room (kitchen, bathroom, etc).' },
+    { id: 'postit-fridge',    text: 'Label the contents of your fridge or pantry.' },
+    { id: 'postit-desk',      text: 'Label items on your desk or workspace.' },
   ],
   'describe-day': [
-    'Describe your whole day out loud, as if telling a friend.',
-    'Describe your day as a voice message you\'d actually send.',
-    'Describe the best and worst part of your day.',
-    'Describe your day and your plan for tomorrow.',
+    { id: 'describe-day-whole',    text: 'Describe your whole day out loud, as if telling a friend.' },
+    { id: 'describe-day-voicemsg', text: 'Describe your day as a voice message you\'d actually send.' },
+    { id: 'describe-day-bestworst',text: 'Describe the best and worst part of your day.' },
+    { id: 'describe-day-tomorrow', text: 'Describe your day and your plan for tomorrow.' },
   ],
 }
 
 export function typeLabel(typeId) {
   return CHALLENGE_TYPES.find(t => t.id === typeId)?.label ?? typeId
+}
+
+export function flavorText(typeId, flavorId) {
+  return FLAVORS[typeId]?.find(f => f.id === flavorId)?.text ?? ''
 }
 
 export function todaysType(date = new Date()) {
@@ -102,13 +114,13 @@ function emptyLangState() {
     // within the same day but is naturally fresh on a new day
     todayDate: null,
     todayType: null,
-    todayFlavorIndex: null,
+    todayFlavorId: null,
     // challenges the user has explicitly accepted but not yet marked done
-    // { key: 'typeId::flavorIndex', typeId, flavorIndex, acceptedAt }
+    // { key: 'typeId::flavorId', typeId, flavorId, acceptedAt }
     open: {},
-    // cumulative completion counts, keyed 'typeId::flavorIndex'
+    // cumulative completion counts, keyed 'typeId::flavorId'
     counts: {},
-    // favorited keys, keyed 'typeId::flavorIndex' -> true
+    // favorited keys, keyed 'typeId::flavorId' -> true
     favorites: {},
   }
 }
@@ -130,19 +142,19 @@ function saveAll(all) {
   }
 }
 
-export function challengeKey(typeId, flavorIndex) {
-  return `${typeId}::${flavorIndex}`
+export function challengeKey(typeId, flavorId) {
+  return `${typeId}::${flavorId}`
 }
 
-function randomFlavorIndex(typeId, excludeIndex = null) {
+function randomFlavorId(typeId, excludeId = null) {
   const flavors = FLAVORS[typeId] || []
-  if (flavors.length === 0) return 0
-  if (flavors.length === 1) return 0
-  let idx
+  if (flavors.length === 0) return null
+  if (flavors.length === 1) return flavors[0].id
+  let flavor
   do {
-    idx = Math.floor(Math.random() * flavors.length)
-  } while (idx === excludeIndex)
-  return idx
+    flavor = flavors[Math.floor(Math.random() * flavors.length)]
+  } while (flavor.id === excludeId)
+  return flavor.id
 }
 
 /** Load (and lazily initialize) today's state for a language. */
@@ -155,7 +167,7 @@ export function getState(lang) {
     // new day (or first ever load): pick fresh core idea + random flavor
     state.todayDate = key
     state.todayType = todaysType()
-    state.todayFlavorIndex = randomFlavorIndex(state.todayType)
+    state.todayFlavorId = randomFlavorId(state.todayType)
     all[lang] = state
     saveAll(all)
   }
@@ -176,30 +188,30 @@ export function changeTask(lang) {
   return updateState(lang, state => {
     const otherTypes = CHALLENGE_TYPES.map(t => t.id).filter(id => id !== state.todayType)
     state.todayType = otherTypes[Math.floor(Math.random() * otherTypes.length)]
-    state.todayFlavorIndex = randomFlavorIndex(state.todayType)
+    state.todayFlavorId = randomFlavorId(state.todayType)
   })
 }
 
 /** Swap today's flavor within the same core idea. */
 export function changeFlavor(lang) {
   return updateState(lang, state => {
-    state.todayFlavorIndex = randomFlavorIndex(state.todayType, state.todayFlavorIndex)
+    state.todayFlavorId = randomFlavorId(state.todayType, state.todayFlavorId)
   })
 }
 
 /** Manually pick a specific type+flavor as today's task (from the grid browser). */
-export function pickTask(lang, typeId, flavorIndex) {
+export function pickTask(lang, typeId, flavorId) {
   return updateState(lang, state => {
     state.todayType = typeId
-    state.todayFlavorIndex = flavorIndex
+    state.todayFlavorId = flavorId
   })
 }
 
 /** Accept today's task into the open-challenges list. */
-export function acceptChallenge(lang, typeId, flavorIndex) {
+export function acceptChallenge(lang, typeId, flavorId) {
   return updateState(lang, state => {
-    const key = challengeKey(typeId, flavorIndex)
-    state.open[key] = { typeId, flavorIndex, acceptedAt: Date.now() }
+    const key = challengeKey(typeId, flavorId)
+    state.open[key] = { typeId, flavorId, acceptedAt: Date.now() }
   })
 }
 
@@ -221,7 +233,7 @@ export function finishChallenge(lang, key) {
 /** Mark today's task done directly (without going through the open list). */
 export function markTodayDone(lang) {
   return updateState(lang, state => {
-    const key = challengeKey(state.todayType, state.todayFlavorIndex)
+    const key = challengeKey(state.todayType, state.todayFlavorId)
     delete state.open[key]
     state.counts[key] = (state.counts[key] || 0) + 1
   })

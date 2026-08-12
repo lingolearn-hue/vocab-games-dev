@@ -5,13 +5,13 @@
  * overlay so the user has a running-start model sentence, not just an
  * English instruction.
  *
- * Structure: EXAMPLES[typeId][flavorIndex][lang] = [sentence1, sentence2]
- * Indices match FLAVORS in dailyChallenge.js exactly (same order, same length).
+ * Structure: EXAMPLES[typeId][flavorId] = { en: [s1,s2], de: [...], ... }
+ * flavorId must match the `id` field in FLAVORS in dailyChallenge.js exactly.
  */
 
 export const EXAMPLES = {
-  naming: [
-    { // 0: desk/table objects
+  naming: {
+    'naming-desk': {
       en: ['This is a pen.', 'This is a notebook.'],
       de: ['Das ist ein Stift.', 'Das ist ein Heft.'],
       es: ['Esto es un bolígrafo.', 'Esto es un cuaderno.'],
@@ -19,7 +19,7 @@ export const EXAMPLES = {
       ja: ['これはペンです。', 'これはノートです。'],
       zh: ['这是一支笔。', '这是一个本子。'],
     },
-    { // 1: vehicles
+    'naming-vehicle': {
       en: ['That is a car.', 'That is a bicycle.'],
       de: ['Das ist ein Auto.', 'Das ist ein Fahrrad.'],
       es: ['Eso es un coche.', 'Eso es una bicicleta.'],
@@ -27,7 +27,7 @@ export const EXAMPLES = {
       ja: ['あれは車です。', 'あれは自転車です。'],
       zh: ['那是一辆车。', '那是一辆自行车。'],
     },
-    { // 2: food/drink
+    'naming-food': {
       en: ['This is coffee.', 'This is bread.'],
       de: ['Das ist Kaffee.', 'Das ist Brot.'],
       es: ['Esto es café.', 'Esto es pan.'],
@@ -35,7 +35,7 @@ export const EXAMPLES = {
       ja: ['これはコーヒーです。', 'これはパンです。'],
       zh: ['这是咖啡。', '这是面包。'],
     },
-    { // 3: room objects
+    'naming-room': {
       en: ['This is a chair.', 'This is a lamp.'],
       de: ['Das ist ein Stuhl.', 'Das ist eine Lampe.'],
       es: ['Esto es una silla.', 'Esto es una lámpara.'],
@@ -43,9 +43,9 @@ export const EXAMPLES = {
       ja: ['これは椅子です。', 'これはランプです。'],
       zh: ['这是一把椅子。', '这是一盏灯。'],
     },
-  ],
-  constraint: [
-    { // 0: red things
+  },
+  constraint: {
+    'constraint-red': {
       en: ['The apple is red.', 'My cup is red.'],
       de: ['Der Apfel ist rot.', 'Meine Tasse ist rot.'],
       es: ['La manzana es roja.', 'Mi taza es roja.'],
@@ -53,7 +53,7 @@ export const EXAMPLES = {
       ja: ['リンゴは赤いです。', '私のカップは赤いです。'],
       zh: ['苹果是红色的。', '我的杯子是红色的。'],
     },
-    { // 1: kitchen things
+    'constraint-kitchen': {
       en: ['The pot is on the stove.', 'The knife is on the table.'],
       de: ['Der Topf steht auf dem Herd.', 'Das Messer liegt auf dem Tisch.'],
       es: ['La olla está en la estufa.', 'El cuchillo está en la mesa.'],
@@ -61,7 +61,7 @@ export const EXAMPLES = {
       ja: ['鍋はコンロの上にあります。', 'ナイフはテーブルの上にあります。'],
       zh: ['锅在炉子上。', '刀在桌子上。'],
     },
-    { // 2: metal things
+    'constraint-metal': {
       en: ['The fork is metal.', 'The key is metal.'],
       de: ['Die Gabel ist aus Metall.', 'Der Schlüssel ist aus Metall.'],
       es: ['El tenedor es de metal.', 'La llave es de metal.'],
@@ -69,7 +69,7 @@ export const EXAMPLES = {
       ja: ['フォークは金属です。', '鍵は金属です。'],
       zh: ['叉子是金属的。', '钥匙是金属的。'],
     },
-    { // 3: hold in one hand
+    'constraint-onehand': {
       en: ['This is a phone.', 'This is a cup.'],
       de: ['Das ist ein Handy.', 'Das ist eine Tasse.'],
       es: ['Esto es un teléfono.', 'Esto es una taza.'],
@@ -77,7 +77,7 @@ export const EXAMPLES = {
       ja: ['これは携帯電話です。', 'これはカップです。'],
       zh: ['这是一部手机。', '这是一个杯子。'],
     },
-    { // 4: clothing worn
+    'constraint-clothing': {
       en: ['She is wearing a jacket.', 'He is wearing shoes.'],
       de: ['Sie trägt eine Jacke.', 'Er trägt Schuhe.'],
       es: ['Ella lleva una chaqueta.', 'Él lleva zapatos.'],
@@ -85,9 +85,9 @@ export const EXAMPLES = {
       ja: ['彼女はジャケットを着ています。', '彼は靴を履いています。'],
       zh: ['她穿着一件夹克。', '他穿着鞋子。'],
     },
-  ],
-  narrating: [
-    { // 0: morning routine
+  },
+  narrating: {
+    'narrating-morning': {
       en: ['I brush my teeth.', 'I get dressed.'],
       de: ['Ich putze mir die Zähne.', 'Ich ziehe mich an.'],
       es: ['Me cepillo los dientes.', 'Me visto.'],
@@ -95,7 +95,7 @@ export const EXAMPLES = {
       ja: ['歯を磨きます。', '服を着ます。'],
       zh: ['我刷牙。', '我穿衣服。'],
     },
-    { // 1: making drink/meal
+    'narrating-meal': {
       en: ['I boil the water.', 'I cut the vegetables.'],
       de: ['Ich koche das Wasser.', 'Ich schneide das Gemüse.'],
       es: ['Hiervo el agua.', 'Corto las verduras.'],
@@ -103,7 +103,7 @@ export const EXAMPLES = {
       ja: ['お湯を沸かします。', '野菜を切ります。'],
       zh: ['我烧水。', '我切蔬菜。'],
     },
-    { // 2: walk/commute
+    'narrating-commute': {
       en: ['I open the door.', 'I walk to the station.'],
       de: ['Ich öffne die Tür.', 'Ich gehe zum Bahnhof.'],
       es: ['Abro la puerta.', 'Camino hacia la estación.'],
@@ -111,7 +111,7 @@ export const EXAMPLES = {
       ja: ['ドアを開けます。', '駅まで歩きます。'],
       zh: ['我打开门。', '我走去车站。'],
     },
-    { // 3: tidying/chore
+    'narrating-chore': {
       en: ['I wash the dishes.', 'I make the bed.'],
       de: ['Ich spüle das Geschirr.', 'Ich mache das Bett.'],
       es: ['Lavo los platos.', 'Hago la cama.'],
@@ -119,9 +119,9 @@ export const EXAMPLES = {
       ja: ['食器を洗います。', 'ベッドを整えます。'],
       zh: ['我洗碗。', '我整理床铺。'],
     },
-  ],
-  recap: [
-    { // 0: break recap
+  },
+  recap: {
+    'recap-break': {
       en: ['This morning I answered emails.', 'Then I had a meeting.'],
       de: ['Heute Morgen habe ich E-Mails beantwortet.', 'Dann hatte ich eine Besprechung.'],
       es: ['Esta mañana respondí correos.', 'Luego tuve una reunión.'],
@@ -129,7 +129,7 @@ export const EXAMPLES = {
       ja: ['今朝、メールに返信しました。', 'それから会議がありました。'],
       zh: ['今天早上我回复了邮件。', '然后我开了一个会。'],
     },
-    { // 1: lunch recap
+    'recap-lunch': {
       en: ['So far today, I finished a report.', 'Now it\u2019s time for lunch.'],
       de: ['Bisher habe ich heute einen Bericht fertiggestellt.', 'Jetzt ist Mittagszeit.'],
       es: ['Hasta ahora hoy, terminé un informe.', 'Ahora es hora de comer.'],
@@ -137,7 +137,7 @@ export const EXAMPLES = {
       ja: ['今日はここまでにレポートを終えました。', '今はお昼の時間です。'],
       zh: ['今天到目前为止我完成了一份报告。', '现在是午饭时间。'],
     },
-    { // 2: teaser for tomorrow
+    'recap-tomorrow': {
       en: ['Tomorrow I will call a client.', 'Tomorrow I will finish the project.'],
       de: ['Morgen rufe ich einen Kunden an.', 'Morgen beende ich das Projekt.'],
       es: ['Mañana llamaré a un cliente.', 'Mañana terminaré el proyecto.'],
@@ -145,9 +145,9 @@ export const EXAMPLES = {
       ja: ['明日、お客様に電話します。', '明日、プロジェクトを終えます。'],
       zh: ['明天我会给客户打电话。', '明天我会完成这个项目。'],
     },
-  ],
-  signs: [
-    { // 0: street signs
+  },
+  signs: {
+    'signs-street': {
       en: ['Stop.', 'No parking.'],
       de: ['Halt.', 'Parken verboten.'],
       es: ['Alto.', 'Prohibido aparcar.'],
@@ -155,7 +155,7 @@ export const EXAMPLES = {
       ja: ['止まれ。', '駐車禁止。'],
       zh: ['停。', '禁止停车。'],
     },
-    { // 1: elevator notices
+    'signs-elevator': {
       en: ['Out of service.', 'Maximum eight people.'],
       de: ['Außer Betrieb.', 'Maximal acht Personen.'],
       es: ['Fuera de servicio.', 'Máximo ocho personas.'],
@@ -163,7 +163,7 @@ export const EXAMPLES = {
       ja: ['故障中。', '定員8名。'],
       zh: ['故障停用。', '限乘八人。'],
     },
-    { // 2: safety signs
+    'signs-safety': {
       en: ['Emergency exit.', 'Wear a helmet.'],
       de: ['Notausgang.', 'Helm tragen.'],
       es: ['Salida de emergencia.', 'Use casco.'],
@@ -171,7 +171,7 @@ export const EXAMPLES = {
       ja: ['非常口。', 'ヘルメット着用。'],
       zh: ['紧急出口。', '请戴安全帽。'],
     },
-    { // 3: shop/restaurant signs
+    'signs-shop': {
       en: ['Open today.', 'Closed on Mondays.'],
       de: ['Heute geöffnet.', 'Montags geschlossen.'],
       es: ['Abierto hoy.', 'Cerrado los lunes.'],
@@ -179,7 +179,7 @@ export const EXAMPLES = {
       ja: ['本日営業中。', '月曜定休。'],
       zh: ['今日营业。', '周一休息。'],
     },
-    { // 4: menu items
+    'signs-menu': {
       en: ['Grilled chicken.', 'Vegetable soup.'],
       de: ['Gegrilltes Hähnchen.', 'Gemüsesuppe.'],
       es: ['Pollo a la parrilla.', 'Sopa de verduras.'],
@@ -187,9 +187,9 @@ export const EXAMPLES = {
       ja: ['グリルチキン。', '野菜スープ。'],
       zh: ['烤鸡。', '蔬菜汤。'],
     },
-  ],
-  postit: [
-    { // 0: label 10 household objects
+  },
+  postit: {
+    'postit-household': {
       en: ['This is the door.', 'This is the window.'],
       de: ['Das ist die Tür.', 'Das ist das Fenster.'],
       es: ['Esto es la puerta.', 'Esto es la ventana.'],
@@ -197,7 +197,7 @@ export const EXAMPLES = {
       ja: ['これはドアです。', 'これは窓です。'],
       zh: ['这是门。', '这是窗户。'],
     },
-    { // 1: label a room
+    'postit-room': {
       en: ['This is the sink.', 'This is the mirror.'],
       de: ['Das ist das Waschbecken.', 'Das ist der Spiegel.'],
       es: ['Esto es el lavabo.', 'Esto es el espejo.'],
@@ -205,7 +205,7 @@ export const EXAMPLES = {
       ja: ['これは洗面台です。', 'これは鏡です。'],
       zh: ['这是洗手池。', '这是镜子。'],
     },
-    { // 2: fridge/pantry
+    'postit-fridge': {
       en: ['This is milk.', 'This is rice.'],
       de: ['Das ist Milch.', 'Das ist Reis.'],
       es: ['Esto es leche.', 'Esto es arroz.'],
@@ -213,7 +213,7 @@ export const EXAMPLES = {
       ja: ['これは牛乳です。', 'これは米です。'],
       zh: ['这是牛奶。', '这是米。'],
     },
-    { // 3: desk items
+    'postit-desk': {
       en: ['This is a computer.', 'This is a lamp.'],
       de: ['Das ist ein Computer.', 'Das ist eine Lampe.'],
       es: ['Esto es una computadora.', 'Esto es una lámpara.'],
@@ -221,9 +221,9 @@ export const EXAMPLES = {
       ja: ['これはパソコンです。', 'これはランプです。'],
       zh: ['这是电脑。', '这是台灯。'],
     },
-  ],
-  'describe-day': [
-    { // 0: whole day to a friend
+  },
+  'describe-day': {
+    'describe-day-whole': {
       en: ['Today was busy.', 'I met a friend in the evening.'],
       de: ['Heute war es stressig.', 'Am Abend habe ich einen Freund getroffen.'],
       es: ['Hoy estuvo ocupado.', 'Por la noche vi a un amigo.'],
@@ -231,7 +231,7 @@ export const EXAMPLES = {
       ja: ['今日は忙しかったです。', '夜、友達に会いました。'],
       zh: ['今天很忙。', '晚上我见了一个朋友。'],
     },
-    { // 1: voice message
+    'describe-day-voicemsg': {
       en: ['Hey, my day was good.', 'I\u2019ll call you later.'],
       de: ['Hey, mein Tag war gut.', 'Ich rufe dich später an.'],
       es: ['Oye, mi día estuvo bien.', 'Te llamo más tarde.'],
@@ -239,7 +239,7 @@ export const EXAMPLES = {
       ja: ['今日は良い一日だったよ。', '後で電話するね。'],
       zh: ['嘿，我今天过得不错。', '我晚点给你打电话。'],
     },
-    { // 2: best/worst
+    'describe-day-bestworst': {
       en: ['The best part was lunch.', 'The worst part was the traffic.'],
       de: ['Der beste Teil war das Mittagessen.', 'Der schlimmste Teil war der Verkehr.'],
       es: ['Lo mejor fue el almuerzo.', 'Lo peor fue el tráfico.'],
@@ -247,7 +247,7 @@ export const EXAMPLES = {
       ja: ['一番良かったのはお昼ご飯です。', '一番大変だったのは渋滞でした。'],
       zh: ['最好的部分是午饭。', '最糟糕的部分是堵车。'],
     },
-    { // 3: day + tomorrow plan
+    'describe-day-tomorrow': {
       en: ['Today I worked a lot.', 'Tomorrow I will rest.'],
       de: ['Heute habe ich viel gearbeitet.', 'Morgen werde ich mich ausruhen.'],
       es: ['Hoy trabajé mucho.', 'Mañana descansaré.'],
@@ -255,12 +255,12 @@ export const EXAMPLES = {
       ja: ['今日はたくさん働きました。', '明日は休みます。'],
       zh: ['今天我工作了很多。', '明天我要休息。'],
     },
-  ],
+  },
 }
 
 /** Get the two example sentences for a type/flavor/language, falling back to English if missing. */
-export function getExamples(typeId, flavorIndex, lang) {
-  const set = EXAMPLES[typeId]?.[flavorIndex]
+export function getExamples(typeId, flavorId, lang) {
+  const set = EXAMPLES[typeId]?.[flavorId]
   if (!set) return []
   return set[lang] ?? set.en ?? []
 }
