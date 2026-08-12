@@ -1,10 +1,11 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66aw** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66ax** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
-  lemmatizer fix, article engines, Vocab Browser word-detail overlay, etc.
+  lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
+  Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
 - `vocab-games` (production, `main` branch): **v0.66** — several commits
   behind dev (not yet synced forward). Next production push should carry
@@ -24,6 +25,45 @@
   push rather than shipped unreviewed. Saved at `/tmp/zh-en-pending.diff`
   in the working container for review; apply with `git apply` if it turns
   out to be wanted, otherwise redo the merge decision from scratch.
+
+## Japanese Grammar Dictionary: dynamic quiz expansion + Daily Challenge feature (v0.66ax)
+- [x] Japanese Grammar Dictionary: 14 new quiz generators covering 15 static
+      patterns (は/が/を/も, なければならない-family particles, ように/ために,
+      としては/にしては, に/で, and others). Renamed
+      `generateGermanPrepositionQuestion` → `generateClosedSetQuestion` in
+      `grammarQuiz.js` (confirmed language-agnostic, all German call sites
+      updated) and added a new generic `generateFixedAnswerQuestion` helper
+      for single-fixed-answer patterns tested across varied example
+      sentences. `quizType` wired into `ja-en.json` for all 15 patterns.
+      Caught and fixed a few real grammar/naturalness bugs in example
+      sentences during curation (blank placement, awkward word choice).
+      See `grammar-dictionary-logic.md` for full generator documentation.
+- [x] New feature: **Daily Challenge** ("Thiede function") — a real-world,
+      phone-free daily micro-exercise, deliberately separate from the
+      in-app games. No correctness checking, no time limit; entirely
+      user-attested. New 🎯 button in the top nav row next to Adventure.
+      - `src/engine/dailyChallenge.js`: weekday → fixed "core idea" mapping
+        (Monday=naming, Tuesday=colour/category constraint, Wednesday=
+        narrating actions, Thursday="previously in my workday" recap,
+        Friday=signs/notices, Saturday=post-it labeling, Sunday=describe
+        your day), each with several rotating "flavor" variants.
+        localStorage-backed state per language: today's pick (date-scoped),
+        open/accepted challenges, cumulative completion counts, favorites.
+      - `src/components/DailyChallenge.jsx` + `.css`: overlay with a
+        4-item left rail (Task of the day / Open challenges / Browse all
+        grid / Favorite tasks), accept + mark-done flow, star favoriting
+        with gold-border treatment in the grid, "change task"/"change
+        flavor" controls (flavor change has a glowing-orb animation).
+      - `src/engine/dailyChallengeExamples.js`: two example sentences per
+        flavor, per language (all 6 languages, 29 flavors — 348 sentences
+        total), shown inline under the flavor text and in the open-
+        challenges list.
+      - Full design discussion captured in
+        `daily-challenge-function-design.md` (see chat history / outputs).
+      - Verified via Playwright in a real browser: today's task (weekday-
+        correct), accept/finish/cancel flow, grid browser, favoriting,
+        flavor-change animation, mark-done counter, examples rendering
+        correctly for German and Japanese. No console errors.
 
 ## Graded Reader: small polish (v0.66aw)
 - [x] Passage cards in the library list shortened (padding/gap trimmed).
