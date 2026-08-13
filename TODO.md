@@ -1,22 +1,25 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66ay** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66az** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
-- **v0.66ay**: Daily Challenge stable-ID refactor follow-up fixes —
-  favoriting now works from the Grid and Open Challenges tabs (previously
-  Today-tab only); full text-label legend restored under the header/tagline
-  (rail stays icon-only, but labels are visible again, with the active tab
-  bolded, plus `aria-label`s on the rail buttons). Known gap carried
-  forward, not yet fixed: no schema-version guard on the Daily Challenge
-  localStorage — old pre-refactor state shape (index-based flavor keys)
-  would silently render a blank task instead of being detected and
-  regenerated. Low real-world exposure (feature not yet in production),
-  but flagged for a follow-up fix.
+- **v0.66az**: Daily Challenge — replaced the horizontal tab-label legend
+  with a single vertical rail (icon-only for inactive tabs, active tab's
+  button also shows its label so the sub-menu title only appears for the
+  open section). Listening game — fixed a real bug: when learning English
+  (which reverse-builds its list from another language, e.g. German),
+  the translation-step utterance was hardcoded to the 'en' voice even
+  though `entry.translation` holds the *source*-language word in that mode,
+  so it was mispronouncing German/French/etc. words with an English voice.
+  Now uses `reverseSourceLanguage` from context when active. Verified live
+  via Playwright with a patched speechSynthesis capturing utterance
+  text+lang: reverse-English case now correctly speaks the source word
+  with the source-language voice (e.g. "prüfen" / de-DE); normal direction
+  (e.g. learning German) unaffected, translation step still en-US.
 - `vocab-games` (production, `main` branch): **v0.66** — several commits
   behind dev (not yet synced forward). Next production push should carry
   all of this session's work forward.

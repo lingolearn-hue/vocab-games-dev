@@ -71,14 +71,6 @@ export default function DailyChallenge({ lang, onClose }) {
         <h1 className="dc-title">Daily Challenge</h1>
         <p className="dc-subtitle">Real-world practice — no phone, no checking, no pressure.</p>
 
-        <div className="dc-tab-legend">
-          {TABS.map(t => (
-            <span key={t.id} className={`dc-tab-legend-item ${tab === t.id ? 'active' : ''}`}>
-              <span className="dc-tab-legend-icon">{t.icon}</span>{t.label}
-            </span>
-          ))}
-        </div>
-
         <div className="dc-body">
           <div className="dc-rail">
             {TABS.map(t => (
@@ -90,6 +82,7 @@ export default function DailyChallenge({ lang, onClose }) {
                 aria-label={t.label}
               >
                 <span className="dc-rail-icon">{t.icon}</span>
+                {tab === t.id && <span className="dc-rail-label">{t.label}</span>}
               </button>
             ))}
           </div>

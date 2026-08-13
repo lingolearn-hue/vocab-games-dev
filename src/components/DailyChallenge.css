@@ -52,54 +52,43 @@
   flex-shrink: 0;
 }
 
-/* Visible text labels for the icon-only rail, shown as a legend under the
-   header/tagline. Keeps the rail compact while still surfacing full labels
-   (readability + accessibility) and highlighting the active tab. */
-.dc-tab-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 0.9rem;
-  margin: 0 0 0.9rem;
-  flex-shrink: 0;
-}
-.dc-tab-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.72rem;
-  color: var(--dt2);
-}
-.dc-tab-legend-item.active {
-  color: inherit;
-  font-weight: 700;
-}
-.dc-tab-legend-icon { font-size: 0.85rem; }
-
 .dc-body { display: flex; gap: 1rem; flex: 1; min-height: 0; }
 
-/* Icon-only rail, pinned fully to the left edge. */
+/* Vertical icon rail on the left. Icon-only for inactive tabs; the active
+   tab's button also shows its label, so the sub-menu title is only visible
+   for whichever section is currently open. Rail width is fixed (sized for
+   the longest label, "Open challenges") so the active button's label never
+   needs to overflow into — and get painted over by — the content pane. */
 .dc-rail {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   flex-shrink: 0;
-  width: 48px;
+  width: 168px;
 }
 .dc-rail-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   background: none;
   border: 1px solid var(--border, #ddd);
   border-radius: 12px;
   padding: 0.6rem 0;
   cursor: pointer;
   color: inherit;
-  width: 48px;
+  width: 100%;
   height: 48px;
+  white-space: nowrap;
 }
-.dc-rail-btn.active { background: var(--accent-soft, #eef4ff); border-color: var(--accent, #4a7cff); }
-.dc-rail-icon { font-size: 1.25rem; line-height: 1; }
+.dc-rail-btn.active {
+  background: var(--accent-soft, #eef4ff);
+  border-color: var(--accent, #4a7cff);
+  justify-content: flex-start;
+  padding: 0.6rem 0.9rem;
+}
+.dc-rail-label { font-size: 0.8rem; font-weight: 700; }
+.dc-rail-icon { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
 [data-theme="dark"] .dc-rail-btn { border-color: #444; }
 [data-theme="dark"] .dc-rail-btn.active { background: #2a3348; border-color: #6a9bff; }
 
@@ -285,4 +274,5 @@
   .dc-panel { height: 680px; }
   .dc-body { flex-direction: column; }
   .dc-rail { flex-direction: row; width: 100%; overflow-x: auto; height: 48px; }
+  .dc-rail-btn { width: auto; flex-shrink: 0; padding: 0.6rem 0.8rem; }
 }
