@@ -1,12 +1,19 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66az** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66ba** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66ba**: vocab quality pass from a parallel session — ß/ss dedup,
+  CEFR A1/A2 coverage fixes for DE/JA/ES/FR, 752 translation-formatting
+  bugs fixed (paren-split import artifact) across DE/ES/FR/JA. Full
+  methodology and per-language status in `REVIEW-VOCAB.md`. Note: that
+  session's commit message called itself v0.66ba but never actually
+  bumped `public/version.json` (still read 0.66az) — corrected here as
+  part of this push.
 - **v0.66az**: Daily Challenge — replaced the horizontal tab-label legend
   with a single vertical rail (icon-only for inactive tabs, active tab's
   button also shows its label so the sub-menu title only appears for the
