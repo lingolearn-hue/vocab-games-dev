@@ -166,13 +166,32 @@ manual exceptions:
   of the French case — causing the same kind of false split. Handled
   the same way.
 
+**A sharper version of the JA/ZH case, found while writing the B1
+fairy-tale trio**: the merge-backward rule is not limited to merging
+one fragment — it chains. Two back-to-back quoted exclamations with no
+narrative text between them (`「たすけて！」「どろぼうがぬすみました！」`
+— "Help!" "Thieves stole it!") get fused into a single counted
+sentence, because the second raw fragment starts with `」` and merges
+into the first, and there's nothing to stop it. There's no reliable
+fix on the tool side for this specific shape (any narrative text
+between the two quotes prevents the false merge, but zero-narrative
+back-to-back exclamations are a legitimate thing to write). Confirmed
+in both Japanese and Chinese (`ft11`) — same script family, same
+closing-quote mechanism, same artifact, appearing at the identical
+sentence for both languages since both are independent translations
+of the same English "Help!" / "Thieves..." line. Treat this the same
+as the Latin-script quote-before-period case: manually verify the
+content is faithful, then accept the count mismatch rather than
+distort the sentence structure to chase the automated number.
+
 One class is *not* auto-handled and still needs manual judgement: a
 quote mark sitting immediately before a sentence-ending period in
 English/German/Spanish (`do.' Only...`) suppresses the split there,
 since straight quotes don't distinguish open from close, making
 automatic correction unreliable. This has caused a growing list of
 confirmed false positives (`s5`, `s7`, `p38`, `nf7`/es, and `ft1`/es,
-`ft2`/es, `ft4`/es, `ft5`/es+fr, `ft6`/ja+es — see `REVIEW-TEXTS.md`) —
+`ft2`/es, `ft4`/es, `ft5`/es+fr, `ft6`/ja+es, `ft10`/ja, `ft11`/ja+zh —
+see `REVIEW-TEXTS.md`) —
 always manually inspect a flagged mismatch involving dialogue before
 assuming it's a real gap. In practice this is almost always English
 itself that's undercounting (its straight quotes plus a mid-sentence
@@ -271,17 +290,72 @@ across every level.
   yet written at either level. Still open: whether this trio stays
   German/Grimm (matching the A1/B1 trio) or is the point to diversify
   origin country.
+- **A1 trio** (origin: France, Perrault): Bluebeard, Puss in Boots, Tom
+  Thumb — written and translated into all 6 languages (`ft7`/`ft8`/`ft9`
+  in each `public/reader/{lang}-en.json`), verified congruent via
+  `tools/check_reader_congruence.py`. English drafted first and reviewed
+  before translation, per the process order above; one deliberate
+  content edit during review (softened Bluebeard's graphic content —
+  "hints of something terrible" instead of describing corpses/blood —
+  and the ending changed from a sword fight to the brothers simply
+  stopping him). Note Cinderella was initially proposed for this trio
+  too (as a deliberate Perrault-vs-Grimm contrasting-tellings pair with
+  the existing Aschenputtel) but swapped for Bluebeard on review to
+  avoid retelling the same story twice under two origins.
+- **B1 retellings of the France trio**: written and translated into all
+  6 languages (`ft10`/`ft11`/`ft12`). First English draft overshot to
+  B2 register (sentences averaging 20+ words with stacked subordinate
+  clauses and idioms like "murder in his eyes") despite aiming for B1 —
+  caught on review, not by self-check, when asked directly whether the
+  difficulty was correct. Rewritten with real verification this time:
+  sentence-length stats computed (not eyeballed) to confirm the 12–18
+  word target, and vocabulary cross-checked against the CEFR-J word
+  list, which caught 4 words that tested at C1 (`reluctantly`, `crumb`,
+  `removed`, `startling`) and got them replaced. Final stats: sentence
+  averages 13.7–15.2 words across the three stories; vocabulary
+  distribution A1:118 A2:80 B1:61 B2:42 C1:0. The B2 tail is partly
+  unavoidable — concrete story nouns like `donkey`, `mill`, `sack`,
+  `master` are essential to retelling this specific tale regardless of
+  frequency ranking. `ft10`/`ft11` show Japanese-only sentence-count
+  mismatches against the congruence checker; both are the known
+  tool-artifact classes described earlier in this document (see the
+  "sharper version of the JA/ZH case" note), verified as faithful
+  translations, not real content gaps.
 
 ## Country strategy
 
 Goal: pull fairy tales from each of the six supported languages' own
 cultural traditions, so every language gets a turn as source culture, not
-just translation target. Germany is the first origin (all three current
-tales are Grimm). Suggested remaining five: Spain, France, Japan, China,
-and a specific English-language tradition (a named British/Irish tale or
-American folklore, rather than "generic English") — not finalized, open
-to discussion when we get there. Work one country at a time rather than
+just translation target. Germany was the first origin (all three current
+Grimm tales). **France is second** (Bluebeard, Puss in Boots, Tom Thumb —
+Perrault, A1 level, done). Remaining: Spain, Japan, China, and a specific
+English-language tradition (a named British/Irish tale or American
+folklore, rather than "generic English") — not finalized, open to
+discussion when we get there. Work one country at a time rather than
 committing to the full six-country matrix up front.
+
+One naming lesson from the France batch: **Japanese fairy tales in this
+corpus (`ft1`–`ft6`, the German-origin set) are written in pure
+hiragana, word-spaced, with zero kanji** — this wasn't obvious from the
+schema and cost a full rewrite of the first France-trio draft, which
+had used normal kanji-mixed Japanese. Matches the existing
+`origin:germany` set's convention (verified against `ja-ft1`/`ja-ft4`
+before rewriting) since that content targets absolute-beginner N5/N4
+readers who may not have learned kanji yet. Check this convention
+directly against an existing passage before writing new Japanese
+content in this genre, rather than assuming standard kanji-mixed
+orthography applies.
+
+**Deliberate deviation, decided explicitly rather than by default**:
+the France trio (`ft7`–`ft12`) uses full standard kanji at *both* A1
+and B1, unlike `ft1`–`ft6`. This was a conscious choice, discussed and
+confirmed directly — the France trio is not meant to match the German
+set's kana-only convention, and future fairy-tale batches should not
+assume kana-only is the house style without checking whether it's
+still intended. A toggleable furigana reading aid was also requested
+but does not exist as an engine feature yet — flagged as a follow-up
+for the engine/UI thread, not attempted here since it would require
+new rendering support, not just content changes.
 
 ## Non-fiction & biographies
 

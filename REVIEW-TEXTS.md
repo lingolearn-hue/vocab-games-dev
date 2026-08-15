@@ -127,6 +127,40 @@ rewrite work starts.
 
 ## Graded Reader (`public/reader/*.json`)
 
+**Note: the table below is stale** — written before French was fully
+built out and before the fairy-tale genre existed. As of this session,
+all six languages are at 48 passages each (45 + 3), including French,
+which the table below still shows as empty. Treat this table as a
+historical snapshot of the original 36-passage survey, not current
+state; a fresh structural survey would be needed for accurate current
+numbers.
+
+### France fairy-tale trio added (this session)
+
+Bluebeard, Puss in Boots, Tom Thumb — `ft7`/`ft8`/`ft9` (A1) and
+`ft10`/`ft11`/`ft12` (B1) in every `public/reader/{lang}-en.json`,
+`origin:france`. Japanese uses full kanji at both levels (deliberate
+deviation from the `ft1`–`ft6` kana-only convention — see
+`AUTHORING-TEXTS.md`); one mid-edit slip caught and fixed where a
+kanji rewrite accidentally substituted the condensed B1 sentence
+structure into an A1 paragraph (12 sentences collapsed to 6) —
+caught by the congruence checker, not by inspection, which is exactly
+what that tool is for. Written English-first, reviewed and revised (see
+`AUTHORING-TEXTS.md` for the content-edit log), then translated
+sentence-by-sentence into DE/ES/FR/JA/ZH. Verified congruent via
+`tools/check_reader_congruence.py` — zero mismatches on the A1 set;
+the B1 set has three Japanese/Chinese mismatches (`ft10`/ja, `ft11`/ja,
+`ft11`/zh), all confirmed as known tool-counting artifacts, not real
+translation gaps (see `AUTHORING-TEXTS.md`). The other 13 flagged mismatches across both
+sets are all pre-existing issues on `ft1`–`ft6`/`s5`/`s7`/`p38`,
+untouched by this work. Japanese was initially drafted with normal
+kanji before catching that this corpus's existing fairy tales are pure
+hiragana, word-spaced, no kanji — see `AUTHORING-TEXTS.md`
+country-strategy section for the full note. The first B1 English draft
+also overshot to B2 register on the first pass (long stacked-clause
+sentences, idioms) and had to be rewritten with actual measurement
+rather than by feel — also logged in `AUTHORING-TEXTS.md`.
+
 | Language | Passages | Levels (count) | Avg text length | Series | Unique topics |
 |---|---|---|---|---|---|
 | German | 36 | A1:3 A2:8 B1:14 B2:6 C1:5 | 825 chars | 3 | 27 |

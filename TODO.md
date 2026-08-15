@@ -1,12 +1,27 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66ba** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bb** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bb**: Graded Reader — new `origin:france` (Perrault) fairy-tale
+  trio: Bluebeard, Puss in Boots, Tom Thumb, at both A1 and B1
+  (`ft7`–`ft12`), written English-first and translated sentence-by-
+  sentence into DE/ES/FR/JA/ZH, verified via
+  `tools/check_reader_congruence.py`. Japanese uses full kanji at both
+  levels — a deliberate deviation from the existing `ft1`–`ft6`
+  (German-origin) kana-only convention; a toggleable furigana reading
+  aid was requested but does not exist as an engine feature yet, flagged
+  as a follow-up for the engine/UI thread. Full methodology, the B1
+  English draft's overshoot-to-B2 correction (sentence-length and
+  CEFR-J vocabulary re-verification), and the known congruence-checker
+  artifact classes (Latin quote-before-period on the English side,
+  JA/ZH closing-quote merge-chaining on back-to-back quoted
+  exclamations) are documented in `AUTHORING-TEXTS.md` and
+  `REVIEW-TEXTS.md`.
 - **v0.66ba**: vocab quality pass from a parallel session — ß/ss dedup,
   CEFR A1/A2 coverage fixes for DE/JA/ES/FR, 752 translation-formatting
   bugs fixed (paren-split import artifact) across DE/ES/FR/JA. Full
