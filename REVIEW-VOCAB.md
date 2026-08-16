@@ -262,9 +262,11 @@ earlier). Still turned up striking basics missing outright: hola
 (2 of 12 months). Same lesson as DE/JA: don't assume a language's
 coverage is solid at any level just because its category-tagging
 stats look clean — tagging completeness and vocabulary completeness
-are different things. One noted imprecision: `niebla` (fog, noun)
-got "foggy" added as a loose adjective-sense synonym rather than a
-separate `neblinoso`-type adjective entry — worth revisiting.
+are different things. One imprecision caught and fixed: `niebla`
+(fog, noun) had initially gotten "foggy" added as a loose
+adjective-sense synonym instead of a proper separate adjective entry
+— corrected by removing "foggy" from `niebla` and creating
+`neblinoso` (adj) → `["foggy"]`.
 
 French (FR): A1/A2 coverage pass complete, 150 raw candidates. Worst
 basic-word gap seen across any language so far — oui (yes), bonjour

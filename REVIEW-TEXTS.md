@@ -153,7 +153,45 @@ the B1 set has three Japanese/Chinese mismatches (`ft10`/ja, `ft11`/ja,
 `ft11`/zh), all confirmed as known tool-counting artifacts, not real
 translation gaps (see `AUTHORING-TEXTS.md`). The other 13 flagged mismatches across both
 sets are all pre-existing issues on `ft1`–`ft6`/`s5`/`s7`/`p38`,
-untouched by this work. Japanese was initially drafted with normal
+untouched by this work.
+
+### Japan fairy-tale trio added (this session)
+
+Momotarō, Urashima Tarō, The Grateful Crane — `ft13`/`ft14`/`ft15` in
+every `public/reader/{lang}-en.json`, `origin:japan`, A2 (written
+directly at A2, no A1 companion). Full kanji in Japanese, matching the
+France trio's convention. Sentence-length and connector-vocabulary
+audit run *before* translation this time — direct lesson from the
+France B1 miscalibration — verified 8–12 word sentences and past-tense
+narration up front rather than after the fact; caught and fixed 3
+uses of "however" (not on the A2-approved connector list) during that
+pre-translation audit. One real translation-structure bug still came
+up during congruence verification despite the earlier audit: the
+Japanese Momotarō translation split one English sentence into two,
+breaking sentence alignment — caught by
+`tools/check_reader_congruence.py`, not by inspection, and fixed by
+merging back into one natural Japanese sentence. Final check: zero new
+mismatches beyond the existing documented set of 16 (13 pre-existing +
+3 from the France B1 set, all previously catalogued).
+
+### Japan B2 trio added (this session)
+
+Momotarō, Urashima Tarō, The Grateful Crane — `ft16`/`ft17`/`ft18` in
+every `public/reader/{lang}-en.json`, `origin:japan`, B2 companion
+pieces to the A2 trio above. Content fidelity checked against
+multiple independent web sources before translation — see
+`AUTHORING-TEXTS.md` for the Grateful Crane finding (a genuine fork in
+the source material under the identical tale title, not an error;
+flagged to the user and resolved by explicit choice). DE/ES/FR/ZH
+translation was clean on first pass. Japanese needed a real, multi-
+paragraph rework: B2's colon- and em-dash-joined complex sentences had
+been split into multiple Japanese sentences during translation across
+all three stories (worst case 3→8 sentences in one paragraph) —
+identified and fixed paragraph-by-paragraph against the actual
+`tools/check_reader_congruence.py` output. Final state: 17 total
+mismatches, exactly the 16 pre-existing/documented ones plus one new
+instance of the already-catalogued Latin quote-before-period artifact
+(`ft17`), not a translation gap. Japanese was initially drafted with normal
 kanji before catching that this corpus's existing fairy tales are pure
 hiragana, word-spaced, no kanji — see `AUTHORING-TEXTS.md`
 country-strategy section for the full note. The first B1 English draft

@@ -1,12 +1,31 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bb** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bc** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bc**: Vocab — fixed one imprecise synonym-gap fix from the prior
+  pass: `niebla` (ES, fog/noun) had "foggy" wrongly added as an
+  adjective-sense synonym; removed, and a proper `neblinoso` (adj)
+  entry created instead. Graded Reader — two new `origin:japan`
+  fairy-tale trios: Momotarō, Urashima Tarō, The Grateful Crane, at A2
+  (`ft13`–`ft15`) and B2 (`ft16`–`ft18`), all 6 languages, full kanji
+  in Japanese. Content fidelity checked against multiple web sources
+  before translation (see `AUTHORING-TEXTS.md` for a genuine fork found
+  in Grateful Crane's source material — the same tale title covers two
+  substantially different tellings). The A2 English draft was audited
+  for sentence length and connector vocabulary *before* translation
+  this time, a direct process improvement from the France B1
+  miscalibration. Japanese B2 translation needed a real multi-paragraph
+  fix after first pass — long colon/em-dash-joined English sentences
+  had been split into multiple Japanese sentences during translation
+  across all three stories; corrected against actual
+  `tools/check_reader_congruence.py` output paragraph-by-paragraph, not
+  by assumption. Full details in `AUTHORING-TEXTS.md` and
+  `REVIEW-TEXTS.md`.
 - **v0.66bb**: Graded Reader — new `origin:france` (Perrault) fairy-tale
   trio: Bluebeard, Puss in Boots, Tom Thumb, at both A1 and B1
   (`ft7`–`ft12`), written English-first and translated sentence-by-

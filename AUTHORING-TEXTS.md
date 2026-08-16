@@ -327,12 +327,74 @@ across every level.
 Goal: pull fairy tales from each of the six supported languages' own
 cultural traditions, so every language gets a turn as source culture, not
 just translation target. Germany was the first origin (all three current
-Grimm tales). **France is second** (Bluebeard, Puss in Boots, Tom Thumb —
-Perrault, A1 level, done). Remaining: Spain, Japan, China, and a specific
-English-language tradition (a named British/Irish tale or American
-folklore, rather than "generic English") — not finalized, open to
-discussion when we get there. Work one country at a time rather than
+Grimm tales, A1; B1 retellings still pending). **France is second**
+(Bluebeard, Puss in Boots, Tom Thumb — Perrault, A1 *and* B1 both done).
+**Japan is third** (Momotarō, Urashima Tarō, The Grateful Crane — A2,
+written directly at A2 with no A1 companion, matching how the second
+German/Grimm trio also started at A2). Remaining: Spain, China, and a
+specific English-language tradition (a named British/Irish tale or
+American folklore, rather than "generic English") — not finalized, open
+to discussion when we get there. Work one country at a time rather than
 committing to the full six-country matrix up front.
+
+**Japan A2 trio, process notes**: sentence-length and connector-vocabulary
+audit run *before* translation this time — a direct lesson from the B1
+miscalibration on the France trio (see below). Verified 8–12 word
+sentences (actual average 9.6–10.5 across the three stories) and
+past-tense narration throughout before starting translation. Caught 3
+instances of "however" during the audit — not on the A2-approved
+connector list (*and, but, because, when, then*), too formal a register
+for A2 — replaced with "but," properly restructured rather than just
+word-swapped (they don't slot into a sentence the same way). One real
+translation-structure bug caught during congruence verification, not
+before: the Japanese translation of Momotarō had split one English
+sentence (with an embedded "which means" clause) into two Japanese
+sentences, breaking 1:1 sentence alignment — merged back into one
+natural Japanese sentence. Full kanji used in Japanese, matching the
+France trio's convention rather than the `ft1`–`ft6` kana-only style.
+
+**Japan B2 trio** (`ft16`–`ft18`): companion B2 retellings of the same
+three tales, written directly in the complex, idiom-permitting B2
+register the rules actually call for (no sentence-length cap, passive
+voice, figurative language) — this is close to the register that
+accidentally emerged from the France B1 miscalibration, reused
+deliberately this time now that it's the correct target. Content
+fidelity checked against multiple independent web sources before
+translation, not just internal consistency with the A2 versions —
+Momotarō confirmed accurate against several sources; Urashima Tarō
+confirmed accurate with two minor simplifications noted (Otohime
+described as ruling the realm herself rather than as the Dragon
+King's daughter; the specific detail that his mother is found dead is
+generalized to "the village had vanished"); The Grateful Crane
+surfaced a genuine fork in the source material — this exact tale
+circulates under the identical title "Tsuru no Ongaeshi" in two
+substantially different forms (an old-couple/no-romance version, and
+a young-man-marries-the-crane version that Wikipedia's own plot
+summary uses, sourced to folklorist Seki Keigo) — flagged to the user
+rather than silently picking one; old-couple version kept by request,
+to match the non-romantic register of the other two tales in the trio.
+
+Translation into DE/ES/FR was clean on the first pass (verified via
+`tools/check_reader_congruence.py`, zero mismatches). Japanese needed
+substantial rework after the first translation pass: B2's much longer,
+multi-clause English sentences (frequently joined with colons or
+em-dashes) had repeatedly been split into two or more separate
+Japanese sentences during translation, for naturalness — this is a
+real, systematic pattern, not an isolated slip, and it recurred across
+all three stories (worst case: one paragraph went from a target of 3
+English sentences to 8 Japanese ones). Fixed by identifying every
+colon/em-dash/dialogue-tag-triggered split and merging the Japanese
+back into single sentences matching the English structure, verified
+paragraph-by-paragraph against the real tool output rather than
+assumption. One remaining mismatch (`ft17` para 2, JA 4 vs EN 3) is
+the already-documented Latin quote-before-period artifact (same class
+as `ft10`/`ft11`), not a translation gap. **Lesson for future
+translation work into Japanese at B2+ specifically**: colon-joined and
+em-dash-joined English clauses need deliberate attention during
+translation — the natural instinct to split them into separate
+Japanese sentences for readability directly breaks sentence-level
+congruence, and this gets worse, not better, as source-language
+sentence complexity increases with level.
 
 One naming lesson from the France batch: **Japanese fairy tales in this
 corpus (`ft1`–`ft6`, the German-origin set) are written in pure
