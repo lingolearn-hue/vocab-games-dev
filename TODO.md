@@ -1,18 +1,43 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bc** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bd** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bd**: Vocab — major grammar-word coverage pass across five
+  languages. Found and fixed a severe, systemic gap: DE/ES/FR had
+  essentially zero native prepositions/conjunctions (e.g. French had
+  1 preposition in 17,625 entries; `dans`, `avec`, `et`, `mais`, `que`
+  were all completely absent — confirmed at the source, the upstream
+  vbvss199 dataset has 0 of either category). Fixed: French +54,
+  German +52, Spanish +33 entries (prepositions, conjunctions, and
+  key relative/demonstrative pronouns). Japanese needed an even more
+  fundamental fix: core grammatical particles (は/が/を/に/で/へ/から/
+  まで/の, etc.) were almost entirely missing — arguably more
+  consequential than the European preposition gaps, since these are
+  required to form any grammatical Japanese sentence at all. Added 21
+  particle entries (introduced a new `particle` POS tag) plus 8
+  conjunction gaps. Chinese was in much better shape already (better-
+  sourced import pipeline, confirmed earlier) but had two real errors:
+  `以` and `离` — both extremely common function words — were glossed
+  only with rare/archaic senses, missing their everyday meanings
+  entirely; fixed as separate homograph entries. Also: removed a
+  derogatory slur reference (Falun Gong) found attached to an
+  unrelated Chinese vocabulary entry, removed genuine profanity and
+  two real-world political-propaganda terms (`Lügenpresse`,
+  `Altpartei`) from German, removed profanity from Spanish/French, and
+  fixed a data error (`cul`, a French word mislabeled as Spanish).
+  Full findings and reasoning in `REVIEW-VOCAB.md`.
 - **v0.66bc**: Vocab — fixed one imprecise synonym-gap fix from the prior
   pass: `niebla` (ES, fog/noun) had "foggy" wrongly added as an
   adjective-sense synonym; removed, and a proper `neblinoso` (adj)
   entry created instead. Graded Reader — two new `origin:japan`
   fairy-tale trios: Momotarō, Urashima Tarō, The Grateful Crane, at A2
   (`ft13`–`ft15`) and B2 (`ft16`–`ft18`), all 6 languages, full kanji
+
   in Japanese. Content fidelity checked against multiple web sources
   before translation (see `AUTHORING-TEXTS.md` for a genuine fork found
   in Grateful Crane's source material — the same tale title covers two
