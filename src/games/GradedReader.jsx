@@ -67,6 +67,12 @@ const CUSTOM_PASSAGE_KEY = 'vocabCustomPassage'
 const FINISHED_KEY = 'vocabFinishedPassages'
 const LAST_PASSAGE_KEY = 'vocabLastPassage'
 const READER_PREFS_KEY = 'vocabReaderPrefs' // per-language: { level, tags, hideFinished }
+// Set right before jumping to Vocab Browser via the in-passage hotlink;
+// consumed on the next Graded Reader mount to reopen the same passage
+// directly instead of dropping back to the library list. sessionStorage
+// (not localStorage) since this is one-shot navigation intent, not a
+// persistent preference — see the read/clear effect below.
+const RETURN_TO_READER_KEY = 'vocabReaderReturnPassage'
 
 function loadReaderPrefs(language) {
   try {
@@ -206,6 +212,19 @@ export default function GradedReader() {
       setLoading(false)
     })
   }, [activeLanguage])
+
+  // Consume the "return here" flag set by the Vocab Browser hotlink below.
+  // Runs once passages are loaded so the target id can actually be found;
+  // no-ops (and no-ops on every later render) once the flag is cleared.
+  useEffect(() => {
+    if (loading || passages.length === 0) return
+    let targetId = null
+    try { targetId = sessionStorage.getItem(RETURN_TO_READER_KEY) } catch { /* ignore */ }
+    if (!targetId) return
+    try { sessionStorage.removeItem(RETURN_TO_READER_KEY) } catch { /* ignore */ }
+    const target = passages.find(p => p.id === targetId)
+    if (target) openPassage(target, true)
+  }, [passages, loading])
 
   // Derive available levels and tags from passages
   const availableLevels = useMemo(() => {
@@ -350,6 +369,14 @@ export default function GradedReader() {
     setActivePassage(null)
     setShowTranslation(false)
     setRevealedCount(1)
+  }
+
+  // Only offered for real library passages (custom pasted text has no
+  // stable id to reopen against on return).
+  function goToVocabBrowser() {
+    if (!activePassage) return
+    try { sessionStorage.setItem(RETURN_TO_READER_KEY, activePassage.id) } catch { /* ignore */ }
+    setScreen('vocab')
   }
 
   const currentPassage = activePassage ?? customPassage
@@ -765,9 +792,14 @@ export default function GradedReader() {
             🔗
           </button>
         )}
+        {activePassage && (
+          <button className="gr-play-btn" onClick={goToVocabBrowser} title="Open Vocab Browser">
+            🗂️
+          </button>
+        )}
         <HelpButton
           title="Graded Reader"
-          description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, tap 🔊 to have the passage read aloud sentence by sentence, and use 📇/🔗 to practice this passage's vocab as flashcards or a matching game."
+          description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, tap 🔊 to have the passage read aloud sentence by sentence, use 📇/🔗 to practice this passage's vocab as flashcards or a matching game, and 🗂️ to open the Vocab Browser — Back from there returns you to this passage."
         />
       </div>
 

@@ -1,12 +1,33 @@
 # TODO / Future Improvements
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bd** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66be** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66be**: Three fixes. (1) Real root-cause fix for the Japanese
+  Graded Reader lookup bug reported against 農場 in the Bremen Musicians
+  story — `buildLookup()` in `src/engine/reader.js` only ever indexed
+  vocab by kanji dictionary form, never by kana reading, so any word
+  spelled phonetically (the house convention for A1 passages) could
+  never match; the client-side tokeniser then fell through
+  character-by-character onto short, unrelated matches. Now also
+  indexes Japanese entries by `reading` (harmless for other languages
+  — de/es/fr have no reading data, zh readings are pinyin and never
+  appear literally in hanzi text). Verified live: tapping のうじょう in
+  ja-ft2 now correctly resolves to 農場. (2) Added a Vocab Browser
+  hotlink (🗂️) to the Graded Reader's open-passage view; Back from
+  Vocab Browser now returns to the exact same passage (via a one-shot
+  sessionStorage flag) instead of dropping to the library list. (3)
+  Fixed a real bug: launching a passage's "practice this vocab as
+  flashcards/matching" shortcut (or an Adventure chapter) sets
+  `sessionEntries` as a temporary vocab override, but nothing ever
+  cleared it — so it silently kept limiting every game, including ones
+  launched normally from the Setup front page, for the rest of the
+  session. Now clears `sessionEntries` whenever navigation lands back
+  on Setup. Verified live end-to-end.
 - **v0.66bd**: Vocab — major grammar-word coverage pass across five
   languages. Found and fixed a severe, systemic gap: DE/ES/FR had
   essentially zero native prepositions/conjunctions (e.g. French had

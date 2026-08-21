@@ -165,6 +165,31 @@ export function buildLookup(entries) {
     const stripped = e.entry.replace(/^(der|die|das|den|dem|des)\s+/i, '')
     if (stripped !== e.entry) map.set(stripped.toLowerCase(), e)
   }
+  // Second pass, after every literal dictionary form is indexed: also index
+  // Japanese entries by their kana reading. A1 Graded Reader passages are
+  // written kanji-free by house convention (see AUTHORING-TEXTS.md), so a
+  // word like 農場 ("farm") appears in text only as のうじょう. Without this,
+  // that string never matches anything in the lookup, and the longest-match
+  // tokeniser below falls through character-by-character, latching onto
+  // short, often unrelated single/two-kana matches instead — e.g. mistaking
+  // part of a real word for an unrelated short one. (Confirmed directly:
+  // fugashi's own tokenizer independently mis-splits のうじょう into 嚢
+  // "sack" + a suffix fragment, neither of which is 農場 — same failure
+  // shape from the opposite direction.)
+  // Reading collisions (homophones sharing one kana spelling, e.g. かみ =
+  // 紙/髪/神) mean whichever entry is processed first wins the tie; an
+  // occasional wrong homophone match is still a strict improvement over no
+  // match at all. Kept as a separate pass (rather than inline above) so
+  // literal dictionary-form matches are always indexed first and can never
+  // be overwritten by a reading-based key for a different entry.
+  // Harmless for non-Japanese entries: `reading` is empty for de/es/fr, and
+  // zh readings are pinyin (Latin script), which never appears literally in
+  // Chinese passage text, so those keys simply never match anything.
+  for (const e of entries) {
+    if (!e.reading || e.reading === e.entry) continue
+    const readingKey = e.reading.toLowerCase()
+    if (!map.has(readingKey)) map.set(readingKey, e)
+  }
   return map
 }
 

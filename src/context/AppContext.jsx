@@ -35,6 +35,17 @@ export function AppProvider({ children }) {
       if (h[h.length - 1] === next) return h   // no duplicate
       return [...h, next]
     })
+    // sessionEntries is a temporary vocab override set by Adventure chapters
+    // and the Graded Reader's "practice this passage's vocab" shortcuts (see
+    // AdventureChapter.jsx / GradedReader.jsx). Nothing ever cleared it, so
+    // once set it silently kept overriding every game's vocab — including
+    // ones launched normally from the Setup front page — for the rest of
+    // the session. Landing back on 'setup' is the natural end-of-session
+    // boundary: any in-progress Adventure/Reader sub-flow bounces between
+    // its own screen and its mini-games via goBack() without ever passing
+    // through 'setup', so this only fires once the user has actually left
+    // that flow.
+    if (next === 'setup') setSessionEntries(null)
   }, [])
 
   // Go back to the previous screen in the history stack
@@ -43,6 +54,7 @@ export function AppProvider({ children }) {
       if (h.length <= 1) return h
       const prev = h[h.length - 2]
       setScreenRaw(prev)
+      if (prev === 'setup') setSessionEntries(null)
       return h.slice(0, -1)
     })
   }, [])
