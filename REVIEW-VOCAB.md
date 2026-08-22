@@ -376,3 +376,62 @@ B1–C2 not yet attempted for Japanese.
   vulgar-filter/dedup only). No alternative source fixes this since no
   official list exists anywhere; not worth chasing a "better" list for
   this reason alone.
+
+## License replacement: Spanish/French gender, German verb conjugation
+
+Three CC-BY-SA/unclear-license enrichment sources were replaced with
+original work: Spanish gender (doozan/spanish_data), French gender
+(Lexique383), and German verb conjugation (german-verbs-database).
+Full tooling lives in `tools/`: `es_gender_rules.py` /
+`es_gender_from_examples.py` / `es_gender_manual.py`,
+`fr_gender_rules.py` / `fr_gender_from_examples.py` /
+`fr_gender_manual.py`, `de_conjugation_rules.py` /
+`de_conjugation_manual.py`.
+
+**Method, all three**: (1) a suffix/orthographic-pattern rule engine
+built from general linguistic knowledge, not copied from any source;
+(2) for gender, a sentence-article-extraction pass using
+`public/examples/{es,fr}-en.json` (same MIT-licensed source as the
+core word lists) — detects the article immediately preceding a noun in
+its example sentence, with a two-token-back fallback for French to
+handle "article + adjective + noun" sentences; (3) a manual
+completion pass classifying the remaining residual from real
+vocabulary/grammar knowledge. Every pass was validated against the old
+source as a quality check, not treated as ground truth to copy —
+disagreements were investigated rather than assumed to favor either
+side.
+
+**Real bugs found and fixed along the way** (representative, not
+exhaustive): an accent-stripped-suffix bug that turned French's
+reliable `-té` pattern into a false-positive magnet for any word
+ending in plain `-te`; two "improvements" to French `-oire`/`-son`
+that looked feminine-leaning from a small sample but were actually
+majority-masculine at full scale; a German rule that treated `ge-` as
+a strippable prefix, breaking ordinary verbs that simply start with
+those letters (`gelten`, `geben`); short-prefix collisions
+(`herrschen` → wrongly split into `her`+`rschen`); and the key German
+finding that `haben`/`sein` auxiliary does **not** reliably inherit
+through verb prefixation even though the conjugation pattern itself
+does (`fahren`=sein but `erfahren`=haben) — confirmed empirically, not
+assumed, which is why the rule engine deliberately abstains on
+auxiliary for prefixed verbs rather than guessing via inheritance.
+
+**Final decision: MIT compliance over completeness.** Fields where the
+old source and the new methods disagreed, or where no method reached a
+confident answer, were nulled out rather than left silently resting on
+old CC-BY-SA/unclear-license data. See `TODO.md` for the specific
+counts and categories of what's blank, and `THIRD_PARTY_LICENSES.md`
+for the (deliberately short) per-source summary.
+
+**Reconstruction note**: this replacement work was originally done in
+full within a single session, but the local working environment reset
+before it was pushed, and the actual files were lost (see git history
+around this commit for the recovery). Everything above was rebuilt
+from the session transcript and re-validated against the real vocab
+data rather than assumed correct — final numbers are close to, but not
+always identical to, the original pass (e.g. the German manual
+auxiliary table covers somewhat fewer verbs than the lost original,
+meaning a slightly larger null set for German conjugation than what
+was first achieved). Re-verified rather than blindly re-declared:
+every reconstructed classifier was run against the actual vocab files
+and its agreement rate checked before being applied.

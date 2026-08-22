@@ -1,12 +1,61 @@
 # TODO / Future Improvements
 
+## Open: license-replacement gaps (contested/unresolved fields left blank)
+
+Per an explicit decision to prioritize a clean MIT license over data
+completeness: `THIRD_PARTY_LICENSES.md` now shows all three vocabulary
+enrichment sources (Spanish gender, French gender, German verb
+conjugation) as fully replaced with original work. Fields where the
+original CC-BY-SA-derived source and our own rule/manual classification
+disagreed, or where neither had a confident answer, were deliberately
+left blank rather than guessed at or silently kept on the old source.
+Full methodology in `REVIEW-VOCAB.md`; this section tracks only the
+concrete remaining gaps.
+
+- **Spanish gender** (`public/vocab/es-en.json`): 246 nouns have
+  `gender: null`. Mostly epicene person-nouns where our classification
+  (`el/la agente`, `el/la testigo`, etc.) disagreed with the old
+  source's flat masculine tag, plus a handful of true homographs
+  (`cometa`, `guía`) and unstable loanwords (`party`, `magazine`,
+  `blockchain`).
+- **French gender** (`public/vocab/fr-en.json`): 321 nouns have
+  `gender: null`. Same pattern — mostly person-nouns where French's
+  distinct-feminine-spelling behavior (`citoyen`/`citoyenne`) makes a
+  simple epicene/masculine call contested, plus loanwords and a few
+  homographs.
+- **German verb conjugation** (`public/conjugations/de.json`): 457
+  verbs have at least one null field among presentTense/pastTense/
+  pastParticiple/auxiliary (719 null fields total). Mostly missing
+  entries in the compiled strong-verb table (rare irregular verbs not
+  yet added), dual-paradigm verbs where a weak and strong conjugation
+  both exist for different senses (`hängen`, `bewegen`, `verwenden`),
+  and a handful of compound/multi-prefix verbs beyond the
+  single-prefix model's scope. Note: this file's tooling
+  (`tools/de_conjugation_manual.py`) was reconstructed from a lost
+  local session and may cover somewhat fewer verbs than the original
+  pass — legitimate room to extend further.
+
+**To close further**: extend `tools/{es,fr}_gender_manual.py` and
+`tools/de_conjugation_rules.py`/`de_conjugation_manual.py` with
+additional verified entries, following the same discipline used
+throughout — classify from real knowledge, validate, don't guess.
+
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66be** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bf** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bf**: License compliance — replaced three CC-BY-SA/unclear-
+  license vocabulary enrichment sources (Spanish gender, French
+  gender, German verb conjugation) with original rule/extraction/
+  manual classification pipelines (`tools/es_gender_*.py`,
+  `tools/fr_gender_*.py`, `tools/de_conjugation_*.py`). Contested or
+  unresolved fields left blank rather than guessed — see the "Open:
+  license-replacement gaps" section above for specifics, and
+  `REVIEW-VOCAB.md` for full methodology and a note on a local-session
+  data-loss incident and its recovery.
 - **v0.66be**: Three fixes. (1) Real root-cause fix for the Japanese
   Graded Reader lookup bug reported against 農場 in the Bremen Musicians
   story — `buildLookup()` in `src/engine/reader.js` only ever indexed
