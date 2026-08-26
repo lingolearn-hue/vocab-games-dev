@@ -346,11 +346,12 @@ export function ToneDrill() {
   )
 }
 
-// ── Measure word drill (Chinese & Japanese) ───────────────────────────────────
+// ── Measure word drill (Chinese, Japanese & Korean) ───────────────────────────
 
 const MW_DISTRACTORS = {
   zh: ['个', '只', '本', '张', '杯', '瓶', '条', '块', '件', '双'],
   ja: ['個', '匹', '冊', '杯', '本', '枚', '台', '頭', '羽', '人'],
+  ko: ['개', '명', '대', '장', '권', '병', '잔', '건', '곳', '번'],
 }
 
 export function MeasureWordDrill() {
@@ -383,11 +384,11 @@ export function MeasureWordDrill() {
   )
 
   if (nouns.length === 0) return (
-    <div className="md-empty">No nouns with measure word data loaded. Select Chinese or Japanese.</div>
+    <div className="md-empty">No nouns with measure word data loaded. Select Chinese, Japanese, or Korean.</div>
   )
 
   const correctMW = current?.measureWord
-  const quantifier = language === 'zh' ? '一' : 'ひとつの'
+  const quantifier = language === 'zh' ? '一' : language === 'ko' ? '하나의' : 'ひとつの'
 
   return (
     <div className="md-exercise">
@@ -461,7 +462,7 @@ export default function MatchingDrills() {
     const drills = []
     if (lang === 'de' || lang === 'es') drills.push('gender')
     if (lang === 'zh')                   drills.push('tone', 'measureWord')
-    if (lang === 'ja')                   drills.push('measureWord')
+    if (lang === 'ja' || lang === 'ko')  drills.push('measureWord')
     if (drills.length === 0)             drills.push('gender', 'tone', 'measureWord') // show all if unknown
     return drills
   }, [activeLanguage])

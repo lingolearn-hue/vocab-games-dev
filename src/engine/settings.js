@@ -55,6 +55,7 @@ const STORAGE_KEY = 'vocabSettings'
 export const LEVEL_ORDER = {
   zh: ['HSK1','HSK2','HSK3','HSK4','HSK5','HSK6','HSK7'],
   ja: ['N5','N4','N3','N2','N1'],
+  ko: ['TOPIK1','TOPIK2','TOPIK3','TOPIK4','TOPIK5','TOPIK6'],
   de: ['A1','A2','B1','B2','C1','C2'],
   es: ['A1','A2','B1','B2','C1','C2'],
   fr: ['A1','A2','B1','B2','C1','C2'],

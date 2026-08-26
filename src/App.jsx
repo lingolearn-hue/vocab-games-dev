@@ -19,14 +19,15 @@ import Listening from './games/Listening'
 import Tutorial from './components/Tutorial'
 import './App.css'
 
-const LANGUAGE_FLAGS = { zh: '🇨🇳', es: '🇪🇸', de: '🇩🇪', ja: '🇯🇵', en: '🇬🇧', fr: '🇫🇷' }
-const LANGUAGE_NAMES = { zh: 'Chinese', es: 'Spanish', de: 'German', ja: 'Japanese', fr: 'French' }
+const LANGUAGE_FLAGS = { zh: '🇨🇳', es: '🇪🇸', de: '🇩🇪', ja: '🇯🇵', en: '🇬🇧', fr: '🇫🇷', ko: '🇰🇷' }
+const LANGUAGE_NAMES = { zh: 'Chinese', es: 'Spanish', de: 'German', ja: 'Japanese', fr: 'French', ko: 'Korean' }
 const LANGUAGES = [
   { language: 'zh', label: 'Chinese 🇨🇳' },
   { language: 'es', label: 'Spanish 🇪🇸' },
   { language: 'de', label: 'German 🇩🇪'  },
   { language: 'fr', label: 'French 🇫🇷'   },
   { language: 'ja', label: 'Japanese 🇯🇵' },
+  { language: 'ko', label: 'Korean 🇰🇷'   },
   { language: 'en', label: 'English 🇬🇧'  },
 ]
 

@@ -225,11 +225,22 @@ export function nextCard(entryMap) {
 /**
  * Record correct answer. Advances score. Removes from pass queue.
  * Returns true if pass is now complete.
+ *
+ * No-ops if entryId has already left the pass queue this pass (i.e. it was
+ * already resolved once, right or wrong). This matters for PairMatch: a
+ * wrong guess marks BOTH clicked items wrong via recordWrong, which removes
+ * them from the queue immediately. If one of those items is later force-
+ * matched correctly (the round can't finish otherwise), that resolution
+ * must not double-score it — its one evaluation for this pass already
+ * happened at the wrong guess. Flashcard/StrokeOrder never trigger this
+ * path (each shows one card at a time, resolved exactly once), so this is
+ * a no-op for them.
  */
 export function recordCorrect(entryId, allEntryIds, game='flashcard') {
   const scores  = readScores(game)
   const session = readSession(game)
   if (!session) return false
+  if (!session.passQueue.includes(entryId)) return false
 
   session.passQueue = session.passQueue.filter(id => id !== entryId)
   session.passDone++
@@ -247,11 +258,17 @@ export function recordCorrect(entryId, allEntryIds, game='flashcard') {
 /**
  * Record wrong answer. Score-1 (min 0). Removes from pass queue.
  * Returns true if pass is now complete.
+ *
+ * Same "resolved exactly once per pass" guard as recordCorrect above — see
+ * its doc comment. For PairMatch specifically, this also prevents a second
+ * (or third...) wrong guess reusing the same already-flagged item from
+ * ratcheting its score down further within one round.
  */
 export function recordWrong(entryId, allEntryIds, game='flashcard') {
   const scores  = readScores(game)
   const session = readSession(game)
   if (!session) return false
+  if (!session.passQueue.includes(entryId)) return false
 
   session.passQueue = session.passQueue.filter(id => id !== entryId)
   session.passDone++
@@ -268,11 +285,16 @@ export function recordWrong(entryId, allEntryIds, game='flashcard') {
 
 /**
  * Master a card immediately. Removes from pass queue.
+ *
+ * Same guard as above, for consistency — recordMaster isn't currently
+ * hit by PairMatch's multi-call scenario, but the "resolved exactly once
+ * per pass" invariant should hold for every record* function uniformly.
  */
 export function recordMaster(entryId, allEntryIds, game='flashcard') {
   const scores  = readScores(game)
   const session = readSession(game)
   if (!session) return false
+  if (!session.passQueue.includes(entryId)) return false
 
   session.passQueue = session.passQueue.filter(id => id !== entryId)
   session.passDone++

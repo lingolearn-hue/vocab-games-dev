@@ -46,6 +46,21 @@ export default function PairMatch() {
   const [roundSize, setRoundSize] = useState(0)
   const [samePosMode, setSamePosMode] = useState(false)  // when on, each round draws all cards from one POS type, filling remainder from other types if needed
 
+  // Ids already scored (right or wrong) this round. A wrong guess marks
+  // BOTH clicked items wrong; the round can't finish until each of those
+  // items is eventually clicked correctly too (there's no other way to
+  // clear its tile from the board), so without this guard that later
+  // forced-correct click would score it a second time. leitner.js has its
+  // own "resolved this pass" guard for the common case, but that alone
+  // isn't enough here: if a wrong guess happens to be what empties the
+  // underlying Leitner box's queue (can happen when few cards remain),
+  // the engine opens the next box immediately, which can legitimately
+  // re-admit the same id into the new queue — bypassing that guard. This
+  // per-round tracker is authoritative regardless of what the engine's
+  // box/pass bookkeeping does underneath, so a pair's fate this round is
+  // decided once, on its first resolution, full stop.
+  const resolvedThisRound = useRef(new Set())
+
   // Leitner box/pass state — same engine and per-game storage key ('pairmatch')
   // already used by Flashcard ('flashcard') and StrokeOrder ('stroke'), so scores
   // and box progress here are entirely separate from those games.
@@ -100,6 +115,7 @@ export default function PairMatch() {
     setSelectedLeft(null)
     setSelectedRight(null)
     setWrongPair(null)
+    resolvedThisRound.current = new Set()
   }
 
   // Build a round by drawing from the *current Leitner pass queue* — i.e. only
@@ -171,17 +187,32 @@ export default function PairMatch() {
   useEffect(() => {
     if (!selectedLeft || !selectedRight) return
     if (selectedLeft.id === selectedRight.id) {
-      leitnerCorrect(selectedLeft.id, entryIds, 'pairmatch')
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- refreshes box/pass state in response to a completed pair selection
-      refreshLeitnerState()
+      const id = selectedLeft.id
+      if (!resolvedThisRound.current.has(id)) {
+        leitnerCorrect(id, entryIds, 'pairmatch')
+        resolvedThisRound.current.add(id)
+        refreshLeitnerState()
+      }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- responds to a completed pair selection, not render state
       setTotalCorrect(c => c + 1)
-      setMatched(prev => new Set([...prev, selectedLeft.id]))
+      setMatched(prev => new Set([...prev, id]))
       setSelectedLeft(null)
       setSelectedRight(null)
     } else {
-      leitnerWrong(selectedLeft.id, entryIds, 'pairmatch')
-      leitnerWrong(selectedRight.id, entryIds, 'pairmatch')
-      refreshLeitnerState()
+      const leftId = selectedLeft.id
+      const rightId = selectedRight.id
+      let scoredSomething = false
+      if (!resolvedThisRound.current.has(leftId)) {
+        leitnerWrong(leftId, entryIds, 'pairmatch')
+        resolvedThisRound.current.add(leftId)
+        scoredSomething = true
+      }
+      if (!resolvedThisRound.current.has(rightId)) {
+        leitnerWrong(rightId, entryIds, 'pairmatch')
+        resolvedThisRound.current.add(rightId)
+        scoredSomething = true
+      }
+      if (scoredSomething) refreshLeitnerState()
       setWrongPair({ left: selectedLeft.id, right: selectedRight.id })
       setTimeout(() => {
         setWrongPair(null)

@@ -41,12 +41,42 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bf** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bg** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bg**: Two independent pieces of work.
+  (1) Fixed a real Pair Match scoring bug: a wrong guess marks both
+  clicked tiles wrong via the shared Leitner engine, but the round
+  can't finish until each of those tiles is also clicked correctly —
+  which was double-scoring them, netting a wrong+correct sequence back
+  to no change at all (reported as "can't advance to the next
+  bucket"). Root cause and fix in two layers: `leitner.js`'s
+  `recordCorrect`/`recordWrong`/`recordMaster` now no-op if an entry
+  already left the pass queue this pass; `PairMatch.jsx` also added
+  its own per-round `resolvedThisRound` tracker, needed because a
+  wrong guess that happens to empty the underlying box's queue can
+  trigger a premature box transition that re-admits the same entry
+  into a freshly-opened queue, bypassing the engine-level guard alone
+  (this was the "except if it's the last one in the bucket" exception
+  case). Verified via isolated engine simulation (exact before/after
+  score tracking) and live in the browser.
+  (2) Added Korean as a new supported language: `public/vocab/ko-en.json`
+  (104 entries) covering personal/demonstrative pronouns, everyday
+  basics, and — per request — business-trip, expo/trade-show, and
+  battery/vehicle-testing vocabulary, each with Revised Romanization as
+  `reading`. Wired into `App.jsx` (flag/picker), `AppContext.jsx`
+  (`AVAILABLE_LISTS`), `settings.js` (TOPIK1-6 level order), `speech.js`
+  (`ko-KR` TTS code), and `MatchingDrills.jsx` (Korean counter/measure-
+  word drill, own distractor set). Deliberately NOT treated as CJK for
+  reading-toggle/Stroke-Order purposes, since Hangul is phonetic, not
+  logographic — reader.js/TextWithLookup.jsx already had 'ko' in their
+  tokenizer's CJK set from earlier groundwork, kept as-is since
+  Korean's agglutinative particles make that the right call there.
+  Verified live: Flashcard (TTS `ko-KR` confirmed), Pair Match, Race
+  Car, and the new Measure Word drill all render and score correctly.
 - **v0.66bf**: License compliance — replaced three CC-BY-SA/unclear-
   license vocabulary enrichment sources (Spanish gender, French
   gender, German verb conjugation) with original rule/extraction/

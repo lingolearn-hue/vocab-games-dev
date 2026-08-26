@@ -20,6 +20,7 @@ const STORAGE_KEY = 'vocabSettings'
 const LANG_CODES = {
   zh: 'zh-CN',
   ja: 'ja-JP',
+  ko: 'ko-KR',
   de: 'de-DE',
   es: 'es-ES',
   fr: 'fr-FR',
