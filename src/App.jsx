@@ -10,6 +10,7 @@ import Settings from './games/Settings'
 import Stats from './games/Stats'
 import Typing from './games/Typing'
 import GradedReader from './games/GradedReader'
+import BookReader from './games/BookReader'
 import StrokeOrder from './games/StrokeOrder'
 import Dialogue from './games/Dialogue'
 import MatchingDrills from './games/MatchingDrills'
@@ -88,7 +89,7 @@ function Router() {
   // Global Escape: always goes back to previous screen
   useEffect(() => {
     const GAME_SCREENS = new Set(['racecar','pairmatch','flashcard','gapfill','typing',
-      'reader','dialogue','matching','vocab','stats','settings','adventure','grammar-dict','listening'])
+      'reader','library','dialogue','matching','vocab','stats','settings','adventure','grammar-dict','listening'])
     function onKey(e) {
       if (e.key === 'Escape' && GAME_SCREENS.has(screen)) goBack()
     }
@@ -106,6 +107,7 @@ function Router() {
     case 'settings':  return <Settings />
     case 'stats':     return <Stats />
     case 'reader':    return <GradedReader />
+    case 'library':   return <BookReader />
     case 'dialogue':  return <Dialogue />
     case 'matching':  return <MatchingDrills />
     case 'adventure':     return <Adventure />

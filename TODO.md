@@ -41,12 +41,35 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bg** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bh** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bh**: Two new features.
+  (1) New "Library" view (📕, under Language in Context, next to Graded
+  Reader) for opening EPUB/MOBI files from the device and reading them
+  with the same tap-to-look-up-any-word support as Graded Reader, plus
+  sentence-by-sentence read-aloud. `src/engine/bookParser.js` handles
+  EPUB via a lazily-loaded `jszip` dependency (unzip + OPF manifest/
+  spine walk, XHTML→plain-text) and a hand-written MOBI6/PalmDOC parser
+  (PDB header + LZ77 decompression) for older MOBI files — newer
+  KF8-based MOBI files aren't supported and get a clear error message
+  suggesting EPUB conversion. `src/games/BookReader.jsx` reuses
+  `buildLookup()`/`tokenise()` directly with no precompile step (no
+  offline fugashi surface-forms merge, unlike Graded Reader's curated
+  passages) — real-time lookup against whatever's on screen. Verified
+  live against a real synthetic EPUB: title/chapter extraction, tap-to-
+  lookup, and read-aloud (correct language code, sentence-by-sentence)
+  all confirmed working.
+  (2) Pair Match: added a 🔊/🔇 tap-to-hear audio toggle in the header
+  icon row (default off, persisted like Flashcard's Auto toggle). When
+  on, tapping a target-language tile plays its audio via the untruncated
+  underlying word text (not the possibly-ellipsized display label);
+  source/English tiles never play regardless of toggle state. Verified
+  live: silent by default, silent when off, speaks only the target-
+  language tile with the correct language code when on.
 - **v0.66bg**: Two independent pieces of work.
   (1) Fixed a real Pair Match scoring bug: a wrong guess marks both
   clicked tiles wrong via the shared Leitner engine, but the round

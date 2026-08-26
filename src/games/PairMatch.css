@@ -49,6 +49,25 @@
   background: #eef2ff;
 }
 
+.pm-audio-toggle {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  width: 32px;
+  height: 28px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pm-audio-toggle.active {
+  border-color: #4f7ef8;
+  background: #eef2ff;
+}
+
 .pm-back {
   background: none;
   border: none;

@@ -20,6 +20,7 @@ const DRILL_GAMES = [
 const CONTEXT_GAMES = [
   { id: 'gapfill',  label: '✏️ Gap Fill',       desc: 'Complete the sentence', unfinished: true },
   { id: 'reader',   label: '📖 Graded Reader',   desc: 'Tap words to look up' },
+  { id: 'library',  label: '📕 Library',         desc: 'Read your own EPUB/MOBI files' },
   { id: 'dialogue', label: '💬 Dialogue',         desc: 'Comprehension questions', unfinished: true },
 ]
 const LISTENING_GAMES = [
@@ -282,7 +283,7 @@ export default function Setup() {
         <GroupCard title="Listening" subtitle="Hands-free audio review"
           icon="🎧" games={LISTENING_GAMES} canStart={canStart} setScreen={setScreen}
           isOpen={openGroup === 'listening'} onOpen={() => toggleGroup('listening')} />
-        <GroupCard title="Language in Context" subtitle="Gap Fill · Reader · Dialogue"
+        <GroupCard title="Language in Context" subtitle="Gap Fill · Reader · Library · Dialogue"
           icon="📚" games={CONTEXT_GAMES} canStart={canStart} setScreen={setScreen}
           isOpen={openGroup === 'context'} onOpen={() => toggleGroup('context')} />
         <GroupCard title="Matching Drills" subtitle="Gender · Tones · Measure Words"

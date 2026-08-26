@@ -13,6 +13,7 @@ import ReadingOnlyToggle from '../components/ReadingOnlyToggle'
 import FacetsByBoxToggle from '../components/FacetsByBoxToggle'
 import HelpButton from '../components/HelpButton'
 import LeitnerBar from '../components/LeitnerBar'
+import { speak } from '../engine/speech'
 import './PairMatch.css'
 
 // Truncate at first semicolon for display in tiles
@@ -45,6 +46,17 @@ export default function PairMatch() {
   const [totalCorrect,    setTotalCorrect]    = useState(0)
   const [roundSize, setRoundSize] = useState(0)
   const [samePosMode, setSamePosMode] = useState(false)  // when on, each round draws all cards from one POS type, filling remainder from other types if needed
+
+  // Plays the target-language word aloud when its tile is tapped (never the
+  // source/English side, regardless of which column it's currently showing
+  // in). Off by default — most players don't want audio firing on every
+  // tap. Persisted like Flashcard's own autoplay toggle.
+  const [audioEnabled, setAudioEnabled] = useState(() => localStorage.getItem('pm-audio-enabled') === 'true')
+  function toggleAudioEnabled() {
+    const next = !audioEnabled
+    setAudioEnabled(next)
+    localStorage.setItem('pm-audio-enabled', String(next))
+  }
 
   // Ids already scored (right or wrong) this round. A wrong guess marks
   // BOTH clicked items wrong; the round can't finish until each of those
@@ -102,11 +114,15 @@ export default function PairMatch() {
       id: e.id,
       label: truncate(effDirection === 'entry->translation' ? entryLabel(e) : e.translation[0]),
       sub: effDirection === 'entry->translation' && effShowReading && !(effReadingOnly && isCJK && e.reading) ? e.reading : null,
+      isTarget: effDirection === 'entry->translation',
+      speakText: effDirection === 'entry->translation' ? entryLabel(e) : null,
     }))
     const rights = entries.map(e => ({
       id: e.id,
       label: truncate(effDirection === 'entry->translation' ? e.translation[0] : entryLabel(e)),
       sub: effDirection === 'translation->entry' && effShowReading && !(effReadingOnly && isCJK && e.reading) ? e.reading : null,
+      isTarget: effDirection === 'translation->entry',
+      speakText: effDirection === 'translation->entry' ? entryLabel(e) : null,
     }))
 
     setLeftItems(shuffle(lefts))
@@ -233,11 +249,13 @@ export default function PairMatch() {
   }, [matched, roundSize])
   function selectLeft(item) {
     if (matched.has(item.id) || wrongPair) return
+    if (audioEnabled && item.isTarget && item.speakText) speak(item.speakText, activeLanguage)
     setSelectedLeft(prev => prev?.id === item.id ? null : item)
   }
 
   function selectRight(item) {
     if (matched.has(item.id) || wrongPair) return
+    if (audioEnabled && item.isTarget && item.speakText) speak(item.speakText, activeLanguage)
     setSelectedRight(prev => prev?.id === item.id ? null : item)
   }
 
@@ -265,6 +283,13 @@ export default function PairMatch() {
           <DirectionToggle />
           <ReadingToggle />
           <FacetsByBoxToggle />
+          <button
+            className={`pm-audio-toggle ${audioEnabled ? 'active' : ''}`}
+            onClick={toggleAudioEnabled}
+            title={audioEnabled ? 'Tap-to-hear: on' : 'Tap-to-hear: off'}
+          >
+            {audioEnabled ? '🔊' : '🔇'}
+          </button>
           {availablePos.length > 1 && (
             <button
               className={`pm-pos-toggle ${samePosMode ? 'active' : ''}`}
@@ -276,12 +301,13 @@ export default function PairMatch() {
           )}
           <HelpButton
             title="Pair Match"
-            description="Tap a word on the left, then its matching translation on the right, to connect pairs. Wrong pairs briefly flash before resetting. Toggle 'Same word type' to draw each round from a single part of speech (e.g. all nouns) for a harder, more focused round."
+            description="Tap a word on the left, then its matching translation on the right, to connect pairs. Wrong pairs briefly flash before resetting. Toggle 🔊 to hear the target-language word spoken aloud when you tap its tile (off by default). Toggle 'Same word type' to draw each round from a single part of speech (e.g. all nouns) for a harder, more focused round."
             buttons={[
               { icon: '⇵', label: 'Reading only',  desc: '(zh/ja) Show reading instead of hanzi/kanji' },
               { icon: '⇄', label: 'Direction',     desc: 'Swap which side is the word — left or right' },
               { icon: 'ふ/子', label: 'Reading',   desc: 'Show or hide the furigana/pinyin annotation' },
               { icon: '🧩', label: 'Train all facets', desc: "Each box drives its own display (translation flip, no reading, reading-only) so one card trains every facet of a word" },
+              { icon: '🔊', label: 'Tap-to-hear',  desc: 'Play the target-language word aloud when its tile is tapped (source language never plays)' },
               { icon: '1×', label: 'Same word type', desc: 'Restrict pairs to the same part of speech' },
             ]}
             showBoxes
