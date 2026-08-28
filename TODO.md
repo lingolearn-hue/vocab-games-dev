@@ -41,12 +41,40 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bh** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bi** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bi**: Two fixes.
+  (1) Library: found and fixed the real cause of a reported "chapter
+  breakdown doesn't work well" issue — many real-world EPUBs bundle
+  multiple chapters into a single XHTML file, separated only by
+  `<h1>`/`<h2>` headings, which the parser was treating as one giant
+  chapter. Any spine file with 2+ headings is now split at each
+  boundary. Also added: persistent library storage (IndexedDB, keyed
+  by filename+size, since the browser can't re-supply a File object on
+  its own — books are recognized as "the same book" on re-open, not
+  duplicated), cover image extraction (EPUB3 properties="cover-image",
+  EPUB2 <meta name="cover">, filename-based fallback; best-effort MOBI
+  EXTH cover support, unverified against a real file), a library grid
+  UI (cover+title+delete, "Add book" tile), reading-progress persistence
+  (resumes at the last-read chapter), `linear="no"` spine filtering,
+  opf: namespace-prefix tolerance, and a likely pre-existing MOBI
+  encoding-detection byte-offset bug (was reading the wrong header
+  field entirely). Verified live end-to-end including a full page
+  reload to confirm persistence actually survives it.
+  (2) Graded Reader: fixed a real overflow bug in the reading-view
+  header — on phones ≤320px wide (iPhone SE and similar) the row of
+  icon buttons (🔊/EN/📇/🔗/🗂️/?) genuinely overflowed the viewport,
+  pushing the help button completely off-screen with no way to reach
+  it; on 375px+ phones it didn't clip yet but squeezed the passage
+  title down to a single illegible character instead. Not CJK-specific
+  — reproduced identically for German and Japanese. Fixed by giving
+  the icon row its own horizontally-scrollable container and a
+  guaranteed minimum title width. Verified live at 320px: header no
+  longer overflows, every button reachable by scrolling.
 - **v0.66bh**: Two new features.
   (1) New "Library" view (📕, under Language in Context, next to Graded
   Reader) for opening EPUB/MOBI files from the device and reading them

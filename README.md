@@ -1,6 +1,6 @@
 # Vocab Games
 
-Version: 0.66bh — 2026-08-26
+Version: 0.66bi — 2026-08-27
 
 A React/Vite PWA for vocabulary learning across six languages (German,
 Spanish, French, English, Chinese, Japanese), built around a custom Leitner

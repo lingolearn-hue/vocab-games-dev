@@ -770,37 +770,39 @@ export default function GradedReader() {
       <div className="gr-header">
         <button className="gr-back" onClick={() => { setActivePassage(null); setCustomPassage(null) }}>← Back</button>
         <span className="gr-title gr-reading-title">{currentPassage.title}</span>
-        {speechSupported() && sentences.length > 0 && (
-          <button
-            className={`gr-play-btn ${readingIndex >= 0 ? 'is-playing' : ''}`}
-            onClick={readingIndex >= 0 ? stopPassage : playPassage}
-            title={readingIndex >= 0 ? 'Stop reading aloud' : 'Read passage aloud'}
-          >
-            {readingIndex >= 0 ? '⏸' : '🔊'}
-          </button>
-        )}
-        {currentPassage.translation && (
-          <button className={`gr-trans-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation(t => !t)}>EN</button>
-        )}
-        {passageEntries.length > 0 && (
-          <button className="gr-play-btn" onClick={startVocabQuiz} title="Practice this passage's vocab as flashcards">
-            📇
-          </button>
-        )}
-        {passageEntries.length >= 2 && (
-          <button className="gr-play-btn" onClick={startVocabMatch} title="Practice this passage's vocab as a matching game">
-            🔗
-          </button>
-        )}
-        {activePassage && (
-          <button className="gr-play-btn" onClick={goToVocabBrowser} title="Open Vocab Browser">
-            🗂️
-          </button>
-        )}
-        <HelpButton
-          title="Graded Reader"
-          description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, tap 🔊 to have the passage read aloud sentence by sentence, use 📇/🔗 to practice this passage's vocab as flashcards or a matching game, and 🗂️ to open the Vocab Browser — Back from there returns you to this passage."
-        />
+        <div className="gr-header-icons">
+          {speechSupported() && sentences.length > 0 && (
+            <button
+              className={`gr-play-btn ${readingIndex >= 0 ? 'is-playing' : ''}`}
+              onClick={readingIndex >= 0 ? stopPassage : playPassage}
+              title={readingIndex >= 0 ? 'Stop reading aloud' : 'Read passage aloud'}
+            >
+              {readingIndex >= 0 ? '⏸' : '🔊'}
+            </button>
+          )}
+          {currentPassage.translation && (
+            <button className={`gr-trans-toggle ${showTranslation ? 'active' : ''}`} onClick={() => setShowTranslation(t => !t)}>EN</button>
+          )}
+          {passageEntries.length > 0 && (
+            <button className="gr-play-btn" onClick={startVocabQuiz} title="Practice this passage's vocab as flashcards">
+              📇
+            </button>
+          )}
+          {passageEntries.length >= 2 && (
+            <button className="gr-play-btn" onClick={startVocabMatch} title="Practice this passage's vocab as a matching game">
+              🔗
+            </button>
+          )}
+          {activePassage && (
+            <button className="gr-play-btn" onClick={goToVocabBrowser} title="Open Vocab Browser">
+              🗂️
+            </button>
+          )}
+          <HelpButton
+            title="Graded Reader"
+            description="Read short passages at your level. Tap any word for its translation, tap elsewhere in a sentence to translate that sentence (when available), toggle EN for a full translation, tap 🔊 to have the passage read aloud sentence by sentence, use 📇/🔗 to practice this passage's vocab as flashcards or a matching game, and 🗂️ to open the Vocab Browser — Back from there returns you to this passage."
+          />
+        </div>
       </div>
 
       <div className="gr-body gr-reading-body" ref={readingBodyRef}>

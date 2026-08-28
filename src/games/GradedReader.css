@@ -42,7 +42,28 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 0 1 auto;
+  min-width: 3.2rem;
+  max-width: 42%;
 }
+
+/* Icon buttons (🔊/EN/📇/🔗/🗂️/?) share whatever space is left after the
+   back button and title. On narrow phones (≤~340px) that's not enough for
+   all of them at once — rather than letting the row silently overflow the
+   viewport (the help button, and sometimes the vocab-browser button, were
+   getting pushed off-screen entirely with no way to reach them), this
+   scrolls horizontally instead so every button stays reachable. */
+.gr-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.gr-header-icons::-webkit-scrollbar { display: none; }
+.gr-header-icons > * { flex-shrink: 0; }
 
 /* Tabs */
 .gr-header-tabs {
