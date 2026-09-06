@@ -9,13 +9,12 @@ import HelpButton from '../components/HelpButton'
 import './BookReader.css'
 
 const SENTENCE_PAUSE_MS = 500
+const SCROLL_SAVE_DEBOUNCE_MS = 600
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Screen Wake Lock — see GradedReader.jsx for the same pattern and rationale
-// (keeps the screen from dimming during hands-free read-aloud playback).
 async function requestWakeLock() {
   try {
     if ('wakeLock' in navigator) return await navigator.wakeLock.request('screen')
@@ -29,27 +28,23 @@ function releaseWakeLock(lock) {
 /**
  * Library — open an EPUB or MOBI file from the device and read it with the
  * same tap-to-look-up-any-word support as Graded Reader, plus sentence-by-
- * sentence read-aloud. Unlike Graded Reader, there's no curated passage data
- * or precomputed lemma/surface-form table for arbitrary book text — lookup
- * runs live against buildLookup()+tokenise() on whatever's on screen, the
- * same direct/longest-match logic those already do, just without the
- * offline fugashi surface-forms merge Graded Reader layers on top for its
- * curated passages. No translations exist for arbitrary book text either,
- * so there's no EN toggle or per-passage vocab-practice shortcuts here —
- * just reading, lookup, and audio.
+ * sentence read-aloud. No translation data exists for arbitrary book text,
+ * so the sentence menu's "Translate" option stays disabled here (Graded
+ * Reader's curated passages mostly do have one).
  *
- * Books are persisted to IndexedDB (see bookLibrary.js) — the browser can't
- * re-supply the original File object on its own, so what's actually kept
- * is the fully parsed result (title, cover, chapter text) plus reading
- * progress, keyed by filename+size so re-picking the same file recognizes
- * it as the same book rather than duplicating it.
+ * Books are persisted to IndexedDB (bookLibrary.js) — the browser can't
+ * re-supply the original File object on its own, so what's kept is the
+ * fully parsed result (title, cover, chapter text) plus reading progress
+ * (chapter, paragraph-reveal count, scroll position — mirroring Graded
+ * Reader's own "continue reading" mechanism), keyed by filename+size so
+ * re-picking the same file is recognized as the same book.
  */
 export default function BookReader() {
   const { activeEntries, activeLanguage, showReading, scores, goBack } = useApp()
 
   const [libraryBooks, setLibraryBooks] = useState([])
   const [libraryLoaded, setLibraryLoaded] = useState(false)
-  const [book, setBook] = useState(null)           // { id, title, cover, chapters: [{title, text}] }
+  const [book, setBook] = useState(null)
   const [chapterIndex, setChapterIndex] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -71,15 +66,25 @@ export default function BookReader() {
     refreshLibrary()
   }, [refreshLibrary])
 
+  const [revealedCount, setRevealedCount] = useState(1)
+  const readingBodyRef = useRef(null)
+  const paragraphRefs = useRef([])
+  const [nearBottom, setNearBottom] = useState(true)
+  const pendingScrollRef = useRef(false)
+  const scrollSaveTimer = useRef(null)
+
   function openBook(record) {
     setBook(record)
-    setChapterIndex(record.chapters.length === 1 ? 0 : (record.lastChapterIndex ?? null))
+    const single = record.chapters.length === 1
+    const targetChapter = single ? 0 : (record.lastChapterIndex ?? null)
+    setChapterIndex(targetChapter)
+    setRevealedCount(targetChapter === record.lastChapterIndex ? (record.lastRevealedCount || 1) : 1)
     setError(null)
   }
 
   async function handleFile(e) {
     const file = e.target.files?.[0]
-    e.target.value = '' // allow re-picking the same file later
+    e.target.value = ''
     if (!file) return
     setError(null)
     setLoading(true)
@@ -94,6 +99,8 @@ export default function BookReader() {
         cover: parsed.cover ?? null,
         chapters: parsed.chapters,
         lastChapterIndex: existing?.lastChapterIndex ?? null,
+        lastRevealedCount: existing?.lastRevealedCount ?? 1,
+        lastScrollTop: existing?.lastScrollTop ?? 0,
         addedAt: existing?.addedAt ?? Date.now(),
         lastOpenedAt: Date.now(),
       }
@@ -121,18 +128,18 @@ export default function BookReader() {
   }
 
   function openChapter(i) {
+    const resuming = book?.lastChapterIndex === i
+    const startRevealed = resuming ? (book.lastRevealedCount || 1) : 1
     setChapterIndex(i)
-    if (book?.id) updateProgress(book.id, { chapterIndex: i })
+    setRevealedCount(startRevealed)
+    if (book?.id) updateProgress(book.id, { chapterIndex: i, revealedCount: startRevealed, scrollTop: resuming ? book.lastScrollTop : 0 })
   }
 
   function backFromReading() {
-    // A single-chapter book never had a meaningful chapter list to return
-    // to — go straight back to the library instead of a one-item list.
     if (book && book.chapters.length === 1) closeBook()
     else setChapterIndex(null)
   }
 
-  // ── Reading view for the active chapter ────────────────────────────────────
   const chapter = book && chapterIndex != null ? book.chapters[chapterIndex] : null
 
   const paragraphs = useMemo(() => {
@@ -140,9 +147,6 @@ export default function BookReader() {
     return chapter.text.split(/\n\s*\n/).filter(Boolean)
   }, [chapter])
 
-  // Sentences grouped by paragraph, each carrying its flat index into the
-  // full sentence list — same structure Graded Reader uses, so read-aloud
-  // can walk sentences in order while rendering still groups by paragraph.
   const paragraphGroups = useMemo(() => {
     let i = 0
     return paragraphs.map(p =>
@@ -150,6 +154,53 @@ export default function BookReader() {
     )
   }, [paragraphs, activeLanguage])
   const sentences = useMemo(() => paragraphGroups.flat().map(s => s.text), [paragraphGroups])
+
+  useEffect(() => {
+    const el = readingBodyRef.current
+    if (!el || !book || chapterIndex == null) return
+    if (book.lastChapterIndex === chapterIndex && book.lastScrollTop > 0) {
+      el.scrollTop = book.lastScrollTop
+    }
+    function onScroll() {
+      clearTimeout(scrollSaveTimer.current)
+      scrollSaveTimer.current = setTimeout(() => {
+        if (book?.id) updateProgress(book.id, { chapterIndex, revealedCount, scrollTop: el.scrollTop })
+      }, SCROLL_SAVE_DEBOUNCE_MS)
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      clearTimeout(scrollSaveTimer.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- book identity intentionally excluded: only re-run on chapter/reveal change, not every progress write to `book` itself
+  }, [chapterIndex, revealedCount])
+
+  useEffect(() => {
+    const el = readingBodyRef.current
+    if (!el || !chapter) return
+    const THRESHOLD = 80
+    function checkNearBottom() {
+      setNearBottom(el.scrollHeight - el.scrollTop - el.clientHeight < THRESHOLD)
+    }
+    checkNearBottom()
+    el.addEventListener('scroll', checkNearBottom, { passive: true })
+    return () => el.removeEventListener('scroll', checkNearBottom)
+  }, [chapter])
+
+  useEffect(() => {
+    if (!pendingScrollRef.current) return
+    pendingScrollRef.current = false
+    paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [revealedCount])
+
+  function handleContinueOrBack() {
+    if (revealedCount < paragraphGroups.length && nearBottom) {
+      pendingScrollRef.current = true
+      setRevealedCount(c => c + 1)
+    } else {
+      paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   const [readingIndex, setReadingIndex] = useState(-1)
   const playingRef = useRef(false)
@@ -169,12 +220,13 @@ export default function BookReader() {
     wakeLockRef.current = null
   }, [])
 
-  async function playChapter() {
+  async function playChapter(startAt = 0) {
     if (playingRef.current || sentences.length === 0) return
+    if (revealedCount < paragraphGroups.length) setRevealedCount(paragraphGroups.length)
     playingRef.current = true
     wakeLockRef.current = await requestWakeLock()
     const rate = 0.9
-    for (let i = 0; i < sentences.length; i++) {
+    for (let i = startAt; i < sentences.length; i++) {
       if (!playingRef.current) break
       setReadingIndex(i)
       await speakAndWait(sentences[i], activeLanguage, { rate })
@@ -186,12 +238,43 @@ export default function BookReader() {
     wakeLockRef.current = null
   }
 
-  // Stop playback when switching chapters or leaving the screen
   useEffect(() => {
     return () => stopPlaying()
   }, [chapterIndex, stopPlaying])
 
-  // ── Render: library grid — stored books + add-book tile ────────────────────
+  // ── Sentence mini-overlay: listen from here / mark spot / translate ───────
+  // A whole-sentence tap target would normally conflict with per-word
+  // lookup taps, but TextWithLookup's word spans already call
+  // e.stopPropagation() on tap — the same mechanism Graded Reader's own
+  // tap-to-translate relies on — so this only fires for taps landing on
+  // the sentence itself (whitespace, punctuation), never on a word.
+  const [sentenceMenu, setSentenceMenu] = useState(null)
+
+  function markThisSpot(i) {
+    let count = 0
+    let targetParagraph = paragraphGroups.length
+    for (let p = 0; p < paragraphGroups.length; p++) {
+      count += paragraphGroups[p].length
+      if (i < count) { targetParagraph = p + 1; break }
+    }
+    const nextRevealed = Math.max(revealedCount, targetParagraph)
+    setRevealedCount(nextRevealed)
+    setSentenceMenu(null)
+    requestAnimationFrame(() => {
+      sentenceRefs.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    if (book?.id) {
+      const el = readingBodyRef.current
+      updateProgress(book.id, { chapterIndex, revealedCount: nextRevealed, scrollTop: el?.scrollTop ?? 0 })
+    }
+  }
+
+  function listenFromHere(i) {
+    setSentenceMenu(null)
+    stopPlaying()
+    playChapter(i)
+  }
+
   if (!book) {
     return (
       <div className="br-screen">
@@ -200,7 +283,7 @@ export default function BookReader() {
           <span className="br-title">Library</span>
           <HelpButton
             title="Library"
-            description="Open an EPUB or MOBI file from your device and read it with the same tap-to-look-up-any-word support as Graded Reader, plus sentence-by-sentence read-aloud. Books you open are kept here (cover, title, and reading progress) so you can pick up where you left off — the original file itself isn't touched or re-read. Older MOBI files (the MOBI6/PalmDOC format) are supported; newer MOBI files built on KF8 may not extract cleanly — convert to EPUB if that happens."
+            description="Open an EPUB or MOBI file from your device and read it with the same tap-to-look-up-any-word support as Graded Reader, plus sentence-by-sentence read-aloud. Tap a sentence (not a word) for options: listen from there, mark it as your reading position, or translate it. Books you open are kept here (cover, title, and reading progress) so you can pick up exactly where you left off. Older MOBI files (the MOBI6/PalmDOC format) are supported; newer MOBI files built on KF8 may not extract cleanly — convert to EPUB if that happens."
           />
         </div>
         <div className="br-library-grid">
@@ -235,7 +318,6 @@ export default function BookReader() {
     )
   }
 
-  // ── Render: book loaded, no chapter chosen yet — chapter list ──────────────
   if (chapterIndex == null) {
     return (
       <div className="br-screen">
@@ -256,7 +338,6 @@ export default function BookReader() {
     )
   }
 
-  // ── Render: reading a chapter ───────────────────────────────────────────────
   const isPlaying = readingIndex >= 0
 
   return (
@@ -264,30 +345,42 @@ export default function BookReader() {
       <div className="br-header">
         <button className="br-back" onClick={backFromReading}>← Back</button>
         <span className="br-title br-reading-title">{chapter.title}</span>
-        {speechSupported() && (
-          <button
-            className={`br-play-btn ${isPlaying ? 'is-playing' : ''}`}
-            onClick={isPlaying ? stopPlaying : playChapter}
-            title={isPlaying ? 'Stop reading aloud' : 'Read this chapter aloud'}
-          >
-            {isPlaying ? '⏹️' : '🔊'}
-          </button>
-        )}
-        <HelpButton
-          title="Library"
-          description="Tap any word for its translation. Tap 🔊 to have the chapter read aloud sentence by sentence — the currently-spoken sentence is highlighted and kept in view."
-        />
+        <div className="br-header-icons">
+          {speechSupported() && (
+            <button
+              className={`br-play-btn ${isPlaying ? 'is-playing' : ''}`}
+              onClick={isPlaying ? stopPlaying : () => playChapter(0)}
+              title={isPlaying ? 'Stop reading aloud' : 'Read this chapter aloud'}
+            >
+              {isPlaying ? '⏹️' : '🔊'}
+            </button>
+          )}
+          <HelpButton
+            title="Library"
+            description="Tap any word for its translation. Tap a sentence itself (not a word) for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Tap 🔊 to read the whole chapter aloud from the top."
+          />
+        </div>
       </div>
 
-      <div className="br-body">
+      <div className="br-body" ref={readingBodyRef}>
+        {paragraphGroups.length > 1 && (
+          <div className="br-progress">
+            <div className="br-progress-track">
+              <div className="br-progress-fill" style={{ width: `${(Math.min(revealedCount, paragraphGroups.length) / paragraphGroups.length) * 100}%` }} />
+            </div>
+            <span className="br-progress-label">Paragraph {Math.min(revealedCount, paragraphGroups.length)} of {paragraphGroups.length}</span>
+          </div>
+        )}
+
         <div className="br-text">
-          {paragraphGroups.map((group, pi) => (
-            <p key={pi} className="br-paragraph">
+          {paragraphGroups.slice(0, revealedCount).map((group, pi) => (
+            <p key={pi} className="br-paragraph" ref={el => { paragraphRefs.current[pi] = el }}>
               {group.map(({ text: sentence, index: i }) => (
                 <span
                   key={i}
                   ref={el => { sentenceRefs.current[i] = el }}
-                  className={`br-sentence ${readingIndex === i ? 'br-sentence-active' : ''}`}
+                  className={`br-sentence br-sentence-tappable ${readingIndex === i ? 'br-sentence-active' : ''}`}
+                  onClick={() => setSentenceMenu(i)}
                 >
                   <TextWithLookup text={sentence} language={activeLanguage} lookup={lookup} scores={scores} showReading={showReading} />
                   {' '}
@@ -297,6 +390,12 @@ export default function BookReader() {
           ))}
         </div>
 
+        {(revealedCount < paragraphGroups.length || !nearBottom) && (
+          <button className="br-continue-reveal-btn" onClick={handleContinueOrBack}>
+            {revealedCount < paragraphGroups.length && nearBottom ? 'Continue reading ↓' : '↓ Back to last paragraph'}
+          </button>
+        )}
+
         <div className="br-legend">
           <span className="br-legend-item br-legend--mastered">mastered</span>
           <span className="br-legend-item br-legend--learning">learning</span>
@@ -304,6 +403,23 @@ export default function BookReader() {
           <span className="br-legend-item br-legend--unknown">not in list</span>
         </div>
       </div>
+
+      {sentenceMenu != null && (
+        <div className="br-sentence-menu-overlay" onClick={() => setSentenceMenu(null)}>
+          <div className="br-sentence-menu" onClick={e => e.stopPropagation()}>
+            <button className="br-sentence-menu-btn" onClick={() => listenFromHere(sentenceMenu)}>
+              🔊 Listen from here
+            </button>
+            <button className="br-sentence-menu-btn" onClick={() => markThisSpot(sentenceMenu)}>
+              🔖 Mark as reading position
+            </button>
+            <button className="br-sentence-menu-btn br-sentence-menu-btn--disabled" disabled title="Not available for imported books">
+              🌐 Translate sentence
+            </button>
+            <button className="br-sentence-menu-cancel" onClick={() => setSentenceMenu(null)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

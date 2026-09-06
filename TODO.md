@@ -41,12 +41,30 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bi** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bj** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bj**: Library reading improvements, porting several Graded Reader
+  mechanics over. (1) Sentence tap menu — tapping a sentence (not a word)
+  opens a bottom sheet: "Listen from here" (starts read-aloud at that
+  sentence), "Mark as reading position" (explicit bookmark), and a
+  disabled "Translate sentence" (no translation data exists for arbitrary
+  book text). No new tap-conflict handling needed — this reuses the same
+  stopPropagation-on-word-tap mechanism Graded Reader's own tap-to-
+  translate already relies on. (2) Automatic scroll + reveal-progress
+  persistence to IndexedDB (chapter, revealed-paragraph count, scroll
+  offset), debounced on scroll — verified live across a real full page
+  reload. (3) Ported Graded Reader's paragraph-by-paragraph "Continue
+  reading ↓" progressive reveal mechanic wholesale (progress bar,
+  near-bottom detection, smooth-scroll-to-newly-revealed-paragraph).
+  Read-aloud now auto-reveals the rest of the chapter when started so
+  playback isn't blocked by the manual reveal gate. All verified live
+  end-to-end via Playwright (progressive reveal, word-vs-sentence tap
+  disambiguation, listen-from-here starting at the correct sentence,
+  and persistence surviving a real page reload).
 - **v0.66bi**: Two fixes.
   (1) Library: found and fixed the real cause of a reported "chapter
   breakdown doesn't work well" issue — many real-world EPUBs bundle

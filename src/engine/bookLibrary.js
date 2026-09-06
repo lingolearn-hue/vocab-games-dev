@@ -84,10 +84,12 @@ export async function deleteBook(id) {
 }
 
 /** Update just the reading-position fields, without rewriting the full text. */
-export async function updateProgress(id, { chapterIndex }) {
+export async function updateProgress(id, { chapterIndex, revealedCount, scrollTop }) {
   const existing = await getBook(id)
   if (!existing) return
   existing.lastChapterIndex = chapterIndex
+  existing.lastRevealedCount = revealedCount ?? existing.lastRevealedCount ?? 1
+  existing.lastScrollTop = scrollTop ?? 0
   existing.lastOpenedAt = Date.now()
   await saveBook(existing)
 }

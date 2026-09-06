@@ -217,6 +217,97 @@
   transition: background 0.15s;
 }
 .br-sentence-active { background: rgba(79,126,248,0.14); }
+.br-sentence-tappable { cursor: pointer; }
+
+.br-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+.br-progress-track {
+  height: 4px;
+  border-radius: 2px;
+  background: #ececec;
+  overflow: hidden;
+}
+.br-progress-fill {
+  height: 100%;
+  background: #4f7ef8;
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+.br-progress-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.br-continue-reveal-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 1.2rem;
+  padding: 0.75rem;
+  border: 1.5px dashed #c8d4fb;
+  border-radius: 12px;
+  background: #f4f7ff;
+  color: #4f7ef8;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+}
+.br-continue-reveal-btn:hover { background: #eef2ff; border-color: #4f7ef8; }
+
+/* Sentence tap menu */
+.br-sentence-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: flex-end;
+  z-index: 50;
+}
+.br-sentence-menu {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.br-sentence-menu-btn {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: #f4f6fb;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+}
+.br-sentence-menu-btn:hover { background: #eef2ff; }
+.br-sentence-menu-btn--disabled {
+  color: #aaa;
+  cursor: default;
+  background: #f8f8f8;
+}
+.br-sentence-menu-btn--disabled:hover { background: #f8f8f8; }
+.br-sentence-menu-cancel {
+  text-align: center;
+  padding: 0.7rem;
+  border: none;
+  background: none;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+}
 
 .br-legend {
   display: flex;
@@ -254,3 +345,10 @@
 [data-theme="dark"] .br-book-cover--placeholder { background: #26283a; }
 [data-theme="dark"] .br-book-delete { background: #202127; border-color: #33343a; color: #999; }
 [data-theme="dark"] .br-add-icon { border-color: #444; color: #777; }
+[data-theme="dark"] .br-progress-track { background: #2a2a2a; }
+[data-theme="dark"] .br-progress-label { color: #999; }
+[data-theme="dark"] .br-continue-reveal-btn { background: #1a2340; border-color: #333; }
+[data-theme="dark"] .br-sentence-menu { background: #202127; }
+[data-theme="dark"] .br-sentence-menu-btn { background: #26272e; color: #eee; }
+[data-theme="dark"] .br-sentence-menu-btn:hover { background: #2e3038; }
+[data-theme="dark"] .br-sentence-menu-btn--disabled { color: #666; background: #1c1d22; }
