@@ -106,9 +106,9 @@ export function WordPopup({ entry, surface, conjugated, scores, showReading, onD
   const isSeeded = mnemonicRecord?.seeded ?? false
 
   return (
-    <div className="twl-popup-overlay" onClick={onDismiss}>
+    <div className="twl-popup-overlay" onClick={e => { e.stopPropagation(); onDismiss() }}>
       <div className="twl-popup" onClick={e => e.stopPropagation()}>
-        <button className="twl-popup-close" onClick={onDismiss}>✕</button>
+        <button className="twl-popup-close" onClick={e => { e.stopPropagation(); onDismiss() }}>✕</button>
 
         <div className="twl-popup-word">
           <RubyText

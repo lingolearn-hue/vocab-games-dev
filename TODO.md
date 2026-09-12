@@ -41,12 +41,31 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bj** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bk** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bk**: Library — added long-press (500ms hold, 10px move
+  tolerance) as a second way to open the sentence mini-menu, alongside
+  the existing tap-on-gap trigger, working even when pressed directly on
+  a word. Found and fixed two real, pre-existing bugs along the way, not
+  timing races as first suspected: (1) a leftover `createPortal` on the
+  word popup from earlier debugging was exploiting a genuine React
+  quirk — portaled elements bubble clicks through the React component
+  tree, not the DOM tree, so dismissing the word popup was silently
+  re-opening the sentence menu; reverted, it was never needed. (2)
+  `WordPopup`'s dismiss overlay never called `stopPropagation()`, so
+  even without the portal, dismissing it bubbled into the enclosing
+  sentence's own click handler; fixed in `TextWithLookup.jsx`.
+  `setPointerCapture` (first attempt at the drag-tolerance problem) was
+  abandoned after discovering it redirects the resulting `click`'s
+  target to the capturing element per spec, which broke plain short
+  taps on words — replaced with document-level pointermove/pointerup
+  listeners added and removed per gesture. All paths (short tap,
+  long-press-steady, long-press-with-drag, existing tap-on-gap,
+  listen-from-here, mark-position) reverified live with no regressions.
 - **v0.66bj**: Library reading improvements, porting several Graded Reader
   mechanics over. (1) Sentence tap menu — tapping a sentence (not a word)
   opens a bottom sheet: "Listen from here" (starts read-aloud at that
