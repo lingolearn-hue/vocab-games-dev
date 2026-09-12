@@ -1,15 +1,14 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useApp } from '../context/AppContext'
-import { buildLookup, splitSentences } from '../engine/reader'
+import { buildLookup, splitSentences, tokenise } from '../engine/reader'
 import { speakAndWait, stop as stopSpeech, isSupported as speechSupported } from '../engine/speech'
 import { parseBookFile } from '../engine/bookParser'
-import { bookIdFor, saveBook, listBooks, deleteBook, updateProgress } from '../engine/bookLibrary'
+import { bookIdFor, saveBook, listBooks, deleteBook, getBook } from '../engine/bookLibrary'
 import { TextWithLookup } from '../components/TextWithLookup'
 import HelpButton from '../components/HelpButton'
 import './BookReader.css'
 
 const SENTENCE_PAUSE_MS = 500
-const SCROLL_SAVE_DEBOUNCE_MS = 600
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -48,7 +47,7 @@ function releaseWakeLock(lock) {
  * re-picking the same file is recognized as the same book.
  */
 export default function BookReader() {
-  const { activeEntries, activeLanguage, showReading, scores, goBack } = useApp()
+  const { activeEntries, activeLanguage, showReading, scores, goBack, setScreen, setSessionEntries } = useApp()
 
   const [libraryBooks, setLibraryBooks] = useState([])
   const [libraryLoaded, setLibraryLoaded] = useState(false)
@@ -79,14 +78,55 @@ export default function BookReader() {
   const paragraphRefs = useRef([])
   const [nearBottom, setNearBottom] = useState(true)
   const pendingScrollRef = useRef(false)
-  const scrollSaveTimer = useRef(null)
 
-  function openBook(record) {
-    setBook(record)
-    const single = record.chapters.length === 1
-    const targetChapter = single ? 0 : (record.lastChapterIndex ?? null)
+  // Writes progress to IndexedDB AND mirrors it into the in-memory `book`
+  // object immediately. Without the mirror, reopening the same book later
+  // in the same session — even without leaving the app — would still see
+  // the stale lastChapterIndex/lastRevealedCount/lastScrollTop it had at
+  // the moment it was first opened, since updateProgress() alone only
+  // ever touched IndexedDB, never the React state actually driving what
+  // "resume" logic reads. This was the real cause of position not
+  // surviving exit-and-reenter: it wasn't that saves were failing, it's
+  // that nothing ever re-read them back in.
+  function saveProgress(fields) {
+    if (!book?.id) return
+    // Build the next record from whatever `prev` React hands the updater —
+    // guaranteed to be the latest state even if several saveProgress calls
+    // land in quick succession (a burst of scroll events during one smooth-
+    // scroll animation, for instance) — then write that complete record in
+    // one atomic put. This intentionally bypasses updateProgress()'s
+    // read-then-write: two sequential async IndexedDB ops per save is race-
+    // prone exactly under that kind of rapid-fire scrolling, since a
+    // slower-finishing earlier read/write could resolve after a faster
+    // later one and clobber it back to stale values. Nothing here needs
+    // that extra read anyway — the full current record is already in
+    // memory.
+    setBook(prev => {
+      if (!prev) return prev
+      const next = {
+        ...prev,
+        lastChapterIndex: fields.chapterIndex,
+        lastRevealedCount: fields.revealedCount,
+        lastScrollTop: fields.scrollTop,
+        lastOpenedAt: now(),
+      }
+      saveBook(next)
+      return next
+    })
+  }
+
+  async function openBook(record) {
+    // Always resume from IndexedDB's latest, not whatever snapshot of this
+    // book happened to be sitting in the library grid's state — that grid
+    // is only refreshed on specific events (mount, add, delete), so it can
+    // just as easily be stale as the old book-object-never-updated bug.
+    const fresh = await getBook(record.id).catch(() => null)
+    const source = fresh ?? record
+    setBook(source)
+    const single = source.chapters.length === 1
+    const targetChapter = single ? 0 : (source.lastChapterIndex ?? null)
     setChapterIndex(targetChapter)
-    setRevealedCount(targetChapter === record.lastChapterIndex ? (record.lastRevealedCount || 1) : 1)
+    setRevealedCount(targetChapter === source.lastChapterIndex ? (source.lastRevealedCount || 1) : 1)
     setError(null)
   }
 
@@ -114,7 +154,7 @@ export default function BookReader() {
       }
       await saveBook(record)
       await refreshLibrary()
-      openBook(record)
+      await openBook(record)
     } catch (err) {
       setError(err.message || 'Could not read this file.')
     } finally {
@@ -126,6 +166,7 @@ export default function BookReader() {
     setBook(null)
     setChapterIndex(null)
     setError(null)
+    refreshLibrary()
   }
 
   async function handleDelete(id, e) {
@@ -140,7 +181,7 @@ export default function BookReader() {
     const startRevealed = resuming ? (book.lastRevealedCount || 1) : 1
     setChapterIndex(i)
     setRevealedCount(startRevealed)
-    if (book?.id) updateProgress(book.id, { chapterIndex: i, revealedCount: startRevealed, scrollTop: resuming ? book.lastScrollTop : 0 })
+    saveProgress({ chapterIndex: i, revealedCount: startRevealed, scrollTop: resuming ? book.lastScrollTop : 0 })
   }
 
   function backFromReading() {
@@ -169,17 +210,19 @@ export default function BookReader() {
     if (book.lastChapterIndex === chapterIndex && book.lastScrollTop > 0) {
       el.scrollTop = book.lastScrollTop
     }
+    // Save right away, not just on the next scroll event — a chapter (or
+    // its remaining unrevealed paragraphs) can easily be short enough to
+    // fit on screen without any scrolling at all, in which case
+    // scrollIntoView() on already-visible content is a no-op and no
+    // 'scroll' event ever fires. Without this, tapping "Continue reading"
+    // through a short chapter would never persist that any reading
+    // happened, however many paragraphs got revealed.
+    saveProgress({ chapterIndex, revealedCount, scrollTop: el.scrollTop })
     function onScroll() {
-      clearTimeout(scrollSaveTimer.current)
-      scrollSaveTimer.current = setTimeout(() => {
-        if (book?.id) updateProgress(book.id, { chapterIndex, revealedCount, scrollTop: el.scrollTop })
-      }, SCROLL_SAVE_DEBOUNCE_MS)
+      saveProgress({ chapterIndex, revealedCount, scrollTop: el.scrollTop })
     }
     el.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      el.removeEventListener('scroll', onScroll)
-      clearTimeout(scrollSaveTimer.current)
-    }
+    return () => el.removeEventListener('scroll', onScroll)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- book identity intentionally excluded: only re-run on chapter/reveal change, not every progress write to `book` itself
   }, [chapterIndex, revealedCount])
 
@@ -208,6 +251,58 @@ export default function BookReader() {
     } else {
       paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  // ── Runtime vocab practice: current location + next few paragraphs ────────
+  // Unlike Graded Reader's passageEntries (a fixed useMemo over one short,
+  // static curated passage), there's no fixed "passage" here — a chapter
+  // can run to hundreds of paragraphs, and the meaningful scope for a
+  // practice session is wherever the person actually is right now. So
+  // this is deliberately NOT memoized: it's computed fresh each time the
+  // buttons are pressed, anchored to whichever paragraph is nearest the
+  // top of the current viewport (not just the reveal frontier — the
+  // person may have scrolled back up to reread something).
+  const VOCAB_WINDOW_PARAGRAPHS = 5
+  const [vocabWindowMessage, setVocabWindowMessage] = useState(null)
+
+  function getCurrentParagraphIndex() {
+    const container = readingBodyRef.current
+    if (!container || paragraphRefs.current.length === 0) return 0
+    const containerTop = container.getBoundingClientRect().top
+    for (let i = 0; i < paragraphRefs.current.length; i++) {
+      const ref = paragraphRefs.current[i]
+      if (!ref) continue
+      if (ref.getBoundingClientRect().bottom > containerTop) return i
+    }
+    return Math.max(0, revealedCount - 1)
+  }
+
+  function getVocabWindowEntries() {
+    const startIdx = getCurrentParagraphIndex()
+    const endIdx = Math.min(startIdx + VOCAB_WINDOW_PARAGRAPHS, paragraphs.length)
+    const windowText = paragraphs.slice(startIdx, endIdx).join('\n\n')
+    const spans = tokenise(windowText, lookup, activeLanguage)
+    const ids = new Set(spans.filter(s => s.entry).map(s => s.entry.id))
+    return activeEntries.filter(e => ids.has(e.id))
+  }
+
+  function flashWindowMessage(text) {
+    setVocabWindowMessage(text)
+    setTimeout(() => setVocabWindowMessage(null), 2500)
+  }
+
+  function startVocabQuiz() {
+    const entries = getVocabWindowEntries()
+    if (entries.length === 0) { flashWindowMessage('No known vocab in this section yet.'); return }
+    setSessionEntries(entries)
+    setScreen('flashcard')
+  }
+
+  function startVocabMatch() {
+    const entries = getVocabWindowEntries()
+    if (entries.length < 2) { flashWindowMessage('Not enough known vocab nearby for a matching round.'); return }
+    setSessionEntries(entries)
+    setScreen('pairmatch')
   }
 
   const [readingIndex, setReadingIndex] = useState(-1)
@@ -367,7 +462,7 @@ export default function BookReader() {
     })
     if (book?.id) {
       const el = readingBodyRef.current
-      updateProgress(book.id, { chapterIndex, revealedCount: nextRevealed, scrollTop: el?.scrollTop ?? 0 })
+      saveProgress({ chapterIndex, revealedCount: nextRevealed, scrollTop: el?.scrollTop ?? 0 })
     }
   }
 
@@ -388,6 +483,22 @@ export default function BookReader() {
             description="Open an EPUB or MOBI file from your device and read it with the same tap-to-look-up-any-word support as Graded Reader, plus sentence-by-sentence read-aloud. Tap a sentence (not a word), or long-press anywhere in it, for options: listen from there, mark it as your reading position, or translate it. Books you open are kept here (cover, title, and reading progress) so you can pick up exactly where you left off. Older MOBI files (the MOBI6/PalmDOC format) are supported; newer MOBI files built on KF8 may not extract cleanly — convert to EPUB if that happens."
           />
         </div>
+        {(() => {
+          const resume = libraryBooks[0]
+          if (!resume || resume.lastChapterIndex == null) return null
+          return (
+            <div className="br-top-banners">
+              <button className="br-continue-banner" onClick={() => openBook(resume)}>
+                <span className="br-continue-icon">📖</span>
+                <span className="br-continue-text">
+                  <span className="br-continue-label">Continue reading</span>
+                  <span className="br-continue-title">{resume.title}</span>
+                </span>
+                <span className="br-continue-arrow">→</span>
+              </button>
+            </div>
+          )
+        })()}
         <div className="br-library-grid">
           <button className="br-book-card br-book-card--add" onClick={() => fileInputRef.current?.click()} disabled={loading}>
             <span className="br-add-icon">{loading ? '…' : '+'}</span>
@@ -457,12 +568,19 @@ export default function BookReader() {
               {isPlaying ? '⏹️' : '🔊'}
             </button>
           )}
+          <button className="br-play-btn" onClick={startVocabQuiz} title="Practice vocab from here as flashcards">
+            📇
+          </button>
+          <button className="br-play-btn" onClick={startVocabMatch} title="Practice vocab from here as a matching game">
+            🔗
+          </button>
           <HelpButton
             title="Library"
-            description="Tap any word for its translation. Tap a sentence itself (not a word), or long-press anywhere in it — including on a word — for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Tap 🔊 to read the whole chapter aloud from the top."
+            description="Tap any word for its translation. Tap a sentence itself (not a word), or long-press anywhere in it — including on a word — for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Tap 🔊 to read the whole chapter aloud from the top. Tap 📇/🔗 to practice known vocab from your current spot plus the next few paragraphs as flashcards or a matching game — built fresh each time from wherever you're reading, since there's no fixed passage here."
           />
         </div>
       </div>
+      {vocabWindowMessage && <div className="br-vocab-window-toast">{vocabWindowMessage}</div>}
 
       <div className="br-body" ref={readingBodyRef}>
         {paragraphGroups.length > 1 && (

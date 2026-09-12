@@ -41,12 +41,37 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bk** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bl** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bl**: Library — fixed reported bug: reading position wasn't
+  surviving exit-and-reenter. Found two real, stacked causes. (1)
+  Progress was written to IndexedDB via `updateProgress` but never
+  mirrored back into the in-memory `book`/`libraryBooks` state, so
+  reopening a book — even mid-session, no exit needed — used a stale
+  snapshot; fixed with a new `saveProgress()` that builds the next
+  record via React's functional `setBook` updater (always sees the
+  true latest state) and writes one complete record directly via
+  `saveBook()`, also eliminating a read-then-write race in the old
+  path under rapid scroll events. (2) The actual explanation for the
+  report: progress was *only* ever saved on a `scroll` event, but
+  `scrollIntoView()` on content that already fits the screen is a
+  no-op and fires no scroll event at all — so any chapter short
+  enough to not require scrolling silently persisted nothing no
+  matter how many times "Continue reading" was tapped. Confirmed via
+  a raw IndexedDB read showing `lastChapterIndex: null` despite 6
+  revealed paragraphs; fixed by saving immediately whenever the
+  reveal-tracking effect re-runs, decoupled from actual scrolling.
+  Also added a "Continue reading" banner at the top of the library
+  grid, mirroring Graded Reader's resume banner exactly (same CSS
+  classes/behavior) — jumps straight back into the last-read book at
+  its saved chapter/paragraph/scroll position. All reverified live:
+  single-chapter and multi-chapter exit/reenter, banner resume, no
+  regressions in the sentence menu or the runtime vocab-window
+  flashcard/match buttons.
 - **v0.66bk**: Library — added long-press (500ms hold, 10px move
   tolerance) as a second way to open the sentence mini-menu, alongside
   the existing tap-on-gap trigger, working even when pressed directly on

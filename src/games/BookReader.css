@@ -55,6 +55,32 @@
 .br-play-btn.is-playing { border-color: #4f7ef8; background: #eef2ff; }
 
 /* Library grid */
+.br-top-banners {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin: 0.5rem 1.2rem 0;
+}
+.br-continue-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.63rem 0.8rem;
+  border: none;
+  border-radius: 12px;
+  background: #eef2ff;
+  cursor: pointer;
+  text-align: left;
+  appearance: none;
+}
+.br-continue-icon { font-size: 1.15rem; flex-shrink: 0; }
+.br-continue-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
+.br-continue-label { font-size: 0.66rem; font-weight: 700; color: #4f7ef8; text-transform: uppercase; letter-spacing: 0.03em; }
+.br-continue-title { font-size: 0.85rem; font-weight: 700; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.br-continue-arrow { font-size: 1rem; color: #4f7ef8; flex-shrink: 0; }
+
 .br-library-grid {
   flex: 1;
   overflow-y: auto;
@@ -337,6 +363,22 @@
 .br-legend--unseen::before   { background: #4f7ef8; }
 .br-legend--unknown::before  { background: transparent; border: 1px solid #ddd; }
 
+.br-vocab-window-toast {
+  position: absolute;
+  top: 3.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c2c2c;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  z-index: 40;
+  max-width: 80%;
+  text-align: center;
+}
+
 [data-theme="dark"] .br-screen { background: #17181c; }
 [data-theme="dark"] .br-header { border-color: #2a2b30; }
 [data-theme="dark"] .br-title, [data-theme="dark"] .br-text { color: #eee; }
@@ -345,6 +387,8 @@
 [data-theme="dark"] .br-book-cover--placeholder { background: #26283a; }
 [data-theme="dark"] .br-book-delete { background: #202127; border-color: #33343a; color: #999; }
 [data-theme="dark"] .br-add-icon { border-color: #444; color: #777; }
+[data-theme="dark"] .br-continue-banner { background: #1a2340; }
+[data-theme="dark"] .br-continue-title { color: #f0f0f0; }
 [data-theme="dark"] .br-progress-track { background: #2a2a2a; }
 [data-theme="dark"] .br-progress-label { color: #999; }
 [data-theme="dark"] .br-continue-reveal-btn { background: #1a2340; border-color: #333; }
