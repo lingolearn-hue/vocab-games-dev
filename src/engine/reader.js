@@ -94,6 +94,34 @@ function aStemToDict(stem, lookup) {
   return null
 }
 
+// Causative renyoukei (使役連用形) ending → dictionary form, e.g.
+// 思わせ (from 思わせる, causative of 思う) → 思う, 書かせ → 書く. Godan
+// causatives are built as a-stem + せ (思う → 思わ+せる), so each ending
+// pairs the a-row kana with its dictionary-form終止形 row, mirroring
+// ASTEM_MAP. させ is ambiguous on its own — it's both the godan す-verb
+// causative (話す → 話させる) and the ichidan causative (食べる →
+// 食べさせる, base + させる with no row-shift at all) — so that one case
+// tries both reconstructions rather than a fixed pair.
+const CAUSATIVE_STEM_MAP = [
+  ['わせ', 'う'], ['かせ', 'く'], ['がせ', 'ぐ'],
+  ['たせ', 'つ'], ['なせ', 'ぬ'], ['ばせ', 'ぶ'], ['ませ', 'む'], ['らせ', 'る'],
+]
+
+function causativeStemToDict(stem, lookup) {
+  if (stem.endsWith('させ')) {
+    const base = stem.slice(0, -2)
+    if (lookup.has(base + 'す')) return lookup.get(base + 'す') // godan す-verb: 話させ → 話す
+    if (lookup.has(base + 'る')) return lookup.get(base + 'る') // ichidan: 食べさせ → 食べる
+  }
+  for (const [ending, dict] of CAUSATIVE_STEM_MAP) {
+    if (stem.endsWith(ending)) {
+      const candidate = stem.slice(0, -ending.length) + dict
+      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)
+    }
+  }
+  return null
+}
+
 function resolveConjugated(surface, lookup) {
   if (surface.length < 2) return null
 
@@ -117,6 +145,10 @@ function resolveConjugated(surface, lookup) {
     // Godan: stem is i-stem → convert
     const godan = iStemToDict(stem, lookup)
     if (godan) return godan
+    // Causative: stem is a causative renyoukei (思わせ → 思う), e.g.
+    // 思わせました, 食べさせます
+    const causative = causativeStemToDict(stem, lookup)
+    if (causative) return causative
     // Irregular: する、くる
     if (lookup.has(stem)) return lookup.get(stem)
   }
@@ -133,6 +165,9 @@ function resolveConjugated(surface, lookup) {
     if (suffix === 'て' || suffix === 'た') {
       const ichidan = stem + 'る'
       if (lookup.has(ichidan)) return lookup.get(ichidan)
+      // Causative-past/te: 思わせた/思わせて → stem "思わせ" → 思う
+      const causative = causativeStemToDict(stem, lookup)
+      if (causative) return causative
     }
   }
 

@@ -55,7 +55,8 @@ export default function BookReader() {
   const [chapterIndex, setChapterIndex] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [hideFinished, setHideFinished] = useState(false)
+  const [hideFinishedChapters, setHideFinishedChapters] = useState(false)
+  const [hideFinishedBooks, setHideFinishedBooks] = useState(false)
   const fileInputRef = useRef(null)
 
   const lookup = useMemo(() => buildLookup(activeEntries), [activeEntries])
@@ -167,7 +168,7 @@ export default function BookReader() {
     setBook(null)
     setChapterIndex(null)
     setError(null)
-    setHideFinished(false)
+    setHideFinishedChapters(false)
     refreshLibrary()
   }
 
@@ -397,105 +398,17 @@ export default function BookReader() {
   }, [chapterIndex, stopPlaying])
 
   // ── Sentence mini-overlay: listen from here / mark spot / translate ───────
-  // Two ways to open it: (1) tap the sentence itself, not a word — works
-  // because TextWithLookup's word spans already call e.stopPropagation()
-  // on tap, the same mechanism Graded Reader's own tap-to-translate relies
-  // on, so a plain onClick here only ever fires for taps that land outside
-  // any word; (2) long-press anywhere in the sentence, including directly
-  // on a word, which is the more standard mobile gesture for "more options"
-  // and doesn't require hunting for a gap between words.
+  // A small dedicated marker is rendered before each sentence (see the
+  // render section below) as the way to open this — plain taps on the
+  // sentence body itself still work too when there's an actual gap to hit,
+  // but with most words now underlined by vocab-enrichment coverage, that
+  // gap often doesn't exist. Long-press was tried here previously and
+  // removed: it fought with the OS's own long-press-to-select/copy
+  // gesture, which is worth preserving unobstructed.
   const [sentenceMenu, setSentenceMenu] = useState(null)
 
-  const LONG_PRESS_MS = 500
-  const LONG_PRESS_MOVE_TOLERANCE = 10
-  const DISMISS_GRACE_MS = 400
-  const longPressState = useRef({ timer: null, startX: 0, startY: 0, index: null, cleanup: null })
-  const menuOpenedAtRef = useRef(0)
-
-  useEffect(() => {
-    const state = longPressState.current
-    return () => {
-      clearTimeout(state.timer)
-      state.cleanup?.()
-    }
-  }, [])
-
-  function cancelLongPress() {
-    clearTimeout(longPressState.current.timer)
-  }
-
   function openSentenceMenu(i) {
-    menuOpenedAtRef.current = now()
     setSentenceMenu(i)
-  }
-
-  function handleSentencePointerDown(i, e) {
-    // Only the primary button/first touch point starts a long-press —
-    // ignore right-clicks, secondary touches, etc.
-    if (e.button != null && e.button !== 0) return
-    longPressState.current.cleanup?.() // in case a prior gesture never cleanly ended
-    longPressState.current.startX = e.clientX
-    longPressState.current.startY = e.clientY
-    longPressState.current.index = i
-    cancelLongPress()
-
-    // Move/up are tracked on the document rather than this span, so a
-    // drag that crosses out of the sentence's own bounds still gets seen
-    // (a plain onPointerMove prop here would stop firing the moment the
-    // cursor leaves this element). setPointerCapture looks like the more
-    // obvious fix for that, but it has a real side effect: captured
-    // elements also become the target of the resulting compatibility
-    // mouse events, including the plain 'click' after a short tap — which
-    // broke word lookup entirely, since the click would target this
-    // sentence span instead of the word underneath. Plain document
-    // listeners, added and removed per gesture, avoid that.
-    function onMove(ev) {
-      const dx = ev.clientX - longPressState.current.startX
-      const dy = ev.clientY - longPressState.current.startY
-      if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE) endGesture()
-    }
-    function endGesture() {
-      cancelLongPress()
-      document.removeEventListener('pointermove', onMove)
-      document.removeEventListener('pointerup', endGesture)
-      document.removeEventListener('pointercancel', endGesture)
-      longPressState.current.cleanup = null
-    }
-    longPressState.current.cleanup = endGesture
-    document.addEventListener('pointermove', onMove)
-    document.addEventListener('pointerup', endGesture)
-    document.addEventListener('pointercancel', endGesture)
-
-    longPressState.current.timer = setTimeout(() => {
-      document.removeEventListener('pointermove', onMove)
-      document.removeEventListener('pointerup', endGesture)
-      document.removeEventListener('pointercancel', endGesture)
-      longPressState.current.cleanup = null
-      if (navigator.vibrate) navigator.vibrate(12) // subtle haptic cue, where supported
-      openSentenceMenu(i)
-    }, LONG_PRESS_MS)
-  }
-
-  // A long-press opens the menu right where the finger/cursor still is. On
-  // release, the browser still synthesizes a trailing 'click' at (or near)
-  // those same coordinates — and by then the menu overlay has rendered on
-  // top, so that trailing click can land on the overlay (which would
-  // instantly dismiss what it just opened) or, depending on exactly how
-  // the browser resolves the click's target, back on the original
-  // sentence/word underneath (which would re-toggle the menu or fire word
-  // lookup). A short time-based grace period after opening is far more
-  // robust than trying to track exactly which element that trailing click
-  // ends up targeting.
-  function handleSentenceClickCapture(e) {
-    if (now() - menuOpenedAtRef.current < DISMISS_GRACE_MS) {
-      e.stopPropagation()
-      e.preventDefault()
-    }
-  }
-
-  function handleOverlayDismiss() {
-    if (now() - menuOpenedAtRef.current < DISMISS_GRACE_MS) return
-    setSentenceMenu(null)
   }
 
   function markThisSpot(i) {
@@ -523,30 +436,54 @@ export default function BookReader() {
     playChapter(i)
   }
 
+  function isBookFinished(b) {
+    return b.chapters?.length > 0 && (b.finishedChapters || []).length >= b.chapters.length
+  }
+
   if (!book) {
+    const finishedBooksCount = libraryBooks.filter(isBookFinished).length
+    const visibleBooks = libraryBooks.filter(b => !hideFinishedBooks || !isBookFinished(b))
     return (
       <div className="br-screen">
         <div className="br-header">
           <button className="br-back" onClick={goBack}>← Back</button>
           <span className="br-title">Library</span>
+          {finishedBooksCount > 0 && (
+            <button
+              className={`br-hide-finished-btn ${hideFinishedBooks ? 'active' : ''}`}
+              onClick={() => setHideFinishedBooks(h => !h)}
+              title={hideFinishedBooks ? 'Show finished books' : 'Hide finished books'}
+            >
+              {hideFinishedBooks ? '🙈' : '👁'}
+            </button>
+          )}
           <HelpButton
             title="Library"
-            description="Open an EPUB or MOBI file from your device and read it with the same tap-to-look-up-any-word support as Graded Reader, plus sentence-by-sentence read-aloud. Tap a sentence (not a word), or long-press anywhere in it, for options: listen from there, mark it as your reading position, or translate it. Books you open are kept here (cover, title, and reading progress) so you can pick up exactly where you left off. Older MOBI files (the MOBI6/PalmDOC format) are supported; newer MOBI files built on KF8 may not extract cleanly — convert to EPUB if that happens."
+            description="Open an EPUB or MOBI file from your device and read it with the same tap-to-look-up-any-word support as Graded Reader, plus sentence-by-sentence read-aloud. Tap the small – – mark before a sentence for options: listen from there, mark it as your reading position, or translate it. Long-press still works normally for the device's own text selection and copy. Books you open are kept here (cover, title, and reading progress) so you can pick up exactly where you left off. Older MOBI files (the MOBI6/PalmDOC format) are supported; newer MOBI files built on KF8 may not extract cleanly — convert to EPUB if that happens."
           />
         </div>
         {(() => {
           const resume = libraryBooks[0]
-          if (!resume || resume.lastChapterIndex == null) return null
+          const showResume = resume && resume.lastChapterIndex != null
+          if (!showResume && finishedBooksCount === 0) return null
           return (
             <div className="br-top-banners">
-              <button className="br-continue-banner" onClick={() => openBook(resume)}>
-                <span className="br-continue-icon">📖</span>
-                <span className="br-continue-text">
-                  <span className="br-continue-label">Continue reading</span>
-                  <span className="br-continue-title">{resume.title}</span>
-                </span>
-                <span className="br-continue-arrow">→</span>
-              </button>
+              {finishedBooksCount > 0 && (
+                <div className="br-progress-summary">
+                  <span className="br-progress-summary-icon">✓</span>
+                  <span className="br-progress-summary-text">{finishedBooksCount}/{libraryBooks.length}</span>
+                </div>
+              )}
+              {showResume && (
+                <button className="br-continue-banner" onClick={() => openBook(resume)}>
+                  <span className="br-continue-icon">📖</span>
+                  <span className="br-continue-text">
+                    <span className="br-continue-label">Continue reading</span>
+                    <span className="br-continue-title">{resume.title}</span>
+                  </span>
+                  <span className="br-continue-arrow">→</span>
+                </button>
+              )}
             </div>
           )
         })()}
@@ -555,13 +492,14 @@ export default function BookReader() {
             <span className="br-add-icon">{loading ? '…' : '+'}</span>
             <span className="br-add-label">{loading ? 'Opening…' : 'Add book'}</span>
           </button>
-          {libraryBooks.map(b => (
+          {visibleBooks.map(b => (
             <button key={b.id} className="br-book-card" onClick={() => openBook(b)}>
               <span className="br-book-cover-wrap">
                 {b.cover
                   ? <img className="br-book-cover" src={b.cover} alt="" />
                   : <span className="br-book-cover br-book-cover--placeholder">📕</span>}
                 <span className="br-book-delete" onClick={e => handleDelete(b.id, e)} title="Remove from library">✕</span>
+                {isBookFinished(b) && <span className="br-finished-check br-finished-check--cover" title="Finished">✓</span>}
               </span>
               <span className="br-book-card-title">{b.title}</span>
             </button>
@@ -586,7 +524,7 @@ export default function BookReader() {
     const finishedCount = (book.finishedChapters || []).length
     const visibleChapters = book.chapters
       .map((c, i) => ({ c, i }))
-      .filter(({ i }) => !hideFinished || !(book.finishedChapters || []).includes(i))
+      .filter(({ i }) => !hideFinishedChapters || !(book.finishedChapters || []).includes(i))
     return (
       <div className="br-screen">
         <div className="br-header">
@@ -594,23 +532,39 @@ export default function BookReader() {
           <span className="br-title br-reading-title">{book.title}</span>
           {finishedCount > 0 && (
             <button
-              className={`br-hide-finished-btn ${hideFinished ? 'active' : ''}`}
-              onClick={() => setHideFinished(h => !h)}
-              title={hideFinished ? 'Show finished chapters' : 'Hide finished chapters'}
+              className={`br-hide-finished-btn ${hideFinishedChapters ? 'active' : ''}`}
+              onClick={() => setHideFinishedChapters(h => !h)}
+              title={hideFinishedChapters ? 'Show finished chapters' : 'Hide finished chapters'}
             >
-              {hideFinished ? '🙈' : '👁'}
+              {hideFinishedChapters ? '🙈' : '👁'}
             </button>
           )}
           <HelpButton title="Library" description="Pick a chapter to start reading. A ✓ marks chapters you've finished — by tapping Next Chapter, revealing the last paragraph, or letting audio playback read through to the end. Use 👁 to hide finished chapters from this list." />
         </div>
-        {finishedCount > 0 && (
-          <div className="br-top-banners">
-            <div className="br-progress-summary">
-              <span className="br-progress-summary-icon">✓</span>
-              <span className="br-progress-summary-text">{finishedCount}/{book.chapters.length}</span>
+        {(() => {
+          const showResume = book.lastChapterIndex != null
+          if (finishedCount === 0 && !showResume) return null
+          return (
+            <div className="br-top-banners">
+              {finishedCount > 0 && (
+                <div className="br-progress-summary">
+                  <span className="br-progress-summary-icon">✓</span>
+                  <span className="br-progress-summary-text">{finishedCount}/{book.chapters.length}</span>
+                </div>
+              )}
+              {showResume && (
+                <button className="br-continue-banner" onClick={() => openChapter(book.lastChapterIndex)}>
+                  <span className="br-continue-icon">📖</span>
+                  <span className="br-continue-text">
+                    <span className="br-continue-label">Continue reading</span>
+                    <span className="br-continue-title">{book.chapters[book.lastChapterIndex]?.title}</span>
+                  </span>
+                  <span className="br-continue-arrow">→</span>
+                </button>
+              )}
             </div>
-          </div>
-        )}
+          )
+        })()}
         <div className="br-chapter-list">
           {visibleChapters.map(({ c, i }) => (
             <button key={i} className="br-chapter-item" onClick={() => openChapter(i)}>
@@ -649,7 +603,7 @@ export default function BookReader() {
           </button>
           <HelpButton
             title="Library"
-            description="Tap any word for its translation. Tap a sentence itself (not a word), or long-press anywhere in it — including on a word — for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Tap 🔊 to read the whole chapter aloud from the top. Tap 📇/🔗 to practice known vocab from your current spot plus the next few paragraphs as flashcards or a matching game — built fresh each time from wherever you're reading, since there's no fixed passage here. Short paragraphs (a line of dialogue, for instance) reveal together with the next ones in a run, rather than one at a time. Once you've fully revealed a chapter, a Next Chapter button appears and the chapter gets marked ✓ finished in the chapter list."
+            description="Tap any word for its translation. Tap the small – – mark before a sentence for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Long-press still works normally for the device's own text selection and copy. Tap 🔊 to read the whole chapter aloud from the top. Tap 📇/🔗 to practice known vocab from your current spot plus the next few paragraphs as flashcards or a matching game — built fresh each time from wherever you're reading, since there's no fixed passage here. Short paragraphs (a line of dialogue, for instance) reveal together with the next ones in a run, rather than one at a time. Once you've fully revealed a chapter, a Next Chapter button appears and the chapter gets marked ✓ finished in the chapter list."
           />
         </div>
       </div>
@@ -672,11 +626,14 @@ export default function BookReader() {
                 <span
                   key={i}
                   ref={el => { sentenceRefs.current[i] = el }}
-                  className={`br-sentence br-sentence-tappable ${readingIndex === i ? 'br-sentence-active' : ''}`}
+                  className={`br-sentence ${readingIndex === i ? 'br-sentence-active' : ''}`}
                   onClick={() => openSentenceMenu(i)}
-                  onClickCapture={handleSentenceClickCapture}
-                  onPointerDown={e => handleSentencePointerDown(i, e)}
                 >
+                  <span
+                    className="br-sentence-marker"
+                    onClick={e => { e.stopPropagation(); openSentenceMenu(i) }}
+                    title="Listen / mark / translate this sentence"
+                  >–&nbsp;–</span>
                   <TextWithLookup text={sentence} language={activeLanguage} lookup={lookup} scores={scores} showReading={showReading} />
                   {' '}
                 </span>
@@ -705,7 +662,7 @@ export default function BookReader() {
       </div>
 
       {sentenceMenu != null && (
-        <div className="br-sentence-menu-overlay" onClick={handleOverlayDismiss}>
+        <div className="br-sentence-menu-overlay" onClick={() => setSentenceMenu(null)}>
           <div className="br-sentence-menu" onClick={e => e.stopPropagation()}>
             <button className="br-sentence-menu-btn" onClick={() => listenFromHere(sentenceMenu)}>
               🔊 Listen from here

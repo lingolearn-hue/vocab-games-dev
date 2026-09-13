@@ -136,7 +136,18 @@
   transition: background 0.15s;
 }
 .gr-sentence-active { background: rgba(79,126,248,0.14); }
-.gr-sentence-tappable { cursor: pointer; }
+
+.gr-sentence-marker {
+  display: inline-block;
+  width: 2em;
+  color: #c2c2c2;
+  cursor: pointer;
+  font-weight: 400;
+  letter-spacing: -0.1em;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.gr-sentence-marker:hover { color: #4f7ef8; }
 
 .gr-sentence-translation {
   display: block;
@@ -630,6 +641,8 @@
 [data-theme="dark"] .gr-play-btn.is-playing { border-color: #4f7ef8; background: #1a2340; }
 [data-theme="dark"] .gr-sentence-active     { background: rgba(79,126,248,0.22); }
 [data-theme="dark"] .gr-sentence-translation { background: #1a2340; color: var(--dt2); }
+[data-theme="dark"] .gr-sentence-marker { color: #4a4b52; }
+[data-theme="dark"] .gr-sentence-marker:hover { color: #6a9bff; }
 [data-theme="dark"] .gr-continue-banner     { background: #1a2340; }
 [data-theme="dark"] .gr-continue-title      { color: #f0f0f0; }
 [data-theme="dark"] .gr-progress-summary    { background: #10281c; color: #3ecf8e; }

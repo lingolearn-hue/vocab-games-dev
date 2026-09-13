@@ -824,9 +824,16 @@ export default function GradedReader() {
                 <span
                   key={i}
                   ref={el => { sentenceRefs.current[i] = el }}
-                  className={`gr-sentence ${readingIndex === i ? 'gr-sentence-active' : ''} ${sentenceTranslationsAligned ? 'gr-sentence-tappable' : ''}`}
+                  className={`gr-sentence ${readingIndex === i ? 'gr-sentence-active' : ''}`}
                   onClick={sentenceTranslationsAligned ? () => toggleSentenceTranslation(i) : undefined}
                 >
+                  {sentenceTranslationsAligned && (
+                    <span
+                      className="gr-sentence-marker"
+                      onClick={e => { e.stopPropagation(); toggleSentenceTranslation(i) }}
+                      title="Translate this sentence"
+                    >–&nbsp;–</span>
+                  )}
                   <TextWithLookup text={sentence} language={language} lookup={augmentedLookup} scores={scores} showReading={showReading} />
                   {' '}
                   {expandedSentence === i && (

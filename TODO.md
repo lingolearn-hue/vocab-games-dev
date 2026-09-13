@@ -41,12 +41,32 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bm** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bn** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bn**: Two pieces of work.
+  (1) Japanese deinflection: added causative-form reconstruction to
+  `reader.js`'s `resolveConjugated` — 思わせた→思う, 読ませた→読む,
+  食べさせた→食べる and generally any causative-past/te form, which had
+  no resolution path at all before (handles both godan a-row causatives
+  and the ambiguous させ case, which could mean either an ichidan or a
+  godan す-verb causative — tries both). 殆んど/殆ど confirmed as a
+  genuine vocabulary gap, not a tokenizer issue — 殆ど doesn't exist in
+  the dictionary at all; left for the vocab-focused thread. Verified
+  against real dictionary data plus regression checks on already-working
+  patterns.
+  (2) Removed long-press entirely from the Library sentence menu — it
+  was interfering with the OS's own long-press-to-select/copy gesture,
+  a real usability regression from when it was added. Replaced with a
+  small dedicated "– –" tap marker (~2em wide) rendered before each
+  sentence in *both* Graded Reader and Library, since near-universal
+  vocab-underline coverage had left little to no non-word gap left to
+  tap for the existing gap-tap trigger. Verified live: marker opens the
+  sentence menu / translate toggle correctly, a long hold on a word no
+  longer intercepts anything, word lookup unaffected.
 - **v0.66bm**: Three pieces of work.
   (1) Japanese deinflection fixes in `reader.js`'s shared `resolveConjugated`:
   the plain-past sokuon form (`った`, e.g. 言った→言う, 行った→行う,

@@ -175,6 +175,21 @@
 }
 .br-book-delete:hover { color: #c0392b; border-color: #c0392b; }
 
+.br-finished-check--cover {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  font-size: 0.75rem;
+}
+
 .br-book-card-title {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -279,7 +294,18 @@
   transition: background 0.15s;
 }
 .br-sentence-active { background: rgba(79,126,248,0.14); }
-.br-sentence-tappable { cursor: pointer; }
+
+.br-sentence-marker {
+  display: inline-block;
+  width: 2em;
+  color: #c2c2c2;
+  cursor: pointer;
+  font-weight: 400;
+  letter-spacing: -0.1em;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.br-sentence-marker:hover { color: #4f7ef8; }
 
 .br-progress {
   display: flex;
@@ -445,6 +471,7 @@
 [data-theme="dark"] .br-book-card { color: #ddd; }
 [data-theme="dark"] .br-book-cover--placeholder { background: #26283a; }
 [data-theme="dark"] .br-book-delete { background: #202127; border-color: #33343a; color: #999; }
+[data-theme="dark"] .br-finished-check--cover { background: #202127; }
 [data-theme="dark"] .br-add-icon { border-color: #444; color: #777; }
 [data-theme="dark"] .br-continue-banner { background: #1a2340; }
 [data-theme="dark"] .br-continue-title { color: #f0f0f0; }
@@ -457,3 +484,5 @@
 [data-theme="dark"] .br-sentence-menu-btn { background: #26272e; color: #eee; }
 [data-theme="dark"] .br-sentence-menu-btn:hover { background: #2e3038; }
 [data-theme="dark"] .br-sentence-menu-btn--disabled { color: #666; background: #1c1d22; }
+[data-theme="dark"] .br-sentence-marker { color: #4a4b52; }
+[data-theme="dark"] .br-sentence-marker:hover { color: #6a9bff; }
