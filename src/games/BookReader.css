@@ -15,6 +15,10 @@
   padding: 1rem 1.2rem 0.6rem;
   border-bottom: 1px solid #f0f0f0;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fafafa;
 }
 
 .br-back {
@@ -54,6 +58,18 @@
 }
 .br-play-btn.is-playing { border-color: #4f7ef8; background: #eef2ff; }
 
+.br-hide-finished-btn {
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 7px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  appearance: none;
+}
+.br-hide-finished-btn.active { border-color: #4f7ef8; background: #eef2ff; }
+
 /* Library grid */
 .br-top-banners {
   display: flex;
@@ -80,6 +96,20 @@
 .br-continue-label { font-size: 0.66rem; font-weight: 700; color: #4f7ef8; text-transform: uppercase; letter-spacing: 0.03em; }
 .br-continue-title { font-size: 0.85rem; font-weight: 700; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .br-continue-arrow { font-size: 1rem; color: #4f7ef8; flex-shrink: 0; }
+
+.br-progress-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.63rem 0.75rem;
+  border-radius: 12px;
+  background: #eefaf3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #22a06b;
+}
+.br-progress-summary-icon { font-size: 0.85rem; }
 
 .br-library-grid {
   flex: 1;
@@ -220,6 +250,12 @@
   justify-content: center;
 }
 .br-chapter-title { flex: 1; }
+.br-finished-check {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #22a06b;
+  flex-shrink: 0;
+}
 
 /* Reading body */
 .br-body {
@@ -286,6 +322,22 @@
   appearance: none;
 }
 .br-continue-reveal-btn:hover { background: #eef2ff; border-color: #4f7ef8; }
+
+.br-next-chapter-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 1.2rem;
+  padding: 0.75rem;
+  border: 1.5px solid #22a06b;
+  border-radius: 12px;
+  background: #e9f8f1;
+  color: #22a06b;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+}
+.br-next-chapter-btn:hover { background: #ddf3e8; }
 
 /* Sentence tap menu */
 .br-sentence-menu-overlay {
@@ -380,8 +432,15 @@
 }
 
 [data-theme="dark"] .br-screen { background: #17181c; }
-[data-theme="dark"] .br-header { border-color: #2a2b30; }
+[data-theme="dark"] .br-header { border-color: #2a2b30; background: #17181c; }
 [data-theme="dark"] .br-title, [data-theme="dark"] .br-text { color: #eee; }
+[data-theme="dark"] .br-back { color: var(--dt2); }
+[data-theme="dark"] .br-back:hover { color: #f0f0f0; }
+[data-theme="dark"] .br-play-btn { border-color: #333; color: var(--dt2); }
+[data-theme="dark"] .br-play-btn.is-playing { border-color: #4f7ef8; background: #1a2340; }
+[data-theme="dark"] .br-hide-finished-btn { border-color: #333; }
+[data-theme="dark"] .br-hide-finished-btn.active { border-color: #4f7ef8; background: #1a2340; }
+[data-theme="dark"] .br-progress-summary { background: #10281c; color: #3ecf8e; }
 [data-theme="dark"] .br-chapter-item { background: #202127; border-color: #2a2b30; }
 [data-theme="dark"] .br-book-card { color: #ddd; }
 [data-theme="dark"] .br-book-cover--placeholder { background: #26283a; }
@@ -392,6 +451,8 @@
 [data-theme="dark"] .br-progress-track { background: #2a2a2a; }
 [data-theme="dark"] .br-progress-label { color: #999; }
 [data-theme="dark"] .br-continue-reveal-btn { background: #1a2340; border-color: #333; }
+[data-theme="dark"] .br-next-chapter-btn { background: #10281c; border-color: #22a06b; color: #3ecf8e; }
+[data-theme="dark"] .br-next-chapter-btn:hover { background: #143323; }
 [data-theme="dark"] .br-sentence-menu { background: #202127; }
 [data-theme="dark"] .br-sentence-menu-btn { background: #26272e; color: #eee; }
 [data-theme="dark"] .br-sentence-menu-btn:hover { background: #2e3038; }

@@ -36,11 +36,11 @@ const TE_TA_FORMS = [
   ['した',    ['する', 'す']],
   ['きた',    ['くる']],
   ['いった',  ['いく']],
-  ['って',    ['う', 'つ', 'る']], // 待って → 待つ, 言って→言う
+  ['って',    ['う', 'つ', 'る']], // te-form: 待って → 待つ, 言って → 言う
+  ['った',    ['う', 'つ', 'る']], // plain-past counterpart of って — was missing entirely, e.g. 言った → 言う, 待った → 待つ
   ['んで',    ['ぬ', 'ぶ', 'む']],
   ['いで',    ['ぐ']],
   ['いて',    ['く']],
-  ['って',    ['う', 'つ']],
   ['た',      ['る']],            // ichidan: 食べた → 食べる
   ['て',      ['る']],
 ]
@@ -96,6 +96,15 @@ function aStemToDict(stem, lookup) {
 
 function resolveConjugated(surface, lookup) {
   if (surface.length < 2) return null
+
+  // 0. Bare i-stem (連用形) used standalone as a noun — a common Japanese
+  // pattern where a verb's continuative stem functions as a noun with no
+  // suffix at all, e.g. 成り立ち → 成り立つ, 始まり → 始まる, 動き → 動く.
+  // iStemToDict() below is otherwise only tried after stripping a polite
+  // suffix (~ます etc.); this tries the whole surface directly first,
+  // since a nominalized stem has no suffix to strip in the first place.
+  const bareIstem = iStemToDict(surface, lookup)
+  if (bareIstem) return bareIstem
 
   // 1. Polite / progressive forms → leaves i-stem or ichidan stem
   for (const suffix of POLITE_SUFFIXES) {
@@ -313,7 +322,22 @@ function tokeniseSpaced(text, lookup) {
 export function splitSentences(text, language) {
   if (!text) return []
   const isCJK = CJK_LANGS.has(language)
-  const re = isCJK ? /[^。！？]*[。！？]|[^。！？]+$/g : /[^.!?]*[.!?]+(?=\s|$)|[^.!?]+$/g
+  // Allow closing quote/bracket characters, and optionally a trailing
+  // comma, to sit between the terminal punctuation and the sentence
+  // boundary. Dialogue routinely ends like "Hallo?" or 「こんにちは。」, and
+  // dialogue tags routinely follow as '"...?", fragte er.' — the comma
+  // there is what a naive fix (closers alone) still misses. Without all
+  // of this, the boundary lookahead never finds whitespace/EOS
+  // immediately after the bare punctuation mark, and the entire clause
+  // before it gets silently dropped from the match, leaving only the
+  // trailing quote/comma as its own "sentence". This doesn't guarantee a
+  // linguistically ideal boundary right at a dialogue tag (a tag can end
+  // up as its own short "sentence" rather than joined to the quote before
+  // it) — but no content is ever lost, which is what matters here.
+  const closers = '"\'\u201d\u2019\u00bb\u300d\u300f)\\]'
+  const re = isCJK
+    ? new RegExp(`[^。！？]*[。！？]+[${closers}]*|[^。！？]+$`, 'g')
+    : new RegExp(`[^.!?]*[.!?]+[${closers}]*,?(?=\\s|$)|[^.!?]+$`, 'g')
   const matches = text.match(re) ?? [text]
   return matches.map(s => s.trim()).filter(Boolean)
 }

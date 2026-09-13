@@ -41,12 +41,51 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bl** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bm** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bm**: Three pieces of work.
+  (1) Japanese deinflection fixes in `reader.js`'s shared `resolveConjugated`:
+  the plain-past sokuon form (`った`, e.g. 言った→言う, 行った→行う,
+  待った→待つ) had no entry at all — only its te-form counterpart
+  (`って`) did — silently breaking *any* godan verb's plain past tense,
+  not just the one reported. Also added a bare-i-stem-as-noun
+  resolution path (成り立ち→成り立つ, and generally any verb whose
+  continuative stem is used standalone as a noun), previously only
+  tried after stripping a polite ~ます suffix, never on a bare word.
+  訊ねた (a third reported case) turned out to be a genuine vocabulary
+  gap, not a tokenizer bug — 訊ねる doesn't exist in the dictionary at
+  all (only 尋ねる does) — flagged as a separate, distinct issue.
+  Confirmed the existing dashed-underline "conjugated match" styling
+  already applies correctly once these words actually resolve; no UI
+  work was needed. All verified live in a real browser against the
+  exact reported sentences plus regression checks on already-working
+  conjugation patterns.
+  (2) Compared Graded Reader's and Library's feature surfaces in full
+  and ported the two genuinely-portable, still-missing pieces: a
+  "✓ X/Y chapters finished" progress summary badge and a "hide
+  finished chapters" toggle in the chapter list, both mirroring Graded
+  Reader's exact styling. Everything else in Graded Reader (level/tag
+  filtering, series grouping, passage-card stats, translation toggle)
+  either depends on curated metadata that doesn't exist for uploaded
+  books, or is already superseded by something Library does better
+  (real EPUB cover extraction vs. a placeholder, real file upload vs.
+  paste-text). Recommended against a wholesale copy/rewrite.
+  (3) Fixed two real Library-only bugs: `.br-back` and `.br-play-btn`
+  were missing the dark-mode color overrides Graded Reader's
+  equivalents have always had (a plain omission from when
+  BookReader.css was first written) — verified the back button's
+  dark-mode color is now the correct `--dt2` light grey, not the
+  illegible `#555` it was rendering at. Also pinned the reading header
+  with `position: sticky` as a defensive fix for a reported
+  disappears-on-scroll symptom — Library is the only screen with a
+  native file picker, a plausible source of the same class of viewport-
+  height-recalculation quirk as mobile browser chrome collapsing;
+  couldn't reproduce the exact trigger in this environment, but the
+  fix is safe regardless of the precise cause.
 - **v0.66bl**: Library — fixed reported bug: reading position wasn't
   surviving exit-and-reenter. Found two real, stacked causes. (1)
   Progress was written to IndexedDB via `updateProgress` but never

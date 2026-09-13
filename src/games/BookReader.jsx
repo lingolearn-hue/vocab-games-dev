@@ -55,6 +55,7 @@ export default function BookReader() {
   const [chapterIndex, setChapterIndex] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [hideFinished, setHideFinished] = useState(false)
   const fileInputRef = useRef(null)
 
   const lookup = useMemo(() => buildLookup(activeEntries), [activeEntries])
@@ -166,6 +167,7 @@ export default function BookReader() {
     setBook(null)
     setChapterIndex(null)
     setError(null)
+    setHideFinished(false)
     refreshLibrary()
   }
 
@@ -244,13 +246,60 @@ export default function BookReader() {
     paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [revealedCount])
 
+  // Chapters (or the single "chapter" for a whole-book text) the person has
+  // finished, per book — persisted the same way as reading progress: build
+  // the next record from the freshest React state, write it in one atomic
+  // put. A chapter counts as finished by any of: tapping "Next chapter",
+  // manually revealing its very last paragraph, or letting audio playback
+  // reach the end (from wherever it started).
+  function markChapterFinished(i) {
+    setBook(prev => {
+      if (!prev) return prev
+      if ((prev.finishedChapters || []).includes(i)) return prev // already marked, avoid a redundant write
+      const next = { ...prev, finishedChapters: [...(prev.finishedChapters || []), i] }
+      saveBook(next)
+      return next
+    })
+  }
+
+  // Many books (dialogue-heavy fiction especially) break each short line
+  // into its own <p>. Revealing exactly one paragraph per "Continue
+  // reading" tap would make those feel like they barely move at all — so
+  // a short paragraph is bundled together with however many short
+  // paragraphs immediately follow it, all revealed in one step. "Short"
+  // is approximated by character count rather than actual rendered line
+  // count, which isn't knowable from plain text alone before layout.
+  const SHORT_PARAGRAPH_MAX_CHARS = 60
+
+  function countParagraphsToReveal(startIdx) {
+    let count = 1
+    if (paragraphs[startIdx] && paragraphs[startIdx].length <= SHORT_PARAGRAPH_MAX_CHARS) {
+      let i = startIdx + 1
+      while (i < paragraphs.length && paragraphs[i].length <= SHORT_PARAGRAPH_MAX_CHARS) {
+        count++
+        i++
+      }
+    }
+    return count
+  }
+
   function handleContinueOrBack() {
     if (revealedCount < paragraphGroups.length && nearBottom) {
       pendingScrollRef.current = true
-      setRevealedCount(c => c + 1)
+      const toReveal = countParagraphsToReveal(revealedCount)
+      const nextRevealed = Math.min(revealedCount + toReveal, paragraphGroups.length)
+      setRevealedCount(nextRevealed)
+      if (nextRevealed >= paragraphGroups.length && chapterIndex != null) markChapterFinished(chapterIndex)
     } else {
       paragraphRefs.current[revealedCount - 1]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  function goToNextChapter() {
+    if (chapterIndex == null || !book) return
+    markChapterFinished(chapterIndex)
+    const next = chapterIndex + 1
+    if (next < book.chapters.length) openChapter(next)
   }
 
   // ── Runtime vocab practice: current location + next few paragraphs ────────
@@ -329,8 +378,9 @@ export default function BookReader() {
     playingRef.current = true
     wakeLockRef.current = await requestWakeLock()
     const rate = 0.9
+    let completedNaturally = true
     for (let i = startAt; i < sentences.length; i++) {
-      if (!playingRef.current) break
+      if (!playingRef.current) { completedNaturally = false; break }
       setReadingIndex(i)
       await speakAndWait(sentences[i], activeLanguage, { rate })
       if (playingRef.current && i < sentences.length - 1) await sleep(SENTENCE_PAUSE_MS)
@@ -339,6 +389,7 @@ export default function BookReader() {
     setReadingIndex(-1)
     releaseWakeLock(wakeLockRef.current)
     wakeLockRef.current = null
+    if (completedNaturally && chapterIndex != null) markChapterFinished(chapterIndex)
   }
 
   useEffect(() => {
@@ -532,18 +583,40 @@ export default function BookReader() {
   }
 
   if (chapterIndex == null) {
+    const finishedCount = (book.finishedChapters || []).length
+    const visibleChapters = book.chapters
+      .map((c, i) => ({ c, i }))
+      .filter(({ i }) => !hideFinished || !(book.finishedChapters || []).includes(i))
     return (
       <div className="br-screen">
         <div className="br-header">
           <button className="br-back" onClick={closeBook}>← Back</button>
           <span className="br-title br-reading-title">{book.title}</span>
-          <HelpButton title="Library" description="Pick a chapter to start reading." />
+          {finishedCount > 0 && (
+            <button
+              className={`br-hide-finished-btn ${hideFinished ? 'active' : ''}`}
+              onClick={() => setHideFinished(h => !h)}
+              title={hideFinished ? 'Show finished chapters' : 'Hide finished chapters'}
+            >
+              {hideFinished ? '🙈' : '👁'}
+            </button>
+          )}
+          <HelpButton title="Library" description="Pick a chapter to start reading. A ✓ marks chapters you've finished — by tapping Next Chapter, revealing the last paragraph, or letting audio playback read through to the end. Use 👁 to hide finished chapters from this list." />
         </div>
+        {finishedCount > 0 && (
+          <div className="br-top-banners">
+            <div className="br-progress-summary">
+              <span className="br-progress-summary-icon">✓</span>
+              <span className="br-progress-summary-text">{finishedCount}/{book.chapters.length}</span>
+            </div>
+          </div>
+        )}
         <div className="br-chapter-list">
-          {book.chapters.map((c, i) => (
+          {visibleChapters.map(({ c, i }) => (
             <button key={i} className="br-chapter-item" onClick={() => openChapter(i)}>
               <span className="br-chapter-num">{i + 1}</span>
               <span className="br-chapter-title">{c.title}</span>
+              {(book.finishedChapters || []).includes(i) && <span className="br-finished-check" title="Finished">✓</span>}
             </button>
           ))}
         </div>
@@ -576,7 +649,7 @@ export default function BookReader() {
           </button>
           <HelpButton
             title="Library"
-            description="Tap any word for its translation. Tap a sentence itself (not a word), or long-press anywhere in it — including on a word — for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Tap 🔊 to read the whole chapter aloud from the top. Tap 📇/🔗 to practice known vocab from your current spot plus the next few paragraphs as flashcards or a matching game — built fresh each time from wherever you're reading, since there's no fixed passage here."
+            description="Tap any word for its translation. Tap a sentence itself (not a word), or long-press anywhere in it — including on a word — for a menu: listen from there, mark it as your reading position to resume from later, or translate it (not available for imported books). Tap 🔊 to read the whole chapter aloud from the top. Tap 📇/🔗 to practice known vocab from your current spot plus the next few paragraphs as flashcards or a matching game — built fresh each time from wherever you're reading, since there's no fixed passage here. Short paragraphs (a line of dialogue, for instance) reveal together with the next ones in a run, rather than one at a time. Once you've fully revealed a chapter, a Next Chapter button appears and the chapter gets marked ✓ finished in the chapter list."
           />
         </div>
       </div>
@@ -615,6 +688,11 @@ export default function BookReader() {
         {(revealedCount < paragraphGroups.length || !nearBottom) && (
           <button className="br-continue-reveal-btn" onClick={handleContinueOrBack}>
             {revealedCount < paragraphGroups.length && nearBottom ? 'Continue reading ↓' : '↓ Back to last paragraph'}
+          </button>
+        )}
+        {revealedCount >= paragraphGroups.length && nearBottom && chapterIndex + 1 < book.chapters.length && (
+          <button className="br-next-chapter-btn" onClick={goToNextChapter}>
+            Next chapter: {book.chapters[chapterIndex + 1].title} →
           </button>
         )}
 
