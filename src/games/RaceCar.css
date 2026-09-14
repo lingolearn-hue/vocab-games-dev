@@ -189,6 +189,18 @@
   word-break: break-word;
 }
 
+/* Ellipsis for long glosses. Scoped to the plain (no-furigana) span only —
+   ruby-annotated CJK text is nested <ruby>/<rt> elements, where applying
+   line-clamp risks the reading overlapping or the clamp cutting
+   unpredictably; a long, un-truncatable gloss is realistically an
+   English/European-language problem, not a CJK-word one. */
+.rc-tile .ruby-plain {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 
 /* Ruby annotation inside tiles */
 .rc-tile rt { font-size: 0.55em; line-height: 2.0; }

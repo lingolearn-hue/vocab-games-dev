@@ -41,12 +41,28 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bn** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bo** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bo**: Race Car — added multi-line ellipsis truncation for long
+  glosses, scoped to `.rc-tile .ruby-plain` (the no-furigana span) only —
+  ruby-annotated CJK text uses nested `<ruby>/<rt>` elements, where
+  line-clamp risks the reading overlapping or the clamp cutting
+  unpredictably, and a genuinely long, un-truncatable gloss is realistically
+  an English/European-language problem, not a CJK-word one. Pair Match
+  already showed a proper ellipsis via its existing `-webkit-line-clamp`
+  (native WebKit/Blink behavior) — confirmed via a built test harness using
+  the real CSS, no change needed there. Empirically measured the actual
+  clipping thresholds for both games first (Pair Match: 35 chars, Race Car:
+  37 chars, at the app's 480px worst-case width) before building the fix.
+  Verified live against the real app: injected a real long-gloss word
+  (Hauptschulabschluss → "lower secondary school leaving certificate", 42
+  chars) into a running Race Car session — now shows "lower secondary.."
+  cleanly instead of the previous hard mid-word cut; confirmed short/medium
+  words render unaffected.
 - **v0.66bn**: Two pieces of work.
   (1) Japanese deinflection: added causative-form reconstruction to
   `reader.js`'s `resolveConjugated` — 思わせた→思う, 読ませた→読む,
