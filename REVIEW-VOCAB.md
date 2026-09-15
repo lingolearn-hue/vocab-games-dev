@@ -435,3 +435,86 @@ meaning a slightly larger null set for German conjugation than what
 was first achieved). Re-verified rather than blindly re-declared:
 every reconstructed classifier was run against the actual vocab files
 and its agreement rate checked before being applied.
+
+## Gloss formatting cleanup: parenthetical repositioning and content trimming
+
+Separate from the coverage/gap-filling work above — a data-quality
+pass on existing gloss *formatting*, prompted by finding entries like
+Japanese `僕` glossed `"I (used by men towards those of equal or lower
+status)"` (core word technically first, but buried under an oversized
+explanation) and Chinese entries where the parenthetical came *before*
+the actual word entirely (`"(fig.) treasure"` instead of
+`"treasure (fig.)"`).
+
+**Agreed convention going forward**: parentheticals go at the *end* of
+a gloss, not the start or middle. Where the parenthetical carries
+real, necessary information (register: `"(informal)"`; domain:
+`"(law)"`; disambiguation: `"(of clothes)"`), keep it — tightened, not
+cut. Where it's a redundant hedge, a vestigial fragment left over from
+a bad merge, or padded with unnecessary examples, cut or trim it.
+Never use literal `...` for shortening in the data itself (reads as
+"content missing," not "deliberately trimmed") — prefer dropping down
+to 1-2 illustrative examples. Ellipsis truncation belongs at the
+*display* layer only, as a last-resort fallback after semicolon-cut
+and parenthetical-cut both fail to bring text within a tile's width
+(see `truncate()` precedent in `src/games/RaceCar.jsx`/`PairMatch.jsx`
+history — note this session's own attempt at extending that function
+was superseded by a better, empirically-tested CSS solution from
+another thread; reverted rather than shipping a redundant duplicate).
+
+**Japanese**: 242 entries fixed. `leads_with_paren` 177→0,
+`long_with_parens` (>35 chars containing a parenthetical) 75→1 (the
+one remaining is `第`, a grammar-prefix entry I added earlier this
+session whose gloss is inherently explanatory, not clutter). Also
+caught two real data-quality bugs while reviewing, not just
+formatting: `政党` was glossed `"(member of) political party"` when
+the word means the party itself, not a member of one — genuine
+mistranslation, fixed; `内閣` had a vestigial standalone array element
+`"(government)"` sitting next to an already-correct `"cabinet"` gloss
+— merged into one clean entry.
+
+**German**: 111 entries fixed. Notably more legitimately-necessary
+cultural/institutional context than Japanese (Swiss/Austrian
+institutions, German school types, regional dialects), so more
+parentheticals were kept — tightened rather than cut.
+`long_with_parens` 96→13, all 13 remaining are deliberate keeps.
+
+**Spanish**: 86 entries fixed, `long_with_parens` 77→17 (remaining are
+deliberate keeps — regional/dialectal register notes like Mexico
+slang, Rioplatense terms, and genuinely necessary cultural context
+like `tortilla`, `zarzuela`, `parador`).
+
+**French**: 102 entries fixed, `long_with_parens` 88→20. Two real
+data-quality issues caught during review: `ancient` was an erroneous
+duplicate headword (not correct French spelling — the real word
+`ancien` already existed correctly) — deleted rather than reformatted;
+`suicidé` was mistranslated as "suicidal," conflating it with the
+genuinely different word `suicidaire` — corrected to its accurate
+meaning (past participle of "to commit suicide," i.e. "who died by
+suicide"), kept minimal and factual given the topic.
+
+**Chinese**: fundamentally different situation from the other four —
+a representative sample review found most flagged entries are
+legitimate lexicographic content (domain/register tags, grammatical
+function markers explaining particle usage, idiom literal+figurative
+glosses, polysemy disambiguation), not redundant clutter. A bulk
+"shorten everything" pass the way the other languages got would have
+destroyed real content. Two-phase approach used instead, tooling in
+`tools/zh_gloss_cleanup.py`:
+
+- **Phase 1** (mechanical, safe to apply broadly): reposition leading
+  parentheticals to the end. 1,291→0 (`leads_with_paren`). Handles
+  stacked leading parens recursively (`"(coll.) (of clothes) to fit
+  nicely"` → `"to fit nicely (coll.) (of clothes)"`, 48 such cases
+  found). Deliberately leaves untouched any gloss where the
+  parenthetical IS the entire content — pure grammar/particle markers
+  like 把/的/而/给/很/第 (71 such cases), same treatment as Japanese's
+  `第`/曾 precedent, since there's no word to reposition around and
+  the content is inherently explanatory.
+- **Phase 2** (individual content review, not automated — confirmed no
+  reliable heuristic distinguishes reducible from necessary content
+  here): in progress. `long_with_parens` 1,248→1,231 so far across 3
+  reviewed batches (~200 entries), roughly 10-15% found genuinely
+  trimmable, consistent with the "most content is legitimate" finding.
+  ~1,200 entries remain for review at this same pace — the largest
+  single remaining piece of vocab-quality work from this session.

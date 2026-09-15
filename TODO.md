@@ -1,5 +1,21 @@
 # TODO / Future Improvements
 
+## Open: Chinese gloss cleanup (phase 2, content trimming) — in progress
+
+Structural fix complete: leading parentheticals repositioned to the
+end across all of `zh-en.json` (1,291→0), using the mechanical/safe
+`reposition()` function in `tools/zh_gloss_cleanup.py`. Phase 2 —
+individual review of the ~1,231 remaining entries where a gloss is
+long (>35 chars) *and* contains a parenthetical, to judge case-by-case
+whether the content is genuinely reducible (redundant "e.g."
+enumeration, hedging) or necessary (idiom explanation, grammatical
+function note, sense disambiguation) — is NOT automatable, confirmed
+during review that no reliable heuristic distinguishes the two. ~3
+batches (~200 entries) reviewed so far, ~10-15% found trimmable. Use
+`tools/zh_gloss_cleanup.py`'s `find_phase2_candidates()` to pull the
+next batch; full methodology and examples in `REVIEW-VOCAB.md`'s
+"Gloss formatting cleanup" section.
+
 ## Open: license-replacement gaps (contested/unresolved fields left blank)
 
 Per an explicit decision to prioritize a clean MIT license over data
