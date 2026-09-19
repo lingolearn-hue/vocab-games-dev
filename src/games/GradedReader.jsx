@@ -193,7 +193,7 @@ export default function GradedReader() {
       const surfaceKey = surface.toLowerCase()
       const lemmaKey = lemma.toLowerCase()
       if (!merged.has(surfaceKey) && lookup.has(lemmaKey)) {
-        merged.set(surfaceKey, { ...lookup.get(lemmaKey), _surface: surface })
+        merged.set(surfaceKey, [{ ...lookup.get(lemmaKey)[0], _surface: surface }])
       }
     }
     return merged

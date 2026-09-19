@@ -41,7 +41,7 @@ export function TextWithLookup({ text, language, lookup, scores, showReading, cl
       const surfaceKey = surface.toLowerCase()
       const lemmaKey = lemma.toLowerCase()
       if (!merged.has(surfaceKey) && base.has(lemmaKey)) {
-        merged.set(surfaceKey, { ...base.get(lemmaKey), _surface: surface })
+        merged.set(surfaceKey, [{ ...base.get(lemmaKey)[0], _surface: surface }])
       }
     }
     return merged
@@ -55,6 +55,7 @@ export function TextWithLookup({ text, language, lookup, scores, showReading, cl
     e.stopPropagation()
     setTapped(prev => prev?.entry?.id === span.entry.id ? null : {
       entry: span.entry,
+      entries: span.entries ?? [span.entry],
       surface: span.text,
       conjugated: !!span.conjugated || !!(span.entry._surface),
     })
@@ -87,6 +88,7 @@ export function TextWithLookup({ text, language, lookup, scores, showReading, cl
       {tapped && (
         <WordPopup
           entry={tapped.entry}
+          entries={tapped.entries}
           surface={tapped.surface}
           conjugated={tapped.conjugated}
           scores={scores}
@@ -99,11 +101,9 @@ export function TextWithLookup({ text, language, lookup, scores, showReading, cl
   )
 }
 
-export function WordPopup({ entry, surface, conjugated, scores, showReading, onDismiss, language }) {
-  const status   = scores[entry.id]?.global ?? 'unseen'
-  const mnemonic = getMnemonic(entry.id)
-  const mnemonicRecord = getAllMnemonics()[entry.id]
-  const isSeeded = mnemonicRecord?.seeded ?? false
+export function WordPopup({ entry, entries, surface, conjugated, scores, showReading, onDismiss, language }) {
+  const senses = entries && entries.length > 0 ? entries : [entry]
+  const singleStatus = senses.length === 1 ? (scores[senses[0].id]?.global ?? 'unseen') : null
 
   return (
     <div className="twl-popup-overlay" onClick={e => { e.stopPropagation(); onDismiss() }}>
@@ -118,7 +118,7 @@ export function WordPopup({ entry, surface, conjugated, scores, showReading, onD
             size="lg"
           />
           <SpeakButton text={entry.entry} language={language} size="lg" />
-          <span className={`twl-popup-status twl-popup-status--${status}`}>{status}</span>
+          {singleStatus && <span className={`twl-popup-status twl-popup-status--${singleStatus}`}>{singleStatus}</span>}
         </div>
         {conjugated && surface && surface !== entry.entry && (
           <div className="twl-popup-conjugated">
@@ -128,26 +128,48 @@ export function WordPopup({ entry, surface, conjugated, scores, showReading, onD
           </div>
         )}
 
-        <div className="twl-popup-translations">
-          {entry.translation.map((t, i) => (
-            <span key={i} className="twl-popup-trans">{t}</span>
-          ))}
-        </div>
-
-        {(entry.pos || entry.level) && (
-          <div className="twl-popup-meta">
-            {entry.pos   && <span className="twl-popup-pos">{entry.pos}</span>}
-            {entry.level && <span className="twl-popup-level">{entry.level}</span>}
-          </div>
+        {senses.length > 1 && (
+          <div className="twl-popup-multi-hint">{senses.length} different words share this spelling</div>
         )}
 
-        {mnemonic && (
-          <div className="twl-popup-mnemonic">
-            💡 {mnemonic}
-            {isSeeded && <span className="twl-popup-seeded">starter</span>}
-          </div>
-        )}
+        {senses.map((sense, i) => (
+          <WordPopupSense key={sense.id} sense={sense} scores={scores} isLast={i === senses.length - 1} showStatus={senses.length > 1} />
+        ))}
       </div>
+    </div>
+  )
+}
+
+function WordPopupSense({ sense, scores, isLast, showStatus }) {
+  const status = scores[sense.id]?.global ?? 'unseen'
+  const mnemonic = getMnemonic(sense.id)
+  const mnemonicRecord = getAllMnemonics()[sense.id]
+  const isSeeded = mnemonicRecord?.seeded ?? false
+
+  return (
+    <div className={`twl-popup-sense ${!isLast ? 'twl-popup-sense--divided' : ''}`}>
+      {showStatus && <span className={`twl-popup-status twl-popup-status--${status}`}>{status}</span>}
+
+      <div className="twl-popup-translations">
+        {sense.translation.map((t, i) => (
+          <span key={i} className="twl-popup-trans">{t}</span>
+        ))}
+      </div>
+
+      {(sense.pos || sense.gender || sense.level) && (
+        <div className="twl-popup-meta">
+          {sense.gender && <span className="twl-popup-pos">{sense.gender}</span>}
+          {sense.pos    && <span className="twl-popup-pos">{sense.pos}</span>}
+          {sense.level  && <span className="twl-popup-level">{sense.level}</span>}
+        </div>
+      )}
+
+      {mnemonic && (
+        <div className="twl-popup-mnemonic">
+          💡 {mnemonic}
+          {isSeeded && <span className="twl-popup-seeded">starter</span>}
+        </div>
+      )}
     </div>
   )
 }

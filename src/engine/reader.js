@@ -78,7 +78,7 @@ function iStemToDict(stem, lookup) {
   for (const [ending, dict] of ISTEM_MAP) {
     if (stem.endsWith(ending)) {
       const candidate = stem.slice(0, -ending.length) + dict
-      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)
+      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)[0]
     }
   }
   return null
@@ -88,7 +88,7 @@ function aStemToDict(stem, lookup) {
   for (const [ending, dict] of ASTEM_MAP) {
     if (stem.endsWith(ending)) {
       const candidate = stem.slice(0, -ending.length) + dict
-      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)
+      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)[0]
     }
   }
   return null
@@ -110,13 +110,13 @@ const CAUSATIVE_STEM_MAP = [
 function causativeStemToDict(stem, lookup) {
   if (stem.endsWith('させ')) {
     const base = stem.slice(0, -2)
-    if (lookup.has(base + 'す')) return lookup.get(base + 'す') // godan す-verb: 話させ → 話す
-    if (lookup.has(base + 'る')) return lookup.get(base + 'る') // ichidan: 食べさせ → 食べる
+    if (lookup.has(base + 'す')) return lookup.get(base + 'す')[0] // godan す-verb: 話させ → 話す
+    if (lookup.has(base + 'る')) return lookup.get(base + 'る')[0] // ichidan: 食べさせ → 食べる
   }
   for (const [ending, dict] of CAUSATIVE_STEM_MAP) {
     if (stem.endsWith(ending)) {
       const candidate = stem.slice(0, -ending.length) + dict
-      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)
+      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)[0]
     }
   }
   return null
@@ -141,7 +141,7 @@ function resolveConjugated(surface, lookup) {
     if (!stem) continue
     // Ichidan: stem + る
     const ichidan = stem + 'る'
-    if (lookup.has(ichidan)) return lookup.get(ichidan)
+    if (lookup.has(ichidan)) return lookup.get(ichidan)[0]
     // Godan: stem is i-stem → convert
     const godan = iStemToDict(stem, lookup)
     if (godan) return godan
@@ -150,7 +150,7 @@ function resolveConjugated(surface, lookup) {
     const causative = causativeStemToDict(stem, lookup)
     if (causative) return causative
     // Irregular: する、くる
-    if (lookup.has(stem)) return lookup.get(stem)
+    if (lookup.has(stem)) return lookup.get(stem)[0]
   }
 
   // 2. Te-form / plain past — suffix encodes conjugation class
@@ -159,12 +159,12 @@ function resolveConjugated(surface, lookup) {
     const stem = surface.slice(0, -suffix.length)
     for (const ending of endings) {
       const candidate = stem + ending
-      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)
+      if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)[0]
     }
     // Also try ichidan (for て/た)
     if (suffix === 'て' || suffix === 'た') {
       const ichidan = stem + 'る'
-      if (lookup.has(ichidan)) return lookup.get(ichidan)
+      if (lookup.has(ichidan)) return lookup.get(ichidan)[0]
       // Causative-past/te: 思わせた/思わせて → stem "思わせ" → 思う
       const causative = causativeStemToDict(stem, lookup)
       if (causative) return causative
@@ -176,7 +176,7 @@ function resolveConjugated(surface, lookup) {
     const stem = surface.slice(0, -2)
     // Ichidan: stem + る (e.g. 食べない → 食べる)
     const ichidan = stem + 'る'
-    if (lookup.has(ichidan)) return lookup.get(ichidan)
+    if (lookup.has(ichidan)) return lookup.get(ichidan)[0]
     // Godan: a-stem → dict
     const godan = aStemToDict(stem, lookup)
     if (godan) return godan
@@ -186,14 +186,14 @@ function resolveConjugated(surface, lookup) {
   for (const [suffix, replacement] of IADJ_DEINFLECTIONS) {
     if (surface.length <= suffix.length || !surface.endsWith(suffix)) continue
     const candidate = surface.slice(0, -suffix.length) + replacement
-    if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)
+    if (candidate.length >= 2 && lookup.has(candidate)) return lookup.get(candidate)[0]
   }
 
   // 5. な-adjective / copula inflections
   for (const [suffix, replacement] of NADJ_DEINFLECTIONS) {
     if (!suffix || surface.length <= suffix.length || !surface.endsWith(suffix)) continue
     const candidate = surface.slice(0, -suffix.length) + replacement
-    if (candidate.length >= 1 && lookup.has(candidate)) return lookup.get(candidate)
+    if (candidate.length >= 1 && lookup.has(candidate)) return lookup.get(candidate)[0]
   }
 
   return null
@@ -203,11 +203,19 @@ function resolveConjugated(surface, lookup) {
 
 export function buildLookup(entries) {
   const map = new Map()
+  function add(key, e) {
+    const existing = map.get(key)
+    if (existing) {
+      if (!existing.includes(e)) existing.push(e)
+    } else {
+      map.set(key, [e])
+    }
+  }
   for (const e of entries) {
-    map.set(e.entry.toLowerCase(), e)
+    add(e.entry.toLowerCase(), e)
     // German: index without article
     const stripped = e.entry.replace(/^(der|die|das|den|dem|des)\s+/i, '')
-    if (stripped !== e.entry) map.set(stripped.toLowerCase(), e)
+    if (stripped !== e.entry) add(stripped.toLowerCase(), e)
   }
   // Second pass, after every literal dictionary form is indexed: also index
   // Japanese entries by their kana reading. A1 Graded Reader passages are
@@ -221,18 +229,19 @@ export function buildLookup(entries) {
   // "sack" + a suffix fragment, neither of which is 農場 — same failure
   // shape from the opposite direction.)
   // Reading collisions (homophones sharing one kana spelling, e.g. かみ =
-  // 紙/髪/神) mean whichever entry is processed first wins the tie; an
-  // occasional wrong homophone match is still a strict improvement over no
-  // match at all. Kept as a separate pass (rather than inline above) so
-  // literal dictionary-form matches are always indexed first and can never
-  // be overwritten by a reading-based key for a different entry.
+  // 紙/髪/神) all get indexed under the same key (each still independently
+  // reachable, same as any other homograph collision — see the note on
+  // multi-entry keys above) rather than the first one winning outright.
+  // Kept as a separate pass (rather than inline above) so literal
+  // dictionary-form matches are always indexed first and a reading-based
+  // key for a different entry can never push a dictionary-form entry out
+  // of that entry's own primary slot.
   // Harmless for non-Japanese entries: `reading` is empty for de/es/fr, and
   // zh readings are pinyin (Latin script), which never appears literally in
   // Chinese passage text, so those keys simply never match anything.
   for (const e of entries) {
     if (!e.reading || e.reading === e.entry) continue
-    const readingKey = e.reading.toLowerCase()
-    if (!map.has(readingKey)) map.set(readingKey, e)
+    add(e.reading.toLowerCase(), e)
   }
   return map
 }
@@ -258,7 +267,8 @@ function tokeniseCJK(text, lookup, language) {
     for (let len = Math.min(CJK_MAX_LEN, text.length - i); len >= 1; len--) {
       const substr = text.slice(i, i + len)
       if (lookup.has(substr.toLowerCase())) {
-        matched = { text: substr, entry: lookup.get(substr.toLowerCase()), start: i, end: i + len }
+        const candidates = lookup.get(substr.toLowerCase())
+        matched = { text: substr, entry: candidates[0], entries: candidates, start: i, end: i + len }
         break
       }
     }
@@ -327,9 +337,10 @@ function tokeniseSpaced(text, lookup) {
       if (wordTokens.length < phraseLen) continue
       const phrase = wordTokens.map(idx => words[idx].text).join(' ')
       if (lookup.has(phrase.toLowerCase())) {
+        const candidates = lookup.get(phrase.toLowerCase())
         const startPos = words[i].pos
         const lastWord = words[wordTokens[wordTokens.length - 1]]
-        matched = { text: phrase, entry: lookup.get(phrase.toLowerCase()), start: startPos, end: lastWord.pos + lastWord.text.length }
+        matched = { text: phrase, entry: candidates[0], entries: candidates, start: startPos, end: lastWord.pos + lastWord.text.length }
         i = j
       }
     }

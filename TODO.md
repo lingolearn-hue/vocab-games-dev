@@ -57,12 +57,67 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bo** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bp** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bp**: Homograph support — decided, per discussion, to keep
+  homographs (different senses/genders/POS sharing one headword, e.g.
+  German "Leiter" leader/ladder, Chinese 离/以 noun/verb) as separate
+  rows rather than merged into one, and fix the functions that assumed
+  one entry per headword instead. Vocab-side cleanup is being handled
+  in a separate thread; this covers the function-side changes only.
+  (1) `reader.js`'s `buildLookup` now stores an array per headword
+  instead of silently overwriting on collision — previously whichever
+  row was later in the array permanently won the lookup key, with the
+  earlier sense becoming unreachable by tap-to-lookup with no signal
+  anything was lost (confirmed this was already quietly affecting two
+  existing Chinese entries, 离 and 以). Deinflection-chain lookups
+  (conjugated verb forms) deliberately keep taking the first match —
+  homographs are realistically direct-match nouns, not conjugating
+  verbs, so disambiguating a conjugated form's multiple dictionary-form
+  candidates is out of scope. Found and fixed two latent bugs along the
+  way: `GradedReader.jsx`'s and `TextWithLookup.jsx`'s surface-forms
+  merge both did `{...lookup.get(x)}`, object-spreading what is now an
+  array — would have silently broken Japanese furigana-based lookup
+  the first time it ran against real collision data.
+  (2) `TextWithLookup.jsx`'s `WordPopup` now renders every sense when a
+  collision exists (status/translation/pos/gender/level/mnemonic each,
+  divided, under one shared header) instead of just whichever one won
+  the lookup key — verified live with synthetic homograph data: both
+  senses of a test "Leiter" show correctly, "2 different words share
+  this spelling" hint, single-sense case (the overwhelming majority)
+  confirmed pixel-identical to before. Small addition while in there:
+  gender now surfaces in the popup meta row (was in the data, wasn't
+  shown before).
+  (3) Race Car and Pair Match can show multiple entries on screen at
+  once that the player has to visually tell apart — two tiles both
+  rendering "Leiter" with only one being correct makes a round
+  unfair/unsolvable by sight. Added a shared `dedupeByHeadword` helper
+  in `srs.js` that swaps a colliding tile for a valid replacement from
+  the wider pool (falls back to keeping the rare unavoidable duplicate
+  if the pool's too small, rather than crashing or shrinking the
+  round), wired into both games' round-building. Directly unit-tested
+  against known collision scenarios — live-gameplay odds of naturally
+  drawing 2 specific words out of 20,465 are far too low to rely on
+  for verification.
+  (4) Typing shows one prompt at a time, so no visual-collision risk,
+  but faced a different version of the same issue: if the prompt is an
+  ambiguous headword, the player has no way to know which sense was
+  intended, so the "correct" answer could reasonably be any of them.
+  `isCorrect` now accepts any sibling sense's translation when the
+  prompt is a collision, not just the one row that was drawn; the
+  post-wrong-answer reveal was updated to match. Verified directly
+  against 6 scenarios (accepting the other sense, still rejecting
+  genuinely wrong answers, the already-unambiguous reverse direction,
+  and single-sense words fully unaffected); also caught and fixed an
+  accidental import removal from an earlier edit pass before it could
+  break anything.
+  All test data was injected into a temporary copy of the real vocab
+  file and fully reverted after verification — confirmed via `git
+  status` each time.
 - **v0.66bo**: Race Car — added multi-line ellipsis truncation for long
   glosses, scoped to `.rc-tile .ruby-plain` (the no-furigana span) only —
   ruby-annotated CJK text uses nested `<ruby>/<rt>` elements, where

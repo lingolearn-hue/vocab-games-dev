@@ -108,6 +108,22 @@
 .twl-popup-status--learning { background: #fff8e0; color: #bf8700; }
 .twl-popup-status--unseen   { background: #eef2ff; color: #4f7ef8; }
 
+.twl-popup-multi-hint {
+  font-size: 0.78rem;
+  color: #888;
+  font-style: italic;
+}
+
+.twl-popup-sense {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.twl-popup-sense--divided {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #eee;
+}
+
 .twl-popup-translations {
   display: flex;
   flex-wrap: wrap;
@@ -186,6 +202,8 @@
 [data-theme="dark"] .twl-popup-level   { background: #2a2a2a; color: #666; }
 [data-theme="dark"] .twl-popup-mnemonic { border-color: #2a2a2a; }
 [data-theme="dark"] .twl-popup-seeded  { background: #2d2510; border-color: #5c4a1a; }
+[data-theme="dark"] .twl-popup-multi-hint { color: #888; }
+[data-theme="dark"] .twl-popup-sense--divided { border-color: #2a2a2a; }
 
 /* Conjugated form indicator — subtle underline difference */
 .twl-word--conjugated {

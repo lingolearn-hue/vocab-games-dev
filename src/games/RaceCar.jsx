@@ -6,7 +6,7 @@ import FacetsByBoxToggle from '../components/FacetsByBoxToggle'
 import HelpButton from '../components/HelpButton'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useApp } from '../context/AppContext'
-import { srsPick, srsPickDistinct, getScore } from '../engine/srs'
+import { srsPick, srsPickDistinct, dedupeByHeadword, getScore } from '../engine/srs'
 import { resolveFacet } from '../engine/facets'
 import './RaceCar.css'
 
@@ -85,8 +85,19 @@ export default function RaceCar() {
   const spawnTiles = useCallback((currentPrompt) => {
     if (!currentPrompt || activeRef.current.length < 3) return
 
-    const distractors = srsPickDistinct(activeRef.current.filter(e => e.id !== currentPrompt.id), 2, 'racecar')
-    const entries = [currentPrompt, ...distractors]
+    const pool = activeRef.current.filter(e => e.id !== currentPrompt.id)
+    const rawDistractors = srsPickDistinct(pool, 2, 'racecar')
+    // Guard against two tiles rendering identical text (e.g. two different
+    // senses of German "Leiter") with only one flagged correct — see
+    // dedupeByHeadword's own comment for why this matters here specifically.
+    // The prompt itself is included as the first batch item so a
+    // distractor colliding with the PROMPT's headword (not just with
+    // another distractor) gets caught too, then sliced back off.
+    const entries = dedupeByHeadword(
+      [currentPrompt, ...rawDistractors],
+      pool,
+      candidates => srsPick(candidates, 'racecar')[0]
+    )
     const lanes = [0, 1, 2].sort(() => Math.random() - 0.5)
     const stagger = [-60, 0, 60] // y offset stagger
 

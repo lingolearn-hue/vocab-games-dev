@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { srsPick, getScore } from '../engine/srs'
 import { resolveFacet } from '../engine/facets'
@@ -8,6 +8,7 @@ import ReadingToggle from '../components/ReadingToggle'
 import ReadingOnlyToggle from '../components/ReadingOnlyToggle'
 import FacetsByBoxToggle from '../components/FacetsByBoxToggle'
 import HelpButton from '../components/HelpButton'
+import SpeakButton from '../components/SpeakButton'
 import './Typing.css'
 
 // Normalise a string for loose comparison:
@@ -21,14 +22,20 @@ function normalise(str) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
-// Check if user input matches any accepted answer
-import SpeakButton from '../components/SpeakButton'
-
-function isCorrect(input, entry, direction) {
+// Check if user input matches any accepted answer. `siblings` (entries
+// sharing the same headword as `entry`, e.g. both senses of German
+// "Leiter" — leader vs ladder) are included for entry->translation, since
+// the prompt itself doesn't disambiguate which sense was intended; the
+// player has no way to know which one was drawn, so any valid sense's
+// translation must count as correct. Not needed for translation->entry:
+// there the prompt is itself one specific gloss, so the expected answer
+// (the shared headword spelling) is unambiguous regardless of collisions.
+function isCorrect(input, entry, direction, siblings) {
   const norm = normalise(input)
   if (norm === '') return false
   if (direction === 'entry->translation') {
-    return entry.translation.some(t => normalise(t) === norm)
+    const pool = siblings && siblings.length > 0 ? siblings : [entry]
+    return pool.some(e => e.translation.some(t => normalise(t) === norm))
   } else {
     // translation->entry: accept entry and all translations
     if (normalise(entry.entry) === norm) return true
@@ -42,6 +49,20 @@ export default function Typing() {
   const language = useApp().activeLanguage ?? 'zh'
   const { entries: activeEntries, isEmpty: levelEmpty } = getEntriesForGame('typing')
   const { requireCorrect, skipEnabled } = settings.typing
+
+  // Groups entries by headword so a homograph's siblings (e.g. both senses
+  // of German "Leiter") can be found at answer-check time — see isCorrect's
+  // own comment for why this is needed.
+  const headwordSiblings = useMemo(() => {
+    const m = new Map()
+    for (const e of activeEntries) {
+      const key = e.entry
+      const list = m.get(key)
+      if (list) list.push(e)
+      else m.set(key, [e])
+    }
+    return m
+  }, [activeEntries])
 
   const [entry,       setEntry]       = useState(null)
   const [input,       setInput]       = useState('')
@@ -111,7 +132,11 @@ export default function Typing() {
   function getAcceptedAnswers() {
     if (!entry) return []
     const readingAlt = (effReadingOnly && (language === 'zh' || language === 'ja') && entry.reading) ? [entry.reading] : []
-    if (effDirection === 'entry->translation') return entry.translation
+    if (effDirection === 'entry->translation') {
+      const siblings = headwordSiblings.get(entry.entry)
+      const pool = siblings && siblings.length > 0 ? siblings : [entry]
+      return [...new Set(pool.flatMap(e => e.translation))]
+    }
     return [entry.entry, ...readingAlt, ...entry.translation]
   }
 
@@ -119,7 +144,7 @@ export default function Typing() {
     if (!entry || feedback) return
     if (input.trim() === '') return
 
-    const ok = isCorrect(input, entry, direction)
+    const ok = isCorrect(input, entry, direction, headwordSiblings.get(entry.entry))
     setTotal(t => t + 1)
     setFeedback(ok ? 'correct' : 'wrong')
     setShowAnswer(true)
@@ -146,7 +171,7 @@ export default function Typing() {
 
   function submitRetype() {
     if (!entry || !mustRetype) return
-    const ok = isCorrect(retypeVal, entry, direction)
+    const ok = isCorrect(retypeVal, entry, direction, headwordSiblings.get(entry.entry))
     if (ok) {
       setMustRetype(false)
       nextEntry()

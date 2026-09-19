@@ -201,3 +201,50 @@ export function srsPickDistinct(pool, n, game) {
 export function srsPick(pool, game) {
   return srsPickDistinct(pool, 1, game)
 }
+
+/**
+ * Ensures no two entries in `batch` share the same headword (`entry`
+ * string) — e.g. two different senses of German "Leiter" (leader/ladder,
+ * different gender) both appearing as separate tiles in the same Race Car
+ * or Pair Match round. Since those games show multiple entries at once
+ * that the player has to visually tell apart, two tiles rendering
+ * identical text but requiring different answers makes the round
+ * unfair/unsolvable by sight — there's no way to tell which "Leiter" is
+ * which. Sequential-prompt games (Flashcard, Typing, Listening) never
+ * show two entries side by side, so this isn't needed there.
+ *
+ * For every occurrence of a headword after its first in `batch`, swaps it
+ * for a replacement from `pool` that doesn't collide with anything
+ * already kept. `pickOneFn(candidates)`, if given, lets the caller apply
+ * its own weighting (e.g. srsPick) when choosing the replacement, so swap
+ * picks aren't just uniform-random — must return a single entry, not an
+ * array (srsPick itself returns an array, so wrap it: candidates =>
+ * srsPick(candidates, game)[0]). If the pool is too small or too
+ * homogeneous to find a non-colliding replacement, the duplicate is left
+ * in place rather than shrinking the round or looping — a same-headword
+ * pair together is a much smaller problem than a broken round.
+ */
+export function dedupeByHeadword(batch, pool, pickOneFn) {
+  const seenHeadwords = new Set()
+  const usedIds = new Set(batch.map(e => e.id))
+  const result = []
+  for (const entry of batch) {
+    if (!seenHeadwords.has(entry.entry)) {
+      seenHeadwords.add(entry.entry)
+      result.push(entry)
+      continue
+    }
+    const candidates = pool.filter(e => !usedIds.has(e.id) && !seenHeadwords.has(e.entry))
+    const replacement = candidates.length === 0
+      ? null
+      : (pickOneFn ? pickOneFn(candidates) : candidates[Math.floor(Math.random() * candidates.length)])
+    if (replacement) {
+      seenHeadwords.add(replacement.entry)
+      usedIds.add(replacement.id)
+      result.push(replacement)
+    } else {
+      result.push(entry) // no valid swap available — keep the collision rather than drop the slot
+    }
+  }
+  return result
+}

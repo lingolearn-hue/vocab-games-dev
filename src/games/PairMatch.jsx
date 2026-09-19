@@ -6,6 +6,7 @@ import {
   initSession, getBoxCounts, getPassState, openBox,
   recordCorrect as leitnerCorrect, recordWrong as leitnerWrong,
 } from '../engine/leitner'
+import { dedupeByHeadword } from '../engine/srs'
 import RubyText from '../components/RubyText'
 import ReadingToggle from '../components/ReadingToggle'
 import DirectionToggle from '../components/DirectionToggle'
@@ -165,6 +166,11 @@ export default function PairMatch() {
       const n = Math.min(ROUND_SIZE, queueEntries.length)
       entries = shuffle(queueEntries).slice(0, n)
     }
+
+    // Guard against two tiles rendering identical text (e.g. two different
+    // senses of German "Leiter") with only one being the actual correct
+    // match for either translation — see dedupeByHeadword's own comment.
+    entries = dedupeByHeadword(entries, queueEntries)
 
     buildItemsFor(entries, ps.currentPass)
   }, [entryMap, activeEntries, samePosMode, availablePos, direction, ROUND_SIZE, facetsByBox])
