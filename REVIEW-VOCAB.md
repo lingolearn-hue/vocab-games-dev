@@ -77,6 +77,21 @@ random from the whole level.
    looking up a specific word programmatically, match on
    `(entry, pos, translation)` together, not `entry::pos` alone.
 
+   **The app supports multiple entries sharing the same headword**,
+   including across different POS/gender — confirmed and used this
+   session for German `Leiter` (der Leiter = leader, m, noun/work vs
+   die Leiter = ladder, f, noun/home) and `verlegen` (to misplace/
+   publish, verb vs embarrassed, adj). A collision on headword alone
+   is not automatically a duplicate — check whether the existing and
+   candidate entries genuinely represent the same sense (same
+   gender/pos and overlapping meaning) before deciding to enrich,
+   merge, or leave as a separate sibling entry. This was previously
+   treated as a schema limitation earlier in this session (entries
+   left unresolved due to an apparent collision) before this was
+   clarified — if re-reviewing old NOK-style audit output, re-check
+   any case that was skipped for "already exists" without verifying
+   the existing entry actually shares the same sense.
+
 ## Re-sweeping after a keyword-list change
 
 Any addition or fix to `KEYWORDS`/`IDIOM_SCRUBS` in `tools/tag_categories.py`
