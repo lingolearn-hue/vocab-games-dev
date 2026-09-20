@@ -1,5 +1,19 @@
 # Category tagging review procedure
 
+**File format**: all five `public/vocab/*.json` files use one JSON
+entry per line (not the fully-compact single-line format, and not
+`json.dump(indent=N)` either, which would explode every array element
+onto its own line). When writing back to these files, use a custom
+dump that indents the outer keys normally but serializes each element
+of `entries` as one compact `json.dumps(..., separators=(',',':'))`
+line, joined with `,\n` and no leading indentation on the entry lines
+themselves. This trades ~1-2% file size for much easier diffing and
+manual inspection. Don't let a routine
+`json.dump(data, open(path,'w'), separators=(',',':'))` silently
+collapse a file back to one giant line — always verify with
+`git diff --stat` that a change looks like a normal per-line diff, not
+a single-line rewrite of the whole file.
+
 Applies to spot-checking the `categories` field in `public/vocab/*.json`,
 whether tagged by the keyword pipeline (`tools/tag_categories.py`) or a
 fill-only source (e.g. JMdict field tags).
