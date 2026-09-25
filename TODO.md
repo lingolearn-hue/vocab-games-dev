@@ -57,12 +57,40 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bp** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bq** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bq**: No code changes — a deploy-only version bump to get three
+  vocab-thread commits that had already landed on `main` (source) live
+  on the deployed site, since a vocab-only push doesn't trigger a
+  rebuild/redeploy on its own. Covers: a full independently-generated-
+  reference cross-check across DE/ES/FR/JA (819 JA entries added, 8
+  same-headword-different-pos cases resolved, German's 3-key homograph
+  comparison found it was silently colliding on Leiter and switched to
+  a 4-key comparison including gender, 5 more capitalization-based DE
+  homographs added including mögen/jeder which were surprisingly absent
+  entirely, ES/FR genuine-polysemy entries that had been incorrectly
+  blended into one row re-split into proper duplicate-key entries);
+  a 96-entry JA noun-gloss article-stripping pass; and a full JA NOK
+  audit (678 findings) plus a one-entry-per-line reformat across all
+  five vocab files. See each commit's own message for full detail —
+  this entry is a pointer, not a duplicate of that documentation.
+  Independently verified before pushing: entry counts against every
+  commit's own claimed totals (all matched exactly), JSON validity and
+  line-count sanity on all 5 files, zero accidental duplicate
+  (entry, reading, pos, gender, translation) rows anywhere, and spot-
+  checked roughly 20 of the specific cited fixes across all 5
+  languages (all correct). Also live-tested two homograph paths this
+  data specifically exercises against the v0.66bp lookup/popup fix:
+  the literal-headword-collision path (real Leiter data, not synthetic)
+  and — new, not covered by v0.66bp's own testing — the
+  reading-based collision path (Japanese はち colliding across 八/鉢/はち,
+  three different kanji spellings sharing one kana reading); both
+  correctly show every sense with the "N different words share this
+  spelling" hint.
 - **v0.66bp**: Homograph support — decided, per discussion, to keep
   homographs (different senses/genders/POS sharing one headword, e.g.
   German "Leiter" leader/ladder, Chinese 离/以 noun/verb) as separate
