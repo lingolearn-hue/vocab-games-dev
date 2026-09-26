@@ -57,12 +57,38 @@ additional verified entries, following the same discipline used
 throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bq** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66br** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66br**: Graded Reader — always-available sentence marker (tap for
+  listen-from-here / translate, no longer conditionally hidden — see
+  the previous entry) exposed a real gap: Translate was silently
+  disabled for any passage where the source and English translation
+  didn't have exactly the same sentence count, which turned out to be
+  most passages for some languages (measured: de 18/57, es 10/57,
+  ja 37/57 misaligned; fr and zh already fine). Two real fixes:
+  (1) Found and fixed a genuine bug in `splitSentences` while digging
+  into one case — French typography places a space before a closing
+  guillemet ("toi. »", not "toi.»"), which the regex required to be
+  immediately adjacent, producing a spurious lone "»" as its own
+  "sentence" and shifting every later sentence index by one. Fixed by
+  tolerating an optional space; brought French from 4 misaligned
+  passages to 0. (2) Added `alignSentencesByLength`, a length-
+  proportional sentence aligner (simplified Gale-Church style) for the
+  remaining genuine cases where a translator merged or split sentences
+  — Translate no longer requires exact 1:1 counts, just usable
+  translation data at all. Found and fixed a real bug in the first
+  version of this too: the "reserve" math only worked when the
+  translation had *more* sentences than the source, and produced empty
+  results when compressed the other way (caught via a real Spanish
+  passage). Verified across all 65 previously-misaligned DE/ES/JA
+  passages — zero empty results anywhere now. Verified live on a real
+  previously-disabled German passage: Translate now correctly shows
+  "I have a very good friend. His name is Max." for the merged source
+  sentence.
 - **v0.66bq**: No code changes — a deploy-only version bump to get three
   vocab-thread commits that had already landed on `main` (source) live
   on the deployed site, since a vocab-only push doesn't trigger a

@@ -376,16 +376,83 @@ export function splitSentences(text, language) {
   // of this, the boundary lookahead never finds whitespace/EOS
   // immediately after the bare punctuation mark, and the entire clause
   // before it gets silently dropped from the match, leaving only the
-  // trailing quote/comma as its own "sentence". This doesn't guarantee a
-  // linguistically ideal boundary right at a dialogue tag (a tag can end
-  // up as its own short "sentence" rather than joined to the quote before
-  // it) — but no content is ever lost, which is what matters here.
+  // trailing quote/comma as its own "sentence". A single optional space
+  // is also tolerated before the closer — French typography places a
+  // space before a closing guillemet (e.g. "toi. »", not "toi.»"),
+  // without which that space-plus-quote splits off as its own stray
+  // one-character "sentence" and shifts every sentence index after it by
+  // one. This doesn't guarantee a linguistically ideal boundary right at
+  // a dialogue tag (a tag can end up as its own short "sentence" rather
+  // than joined to the quote before it) — but no content is ever lost,
+  // which is what matters here.
   const closers = '"\'\u201d\u2019\u00bb\u300d\u300f)\\]'
   const re = isCJK
     ? new RegExp(`[^。！？]*[。！？]+[${closers}]*|[^。！？]+$`, 'g')
-    : new RegExp(`[^.!?]*[.!?]+[${closers}]*,?(?=\\s|$)|[^.!?]+$`, 'g')
+    : new RegExp(`[^.!?]*[.!?]+\\s?[${closers}]*,?(?=\\s|$)|[^.!?]+$`, 'g')
   const matches = text.match(re) ?? [text]
   return matches.map(s => s.trim()).filter(Boolean)
+}
+
+/**
+ * Aligns two sentence lists (source-language and its translation) that
+ * don't necessarily have the same count — very common even in careful
+ * translation, since a translator routinely combines two source sentences
+ * into one, or splits one into two, wherever the target language reads
+ * better that way. Returns an array the same length as `srcSentences`,
+ * one translation-text entry per source sentence.
+ *
+ * When the counts already match, returns the translations unchanged
+ * (exact 1:1 is always the right answer when it's available). Otherwise,
+ * falls back to a length-proportional heuristic: total the character
+ * length of each side, then walk the source sentences accumulating
+ * length, pulling in however many translation sentences are needed to
+ * match the same proportion of the translation's total length so far.
+ * This is a simplified version of the classical Gale-Church approach to
+ * bilingual sentence alignment (aligned sentence pairs tend to have
+ * roughly proportional character lengths); it isn't a real translation
+ * aligner and won't always land on a perfect boundary, but it reliably
+ * keeps a merged/split sentence pair together rather than shifting every
+ * later sentence index by one, which is what a naive positional mapping
+ * (or leaving translation unavailable entirely) would do instead.
+ */
+export function alignSentencesByLength(srcSentences, tgtSentences) {
+  if (srcSentences.length === tgtSentences.length) return tgtSentences.slice()
+  if (tgtSentences.length === 0) return srcSentences.map(() => '')
+  if (srcSentences.length === 0) return []
+  const srcLens = srcSentences.map(s => s.length)
+  const tgtLens = tgtSentences.map(s => s.length)
+  const srcTotal = srcLens.reduce((a, b) => a + b, 0) || 1
+  const tgtTotal = tgtLens.reduce((a, b) => a + b, 0)
+  const scale = tgtTotal / srcTotal
+
+  const result = []
+  let srcAccum = 0, tgtAccum = 0, tgtIdx = 0, tgtStart = 0
+  for (let i = 0; i < srcSentences.length; i++) {
+    srcAccum += srcLens[i]
+    const goal = srcAccum * scale
+    const remainingSrc = srcSentences.length - 1 - i
+    const remainingTgtCapacity = tgtSentences.length - tgtIdx
+    // Reserve enough target sentences for whatever's left, but never more
+    // than actually remain — translation can compress several source
+    // sentences into fewer target ones, in which case there just isn't a
+    // full target sentence to spare for every remaining source sentence,
+    // and later ones legitimately end up sharing/repeating text instead.
+    const reserve = Math.max(0, Math.min(remainingSrc, remainingTgtCapacity - 1))
+    while (tgtIdx < tgtSentences.length - reserve && tgtAccum < goal) {
+      tgtAccum += tgtLens[tgtIdx]
+      tgtIdx++
+    }
+    const chunk = tgtSentences.slice(tgtStart, tgtIdx).join(' ')
+    // Heavy compression can mean this source sentence's turn consumed no
+    // new target text at all — repeat the previous chunk rather than
+    // leaving it with nothing.
+    result.push(chunk || (result[result.length - 1] ?? ''))
+    tgtStart = tgtIdx
+  }
+  if (tgtStart < tgtSentences.length) {
+    result[result.length - 1] += (result[result.length - 1] ? ' ' : '') + tgtSentences.slice(tgtStart).join(' ')
+  }
+  return result
 }
 
 // ── Passage loader ────────────────────────────────────────────────────────────

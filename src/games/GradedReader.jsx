@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useApp } from '../context/AppContext'
-import { buildLookup, tokenise, loadReaderPassages, loadSurfaceForms, splitSentences } from '../engine/reader'
+import { buildLookup, tokenise, loadReaderPassages, loadSurfaceForms, splitSentences, alignSentencesByLength } from '../engine/reader'
 import { speakAndWait, stop as stopSpeech, isSupported as speechSupported } from '../engine/speech'
 import { TextWithLookup } from '../components/TextWithLookup'
 import LevelChooser from '../components/LevelChooser'
@@ -485,20 +485,33 @@ export default function GradedReader() {
   // translation next to the right sentence; the full-passage EN toggle
   // still works regardless since it doesn't depend on alignment.
   // Same paragraph-first splitting applied here too, so pairing stays
-  // aligned by paragraph order, not just overall count.
+  // aligned by paragraph order, not just overall count. Source and
+  // translation sentence counts frequently don't match exactly — a
+  // translator routinely combines or splits sentences wherever the
+  // target language reads better — so alignSentencesByLength() is used
+  // whenever they don't line up 1:1, rather than disabling per-sentence
+  // translation outright for any passage where that happens (which, on
+  // this data, is most of them for some languages).
   const englishSentences = useMemo(() => {
     if (!currentPassage?.translation) return []
-    return currentPassage.translation
+    const raw = currentPassage.translation
       .split(/\n\s*\n/)
       .flatMap(para => splitSentences(para, 'en'))
-  }, [currentPassage])
-  const sentenceTranslationsAligned = language !== 'en' &&
-    englishSentences.length > 0 && englishSentences.length === sentences.length
+    return alignSentencesByLength(sentences, raw)
+  }, [currentPassage, sentences])
+  const hasTranslation = language !== 'en' && !!currentPassage?.translation
   const [expandedSentence, setExpandedSentence] = useState(null)
+  const [sentenceMenu, setSentenceMenu] = useState(null)
 
   function toggleSentenceTranslation(i) {
-    if (!sentenceTranslationsAligned) return
+    if (!hasTranslation) return
     setExpandedSentence(prev => (prev === i ? null : i))
+  }
+
+  function listenFromHere(i) {
+    setSentenceMenu(null)
+    stopPassage()
+    playPassage(i)
   }
 
   // Keep the currently-spoken sentence in view during read-aloud — without
@@ -510,17 +523,17 @@ export default function GradedReader() {
     sentenceRefs.current[readingIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [readingIndex])
 
-  async function playPassage() {
+  async function playPassage(startAt = 0) {
     if (playingRef.current || sentences.length === 0) return
     playingRef.current = true
     setRevealedCount(paragraphGroups.length) // read-aloud can land on any sentence, so reveal everything first
     wakeLockRef.current = await requestWakeLock()
     const rate = settings.listeningSpeechRate ?? 0.9
-    if (currentPassage?.title) {
+    if (startAt === 0 && currentPassage?.title) {
       await speakAndWait(currentPassage.title, language, { rate })
       if (playingRef.current) await sleep(SENTENCE_PAUSE_MS)
     }
-    for (let i = 0; i < sentences.length; i++) {
+    for (let i = startAt; i < sentences.length; i++) {
       if (!playingRef.current) break
       setReadingIndex(i)
       await speakAndWait(sentences[i], language, { rate })
@@ -825,15 +838,13 @@ export default function GradedReader() {
                   key={i}
                   ref={el => { sentenceRefs.current[i] = el }}
                   className={`gr-sentence ${readingIndex === i ? 'gr-sentence-active' : ''}`}
-                  onClick={sentenceTranslationsAligned ? () => toggleSentenceTranslation(i) : undefined}
+                  onClick={() => setSentenceMenu(i)}
                 >
-                  {sentenceTranslationsAligned && (
-                    <span
-                      className="gr-sentence-marker"
-                      onClick={e => { e.stopPropagation(); toggleSentenceTranslation(i) }}
-                      title="Translate this sentence"
-                    >–&nbsp;–</span>
-                  )}
+                  <span
+                    className="gr-sentence-marker"
+                    onClick={e => { e.stopPropagation(); setSentenceMenu(i) }}
+                    title="Listen / translate this sentence"
+                  >–&nbsp;–</span>
                   <TextWithLookup text={sentence} language={language} lookup={augmentedLookup} scores={scores} showReading={showReading} />
                   {' '}
                   {expandedSentence === i && (
@@ -873,6 +884,27 @@ export default function GradedReader() {
           </button>
         )}
       </div>
+
+      {sentenceMenu != null && (
+        <div className="gr-sentence-menu-overlay" onClick={() => setSentenceMenu(null)}>
+          <div className="gr-sentence-menu" onClick={e => e.stopPropagation()}>
+            {speechSupported() && (
+              <button className="gr-sentence-menu-btn" onClick={() => listenFromHere(sentenceMenu)}>
+                🔊 Listen from here
+              </button>
+            )}
+            <button
+              className={`gr-sentence-menu-btn ${!hasTranslation ? 'gr-sentence-menu-btn--disabled' : ''}`}
+              disabled={!hasTranslation}
+              title={!hasTranslation ? 'Not available for this passage' : undefined}
+              onClick={() => { toggleSentenceTranslation(sentenceMenu); setSentenceMenu(null) }}
+            >
+              🌐 Translate sentence
+            </button>
+            <button className="gr-sentence-menu-cancel" onClick={() => setSentenceMenu(null)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
