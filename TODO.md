@@ -1,60 +1,9 @@
 # TODO / Future Improvements
 
-## Open: Chinese gloss cleanup (phase 2, content trimming) — in progress
+Vocab-data-specific tasks (gloss cleanup, gender/conjugation gaps,
+etc.) live in `TODO_vocab.md` now, maintained by the vocab-curation
+thread. This file covers everything else.
 
-Structural fix complete: leading parentheticals repositioned to the
-end across all of `zh-en.json` (1,291→0), using the mechanical/safe
-`reposition()` function in `tools/zh_gloss_cleanup.py`. Phase 2 —
-individual review of the ~1,231 remaining entries where a gloss is
-long (>35 chars) *and* contains a parenthetical, to judge case-by-case
-whether the content is genuinely reducible (redundant "e.g."
-enumeration, hedging) or necessary (idiom explanation, grammatical
-function note, sense disambiguation) — is NOT automatable, confirmed
-during review that no reliable heuristic distinguishes the two. ~3
-batches (~200 entries) reviewed so far, ~10-15% found trimmable. Use
-`tools/zh_gloss_cleanup.py`'s `find_phase2_candidates()` to pull the
-next batch; full methodology and examples in `REVIEW-VOCAB.md`'s
-"Gloss formatting cleanup" section.
-
-## Open: license-replacement gaps (contested/unresolved fields left blank)
-
-Per an explicit decision to prioritize a clean MIT license over data
-completeness: `THIRD_PARTY_LICENSES.md` now shows all three vocabulary
-enrichment sources (Spanish gender, French gender, German verb
-conjugation) as fully replaced with original work. Fields where the
-original CC-BY-SA-derived source and our own rule/manual classification
-disagreed, or where neither had a confident answer, were deliberately
-left blank rather than guessed at or silently kept on the old source.
-Full methodology in `REVIEW-VOCAB.md`; this section tracks only the
-concrete remaining gaps.
-
-- **Spanish gender** (`public/vocab/es-en.json`): 246 nouns have
-  `gender: null`. Mostly epicene person-nouns where our classification
-  (`el/la agente`, `el/la testigo`, etc.) disagreed with the old
-  source's flat masculine tag, plus a handful of true homographs
-  (`cometa`, `guía`) and unstable loanwords (`party`, `magazine`,
-  `blockchain`).
-- **French gender** (`public/vocab/fr-en.json`): 321 nouns have
-  `gender: null`. Same pattern — mostly person-nouns where French's
-  distinct-feminine-spelling behavior (`citoyen`/`citoyenne`) makes a
-  simple epicene/masculine call contested, plus loanwords and a few
-  homographs.
-- **German verb conjugation** (`public/conjugations/de.json`): 457
-  verbs have at least one null field among presentTense/pastTense/
-  pastParticiple/auxiliary (719 null fields total). Mostly missing
-  entries in the compiled strong-verb table (rare irregular verbs not
-  yet added), dual-paradigm verbs where a weak and strong conjugation
-  both exist for different senses (`hängen`, `bewegen`, `verwenden`),
-  and a handful of compound/multi-prefix verbs beyond the
-  single-prefix model's scope. Note: this file's tooling
-  (`tools/de_conjugation_manual.py`) was reconstructed from a lost
-  local session and may cover somewhat fewer verbs than the original
-  pass — legitimate room to extend further.
-
-**To close further**: extend `tools/{es,fr}_gender_manual.py` and
-`tools/de_conjugation_rules.py`/`de_conjugation_manual.py` with
-additional verified entries, following the same discipline used
-throughout — classify from real knowledge, validate, don't guess.
 
 ## Repo state (as of this writing — check git log for current truth)
 - `vocab-games-dev` (`main` branch): **v0.66br** — this working copy's
