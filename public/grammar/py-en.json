@@ -1,0 +1,730 @@
+{
+  "id": "py-grammar",
+  "language": "py",
+  "native": "en",
+  "patterns": [
+    {
+      "id": "py-g-001",
+      "level": "PY1",
+      "category": "indentation",
+      "title": "Indentation defines blocks",
+      "explanation": "Python uses indentation (not braces) to mark which lines belong inside a block, like the body of an if or for statement.",
+      "type": "pick-correct",
+      "quizType": "py-indent",
+      "sentences": [
+        {
+          "text": "if x > 0:\n    print(x)",
+          "correct": true
+        },
+        {
+          "text": "if x > 0:\nprint(x)",
+          "correct": false,
+          "error": "The body must be indented to belong to the if block."
+        },
+        {
+          "text": "if x > 0:\n  print(x)\n    print(x)",
+          "correct": false,
+          "error": "Indentation levels must be consistent within a block."
+        }
+      ]
+    },
+    {
+      "id": "py-g-002",
+      "level": "PY1",
+      "category": "conditionals",
+      "title": "if / elif / else structure",
+      "explanation": "elif checks another condition only if the previous ones were false. else runs only if none of them were true.",
+      "type": "fill-blank",
+      "quizType": "py-elif",
+      "template": "if x > 0:\n    print('positive')\n___ x < 0:\n    print('negative')\nelse:\n    print('zero')",
+      "hint": "This checks a second condition, between if and else.",
+      "distractors": [
+        "elif",
+        "else if",
+        "elseif",
+        "and if"
+      ]
+    },
+    {
+      "id": "py-g-003",
+      "level": "PY1",
+      "category": "conditionals",
+      "title": "Comparison vs assignment",
+      "explanation": "= assigns a value; == checks whether two values are equal. Using = inside an if condition is a common beginner mistake.",
+      "type": "pick-correct",
+      "quizType": "py-eq",
+      "sentences": [
+        {
+          "text": "if x == 5:\n    print('five')",
+          "correct": true
+        },
+        {
+          "text": "if x = 5:\n    print('five')",
+          "correct": false,
+          "error": "= assigns a value; use == to compare."
+        }
+      ]
+    },
+    {
+      "id": "py-g-004",
+      "level": "PY1",
+      "category": "loops",
+      "title": "for loop over a sequence",
+      "explanation": "for repeats a block once per item in a sequence. The loop variable is used with the keyword in before the sequence.",
+      "type": "fill-blank",
+      "quizType": "py-for-in",
+      "template": "for item ___ my_list:\n    print(item)",
+      "hint": "This keyword connects the loop variable to the sequence.",
+      "distractors": [
+        "in",
+        "of",
+        "from",
+        "within"
+      ]
+    },
+    {
+      "id": "py-g-005",
+      "level": "PY1",
+      "category": "loops",
+      "title": "while loop structure",
+      "explanation": "while repeats a block as long as its condition stays true. The condition is checked again before every repeat.",
+      "type": "fill-blank",
+      "quizType": "py-while",
+      "template": "count = 0\n___ count < 5:\n    count += 1",
+      "hint": "This keyword starts a condition-based loop.",
+      "distractors": [
+        "while",
+        "for",
+        "until",
+        "loop"
+      ]
+    },
+    {
+      "id": "py-g-006",
+      "level": "PY2",
+      "category": "loops",
+      "title": "break vs continue",
+      "explanation": "break exits the loop completely. continue skips only the rest of the current pass and moves to the next item.",
+      "type": "pick-correct",
+      "quizType": "py-break-continue",
+      "sentences": [
+        {
+          "text": "for x in items:\n    if x < 0:\n        continue\n    print(x)",
+          "correct": true
+        },
+        {
+          "text": "for x in items:\n    if x < 0:\n        break\n    print(x)\n    print('after', x)",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "py-g-007",
+      "level": "PY2",
+      "category": "comprehensions",
+      "title": "List comprehension structure",
+      "explanation": "A list comprehension builds a new list in one line: an expression, followed by a for clause, inside square brackets.",
+      "type": "tile-order",
+      "tiles": [
+        "[",
+        "x * 2",
+        "for x in numbers",
+        "]"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "py-g-008",
+      "level": "PY2",
+      "category": "comprehensions",
+      "title": "List comprehension with a condition",
+      "explanation": "An if clause at the end of a comprehension filters which items are included.",
+      "type": "fill-blank",
+      "quizType": "py-comp-if",
+      "template": "evens = [x for x in numbers ___ x % 2 == 0]",
+      "hint": "This keyword filters items in a comprehension.",
+      "distractors": [
+        "if",
+        "while",
+        "elif",
+        "when"
+      ]
+    },
+    {
+      "id": "py-g-009",
+      "level": "PY1",
+      "category": "functions",
+      "title": "Function definition structure",
+      "explanation": "A function is defined with def, a name, parentheses for parameters, and a colon to start its body.",
+      "type": "tile-order",
+      "tiles": [
+        "def",
+        "greet(name):",
+        "return 'hi ' + name"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "py-g-010",
+      "level": "PY2",
+      "category": "functions",
+      "title": "Default parameter values",
+      "explanation": "A parameter can have a default value, used only when the caller doesn't supply that argument.",
+      "type": "pick-correct",
+      "quizType": "py-default-param",
+      "sentences": [
+        {
+          "text": "def greet(name='friend'):\n    print(name)",
+          "correct": true
+        },
+        {
+          "text": "def greet(name=):\n    print(name)",
+          "correct": false,
+          "error": "A default value must follow the = sign."
+        }
+      ]
+    },
+    {
+      "id": "py-g-011",
+      "level": "PY2",
+      "category": "functions",
+      "title": "*args collects extra arguments",
+      "explanation": "*args gathers any extra positional arguments into a tuple inside the function.",
+      "type": "fill-blank",
+      "quizType": "py-args",
+      "template": "def total(___):\n    return sum(args)",
+      "hint": "This collects extra positional arguments.",
+      "distractors": [
+        "*args",
+        "args",
+        "**args",
+        "[args]"
+      ]
+    },
+    {
+      "id": "py-g-012",
+      "level": "PY1",
+      "category": "exceptions",
+      "title": "try / except structure",
+      "explanation": "Code that might fail goes in the try block. If an error occurs, Python jumps to the matching except block instead of crashing.",
+      "type": "fill-blank",
+      "quizType": "py-try-except",
+      "template": "___:\n    result = 10 / 0\nexcept ZeroDivisionError:\n    print('cannot divide by zero')",
+      "hint": "This keyword marks the risky code block.",
+      "distractors": [
+        "try",
+        "catch",
+        "attempt",
+        "test"
+      ]
+    },
+    {
+      "id": "py-g-013",
+      "level": "PY2",
+      "category": "exceptions",
+      "title": "finally always runs",
+      "explanation": "A finally block runs whether or not an exception occurred — useful for cleanup like closing a file.",
+      "type": "pick-correct",
+      "quizType": "py-finally",
+      "sentences": [
+        {
+          "text": "try:\n    f = open('x')\nfinally:\n    f.close()",
+          "correct": true
+        },
+        {
+          "text": "try:\n    f = open('x')\nelse:\n    f.close()",
+          "correct": false,
+          "error": "else is not for cleanup code; use finally."
+        }
+      ]
+    },
+    {
+      "id": "py-g-014",
+      "level": "PY2",
+      "category": "classes",
+      "title": "Class definition and __init__",
+      "explanation": "A class groups data and behavior together. __init__ runs automatically when a new instance is created, to set up its starting state.",
+      "type": "tile-order",
+      "tiles": [
+        "class Dog:",
+        "def __init__(self, name):",
+        "self.name = name"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "py-g-015",
+      "level": "PY2",
+      "category": "classes",
+      "title": "self refers to the instance",
+      "explanation": "self is the first parameter of every instance method, and refers to the specific object the method was called on.",
+      "type": "pick-correct",
+      "quizType": "py-self",
+      "sentences": [
+        {
+          "text": "class Dog:\n    def bark(self):\n        print('woof')",
+          "correct": true
+        },
+        {
+          "text": "class Dog:\n    def bark():\n        print('woof')",
+          "correct": false,
+          "error": "Instance methods need self as their first parameter."
+        }
+      ]
+    },
+    {
+      "id": "py-g-016",
+      "level": "PY2",
+      "category": "classes",
+      "title": "Inheritance syntax",
+      "explanation": "A class inherits from another by naming it in parentheses after the class name, gaining its methods and attributes.",
+      "type": "fill-blank",
+      "quizType": "py-inherit",
+      "template": "class Puppy___Dog):\n    pass",
+      "hint": "Parentheses hold the parent class name.",
+      "distractors": [
+        "(",
+        "[",
+        "extends ",
+        "<"
+      ]
+    },
+    {
+      "id": "py-g-017",
+      "level": "PY1",
+      "category": "strings",
+      "title": "f-string value insertion",
+      "explanation": "An f-string lets you embed a variable's value directly inside text using curly braces, right where it belongs.",
+      "type": "fill-blank",
+      "quizType": "py-fstring",
+      "template": "name = 'Ana'\nprint(___'hello {name}')",
+      "hint": "This letter before the quotes marks an f-string.",
+      "distractors": [
+        "f",
+        "s",
+        "r",
+        "b"
+      ]
+    },
+    {
+      "id": "py-g-018",
+      "level": "PY2",
+      "category": "slicing",
+      "title": "Slice notation [start:stop]",
+      "explanation": "A slice selects a range of a sequence. The start index is included; the stop index is not.",
+      "type": "fill-blank",
+      "quizType": "py-slice",
+      "template": "letters = 'abcdef'\nfirst_three = letters[___]",
+      "hint": "Start and stop are separated by this symbol.",
+      "distractors": [
+        "0:3",
+        "0-3",
+        "0,3",
+        "0;3"
+      ]
+    },
+    {
+      "id": "py-g-019",
+      "level": "PY2",
+      "category": "unpacking",
+      "title": "Multiple assignment / unpacking",
+      "explanation": "A tuple or list can be unpacked into several variables at once, matched by position.",
+      "type": "tile-order",
+      "tiles": [
+        "x, y",
+        "=",
+        "1, 2"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "py-g-020",
+      "level": "PY2",
+      "category": "dicts",
+      "title": "Safe dictionary lookup",
+      "explanation": "Square-bracket access raises an error if the key is missing. .get() returns None (or a default) instead of crashing.",
+      "type": "pick-correct",
+      "quizType": "py-dict-get",
+      "sentences": [
+        {
+          "text": "age = person.get('age', 0)",
+          "correct": true
+        },
+        {
+          "text": "age = person['age']  # key may not exist, risk of crash",
+          "correct": false,
+          "error": "Direct indexing raises KeyError if the key is missing; use .get() to be safe."
+        }
+      ]
+    },
+    {
+      "id": "py-g-021",
+      "level": "PY3",
+      "category": "comprehensions",
+      "title": "Dict comprehension structure",
+      "explanation": "A dict comprehension builds a dictionary in one line: a key:value pair, followed by a for clause, inside curly braces.",
+      "type": "tile-order",
+      "tiles": [
+        "{",
+        "k: v*2",
+        "for k, v in prices.items()",
+        "}"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "py-g-022",
+      "level": "PY3",
+      "category": "hints",
+      "title": "Function type hints",
+      "explanation": "A parameter's expected type follows a colon; the function's return type follows an arrow after the parentheses.",
+      "type": "fill-blank",
+      "quizType": "py-hint-arrow",
+      "template": "def square(x: int) ___ int:\n    return x * x",
+      "hint": "This symbol introduces the return type.",
+      "distractors": [
+        "->",
+        "=>",
+        ":",
+        "::"
+      ]
+    },
+    {
+      "id": "py-g-023",
+      "level": "PY3",
+      "category": "hints",
+      "title": "Optional means value or None",
+      "explanation": "Optional[str] means the value is either a str or None — it documents that None is a valid possibility.",
+      "type": "pick-correct",
+      "quizType": "py-optional",
+      "sentences": [
+        {
+          "text": "def find(name: str) -> Optional[int]:\n    return None",
+          "correct": true
+        },
+        {
+          "text": "def find(name: str) -> int:\n    return None  # violates the declared return type",
+          "correct": false,
+          "error": "The return type says int, but None is returned; Optional[int] would be honest here."
+        }
+      ]
+    },
+    {
+      "id": "py-g-024",
+      "level": "PY3",
+      "category": "collections",
+      "title": "defaultdict avoids key errors",
+      "explanation": "defaultdict creates a default value automatically for a missing key instead of raising KeyError.",
+      "type": "pick-correct",
+      "quizType": "py-defaultdict",
+      "sentences": [
+        {
+          "text": "counts = defaultdict(int)\ncounts['a'] += 1",
+          "correct": true
+        },
+        {
+          "text": "counts = {}\ncounts['a'] += 1  # key doesn't exist yet",
+          "correct": false,
+          "error": "A plain dict raises KeyError on a missing key; defaultdict would not."
+        }
+      ]
+    },
+    {
+      "id": "py-g-025",
+      "level": "PY3",
+      "category": "regex",
+      "title": "search vs match",
+      "explanation": "re.match only checks the start of the string. re.search looks for the pattern anywhere in the string.",
+      "type": "pick-correct",
+      "quizType": "py-re-match-search",
+      "sentences": [
+        {
+          "text": "re.search('cat', 'my cat sleeps')  # finds it anywhere",
+          "correct": true
+        },
+        {
+          "text": "re.match('cat', 'my cat sleeps')  # only checks the start",
+          "correct": false,
+          "error": "match only looks at the beginning of the string, so this won't find 'cat' here."
+        }
+      ]
+    },
+    {
+      "id": "py-g-026",
+      "level": "PY3",
+      "category": "context",
+      "title": "Custom context manager methods",
+      "explanation": "__enter__ runs when a with block starts and __exit__ runs when it ends, even if an error occurred.",
+      "type": "tile-order",
+      "tiles": [
+        "class Timer:",
+        "def __enter__(self):",
+        "return self",
+        "def __exit__(self, *args):",
+        "print('done')"
+      ],
+      "answers": [
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "py-g-027",
+      "level": "PY3",
+      "category": "errors",
+      "title": "Catching specific exceptions first",
+      "explanation": "More specific exception types should be caught before more general ones, since the first matching except wins.",
+      "type": "pick-correct",
+      "quizType": "py-except-order",
+      "sentences": [
+        {
+          "text": "try:\n    x = 1/0\nexcept ZeroDivisionError:\n    print('zero')\nexcept Exception:\n    print('other')",
+          "correct": true
+        },
+        {
+          "text": "try:\n    x = 1/0\nexcept Exception:\n    print('other')\nexcept ZeroDivisionError:\n    print('zero')  # unreachable",
+          "correct": false,
+          "error": "Exception already catches everything, so the more specific except below it can never run."
+        }
+      ]
+    },
+    {
+      "id": "py-g-028",
+      "level": "PY3",
+      "category": "class",
+      "title": "Abstract methods must be overridden",
+      "explanation": "A method marked @abstractmethod has no usable implementation in the base class — every subclass must provide its own.",
+      "type": "fill-blank",
+      "quizType": "py-abstract",
+      "template": "class Shape(ABC):\n    ___\n    def area(self):\n        pass",
+      "hint": "This decorator forces subclasses to implement the method.",
+      "distractors": [
+        "@abstractmethod",
+        "@staticmethod",
+        "@property",
+        "@override"
+      ]
+    },
+    {
+      "id": "py-g-029",
+      "level": "PY3",
+      "category": "class",
+      "title": "__str__ vs __repr__",
+      "explanation": "__str__ gives a readable description for users (used by print and str()). __repr__ gives an unambiguous one for developers.",
+      "type": "pick-correct",
+      "quizType": "py-str-repr",
+      "sentences": [
+        {
+          "text": "def __str__(self):\n    return f'{self.name}, age {self.age}'",
+          "correct": true
+        },
+        {
+          "text": "def __str__(self):\n    return f'Person(name={self.name!r})'  # this reads like __repr__",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "py-g-030",
+      "level": "PY4",
+      "category": "async",
+      "title": "async def and await",
+      "explanation": "A coroutine is defined with async def. Inside it, await pauses until another async operation finishes, without blocking the whole program.",
+      "type": "fill-blank",
+      "quizType": "py-await",
+      "template": "async def fetch_data():\n    result = ___ get_from_network()\n    return result",
+      "hint": "This keyword pauses for an async result.",
+      "distractors": [
+        "await",
+        "yield",
+        "async",
+        "return"
+      ]
+    },
+    {
+      "id": "py-g-031",
+      "level": "PY4",
+      "category": "async",
+      "title": "Coroutines need to be awaited",
+      "explanation": "Calling an async function doesn't run it immediately — it returns a coroutine object that must be awaited (or scheduled) to actually execute.",
+      "type": "pick-correct",
+      "quizType": "py-coroutine-call",
+      "sentences": [
+        {
+          "text": "result = await fetch_data()",
+          "correct": true
+        },
+        {
+          "text": "result = fetch_data()  # this is just a coroutine object, not yet run",
+          "correct": false,
+          "error": "Calling an async function alone doesn't execute it — it must be awaited."
+        }
+      ]
+    },
+    {
+      "id": "py-g-032",
+      "level": "PY3",
+      "category": "dataclass",
+      "title": "@dataclass generates boilerplate",
+      "explanation": "@dataclass automatically writes __init__, __repr__, and __eq__ for a class based on its annotated fields.",
+      "type": "fill-blank",
+      "quizType": "py-dataclass",
+      "template": "___\nclass Point:\n    x: int\n    y: int",
+      "hint": "This decorator auto-generates the class's boilerplate methods.",
+      "distractors": [
+        "@dataclass",
+        "@property",
+        "@staticmethod",
+        "class decorator"
+      ]
+    },
+    {
+      "id": "py-g-033",
+      "level": "PY2",
+      "category": "slicing",
+      "title": "Slice with a step",
+      "explanation": "A third number in a slice sets the step size — how many items to skip between each selected one.",
+      "type": "fill-blank",
+      "quizType": "py-slice-step",
+      "template": "every_other = my_list[___]",
+      "hint": "Start, stop, and step are all separated by this symbol.",
+      "distractors": [
+        "::2",
+        "//2",
+        "..2",
+        ",,2"
+      ]
+    },
+    {
+      "id": "py-g-034",
+      "level": "PY2",
+      "category": "functions",
+      "title": "Unpacking arguments with *",
+      "explanation": "A * before a list or tuple in a function call spreads its items out as separate positional arguments.",
+      "type": "pick-correct",
+      "quizType": "py-star-call",
+      "sentences": [
+        {
+          "text": "nums = [1, 2, 3]\nprint(*nums)  # prints 1 2 3",
+          "correct": true
+        },
+        {
+          "text": "nums = [1, 2, 3]\nprint(nums)  # prints the list itself, [1, 2, 3]",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "id": "py-g-035",
+      "level": "PY3",
+      "category": "iterate",
+      "title": "Generator functions use yield",
+      "explanation": "A function containing yield becomes a generator — calling it doesn't run the body immediately, it returns an object that produces values one at a time.",
+      "type": "pick-correct",
+      "quizType": "py-generator",
+      "sentences": [
+        {
+          "text": "def count_up(n):\n    for i in range(n):\n        yield i",
+          "correct": true
+        },
+        {
+          "text": "def count_up(n):\n    for i in range(n):\n        return i  # stops after the first item",
+          "correct": false,
+          "error": "return exits the function immediately on the first loop pass; yield is needed to produce a sequence of values."
+        }
+      ]
+    },
+    {
+      "id": "py-g-036",
+      "level": "PY4",
+      "category": "async",
+      "title": "Locks prevent race conditions",
+      "explanation": "When multiple threads share data, a Lock ensures only one thread modifies it at a time, preventing corrupted results.",
+      "type": "pick-correct",
+      "quizType": "py-lock",
+      "sentences": [
+        {
+          "text": "with lock:\n    balance += amount",
+          "correct": true
+        },
+        {
+          "text": "balance += amount  # no lock, two threads could interfere",
+          "correct": false,
+          "error": "Without a lock, two threads updating balance at once can lose an update."
+        }
+      ]
+    },
+    {
+      "id": "py-g-037",
+      "level": "PY4",
+      "category": "classes",
+      "title": "Method resolution order",
+      "explanation": "With multiple inheritance, Python searches parent classes in a specific order (MRO) to decide which method actually runs.",
+      "type": "fill-blank",
+      "quizType": "py-mro",
+      "template": "class C(A, B):\n    pass\n\nprint(C.___)",
+      "hint": "This attribute shows the class search order.",
+      "distractors": [
+        "__mro__",
+        "__bases__",
+        "__parents__",
+        "__order__"
+      ]
+    }
+  ]
+}
