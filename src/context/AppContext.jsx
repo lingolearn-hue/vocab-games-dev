@@ -12,6 +12,7 @@ const AVAILABLE_LISTS = [
   { id: 'ja-en', path: './vocab/ja-en.json', label: 'Japanese → English',language: 'ja', languageLabel: 'Japanese 🇯🇵',   sentencePath: './sentences/ja-en.json' },
   { id: 'ko-en', path: './vocab/ko-en.json', label: 'Korean → English',  language: 'ko', languageLabel: 'Korean 🇰🇷',     sentencePath: './sentences/ko-en.json' },
   { id: 'en-en', path: './vocab/en-en.json', label: 'English Reading',   language: 'en', languageLabel: 'English 🇬🇧',    sentencePath: './sentences/en-en.json' },
+  { id: 'py-en', path: './vocab/py-en.json', label: 'Python → English',  language: 'py', languageLabel: 'Python 🐍',      sentencePath: './sentences/py-en.json' },
 ]
 
 const AppContext = createContext(null)

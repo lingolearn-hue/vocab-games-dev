@@ -60,6 +60,7 @@ export const LEVEL_ORDER = {
   es: ['A1','A2','B1','B2','C1','C2'],
   fr: ['A1','A2','B1','B2','C1','C2'],
   en: ['A1','A2','B1','B2','C1','C2'],
+  py: ['PY1','PY2','PY3','PY4'],
 }
 
 // Display label for a level chip — only HSK7 (the combined 7-9 band) differs from its raw value.

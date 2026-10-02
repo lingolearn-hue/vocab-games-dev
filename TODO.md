@@ -6,12 +6,43 @@ thread. This file covers everything else.
 
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66br** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bs** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bs**: Wired up Python as a selectable language (the
+  vocab-curation thread added `public/vocab/py-en.json` (197 entries,
+  PY1-PY4 levels) and `public/grammar/py-en.json` (37 patterns) as data
+  files only; this covers making it actually selectable and playable).
+  Added `py` to the language picker/flags/names (App.jsx), the vocab
+  list registry (AppContext.jsx), and the PY1-PY4 level order
+  (settings.js). Checked every per-language allowlist in the codebase
+  (CJK tokenizing, gender/measure-word drill gating) — Python is a
+  positive-allowlist system throughout, so it's correctly excluded from
+  everything irrelevant to it (no code changes needed there) without
+  risk of being wrongly included somewhere. Found and fixed one real
+  gotcha before it could ship: `speech.js`'s `LANG_CODES` lookup falls
+  back to `zh-CN` for any unmapped language, so without an explicit
+  entry, tapping the speaker button on a Python keyword would have
+  silently spoken it with Chinese phonetics — mapped `py` to `en-US`
+  instead, the closest reasonable fit since Python keywords/identifiers
+  are English-like. Confirmed Grammar Dictionary needs no registration
+  of its own — it fetches `./grammar/${language}-en.json` dynamically
+  by whatever language is active, and the pattern types Python's data
+  uses (`pick-correct`, `tile-order`) render straight from their own
+  embedded data, independent of the separate `quizType`/
+  `QUIZ_GENERATORS` registry used for dynamically-generated quizzes
+  (so Python's `quizType` values, which aren't registered there, don't
+  block anything — reference/explanation content still displays fully,
+  just without that extra interactive-quiz layer). Verified live:
+  language picker, all 4 PY level chips, Flashcard, Race Car (tiles
+  correctly show entries like `.sort()`/`+`/`not` with their reading as
+  a small ruby annotation, same mechanism as CJK furigana), Grammar
+  Dictionary (37 patterns, real content), and speech (confirmed
+  `en-US` is actually used, not the `zh-CN` fallback) — no console
+  errors anywhere.
 - **v0.66br**: Graded Reader — always-available sentence marker (tap for
   listen-from-here / translate, no longer conditionally hidden — see
   the previous entry) exposed a real gap: Translate was silently

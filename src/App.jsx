@@ -20,8 +20,8 @@ import Listening from './games/Listening'
 import Tutorial from './components/Tutorial'
 import './App.css'
 
-const LANGUAGE_FLAGS = { zh: '🇨🇳', es: '🇪🇸', de: '🇩🇪', ja: '🇯🇵', en: '🇬🇧', fr: '🇫🇷', ko: '🇰🇷' }
-const LANGUAGE_NAMES = { zh: 'Chinese', es: 'Spanish', de: 'German', ja: 'Japanese', fr: 'French', ko: 'Korean' }
+const LANGUAGE_FLAGS = { zh: '🇨🇳', es: '🇪🇸', de: '🇩🇪', ja: '🇯🇵', en: '🇬🇧', fr: '🇫🇷', ko: '🇰🇷', py: '🐍' }
+const LANGUAGE_NAMES = { zh: 'Chinese', es: 'Spanish', de: 'German', ja: 'Japanese', fr: 'French', ko: 'Korean', py: 'Python' }
 const LANGUAGES = [
   { language: 'zh', label: 'Chinese 🇨🇳' },
   { language: 'es', label: 'Spanish 🇪🇸' },
@@ -30,6 +30,7 @@ const LANGUAGES = [
   { language: 'ja', label: 'Japanese 🇯🇵' },
   { language: 'ko', label: 'Korean 🇰🇷'   },
   { language: 'en', label: 'English 🇬🇧'  },
+  { language: 'py', label: 'Python 🐍'    },
 ]
 
 function FirstLaunchOverlay() {

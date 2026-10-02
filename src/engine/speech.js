@@ -25,6 +25,7 @@ const LANG_CODES = {
   es: 'es-ES',
   fr: 'fr-FR',
   en: 'en-US',
+  py: 'en-US', // Python keywords/identifiers read reasonably with English phonetics; without this entry they'd silently fall back to the zh-CN default below instead
 }
 
 export function isSupported() {
