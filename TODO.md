@@ -6,12 +6,13 @@ thread. This file covers everything else.
 
 
 ## Repo state (as of this writing — check git log for current truth)
-- `vocab-games-dev` (`main` branch): **v0.66bs** — this working copy's
+- `vocab-games-dev` (`main` branch): **v0.66bt** — this working copy's
   actual current state; dev is where this session's work has been pushed
   throughout (Grammar Dictionary practice overhaul, Graded Reader overhaul,
   lemmatizer fix, article engines, Vocab Browser word-detail overlay, Japanese
   Grammar Dictionary dynamic quiz expansion, Daily Challenge feature, etc.
   — see the rest of this file).
+- **v0.66bt**: Race Car tiles: hanzi/kanji font 1.5x, pinyin/furigana 2x (absolute) and same colour as the base text in light and dark mode; tile height 90→120px (CSS + `TILE_HEIGHT`).
 - **v0.66bs**: Wired up Python as a selectable language (the
   vocab-curation thread added `public/vocab/py-en.json` (197 entries,
   PY1-PY4 levels) and `public/grammar/py-en.json` (37 patterns) as data

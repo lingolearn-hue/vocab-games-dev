@@ -17,7 +17,7 @@ function truncate(text) {
 }
 
 const LANE_COUNT = 3
-const TILE_HEIGHT = 90
+const TILE_HEIGHT = 120
 const BASE_SPEED = 120 // px per second at x1
 const BOOST_MULTIPLIER = 1.5
 const STREAK_THRESHOLDS = [1, 3, 6, 10] // streak levels

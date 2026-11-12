@@ -160,7 +160,7 @@
 /* ── Tiles ───────────────────────────────────────────────────────────────── */
 .rc-tile {
   position: absolute;
-  height: 90px;          /* increased from 80px for larger CJK text + ruby */
+  height: 120px;         /* v0.66bt: room for 1.5x CJK + 2x reading */
   background: #1e1e1e;
   border: 1.5px solid #444;
   border-radius: 14px;
@@ -177,13 +177,13 @@
 /* Override RubyText sizes inside tiles */
 .rc-tile .ruby-md,
 .rc-tile .ruby-plain {
-  font-size: clamp(1.1rem, 5vw, 1.8rem);
+  font-size: clamp(1.65rem, 7.5vw, 2.7rem);
   line-height: 1.25;
   text-align: center;
   word-break: break-word;
 }
 .rc-tile .ruby-sm {
-  font-size: clamp(0.82rem, 4vw, 1.3rem);
+  font-size: clamp(1.23rem, 6vw, 1.95rem);
   line-height: 1.25;
   text-align: center;
   word-break: break-word;
@@ -203,7 +203,8 @@
 
 
 /* Ruby annotation inside tiles */
-.rc-tile rt { font-size: 0.55em; line-height: 2.0; }
+/* reading: 2x old absolute size (0.55em of old base = 0.733em of new 1.5x base), same colour as hanzi/kanji (tile is dark in both themes) */
+.rc-tile rt.ruby-rt { font-size: 0.733em; line-height: 1.2; color: inherit; }
 
 /* ── Car (box with speed lines) ──────────────────────────────────────────── */
 .rc-car {
